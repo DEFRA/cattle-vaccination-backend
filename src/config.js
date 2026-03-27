@@ -3,6 +3,16 @@ import convictFormatWithValidator from 'convict-format-with-validator'
 
 convict.addFormats(convictFormatWithValidator)
 
+convict.addFormat({
+  name: 'required-string',
+  validate: (val) => {
+    if (!val) {
+      throw new Error('Required value cannot be empty')
+    }
+  },
+  coerce: (val) => val
+})
+
 const isProduction = process.env.NODE_ENV === 'production'
 const isTest = process.env.NODE_ENV === 'test'
 
@@ -92,6 +102,43 @@ const config = convict({
       format: String,
       default: 'x-cdp-request-id',
       env: 'TRACING_HEADER'
+    }
+  },
+  apha: {
+    cognitoClientId: {
+      doc: 'APHA Cognito OAuth2 client ID',
+      format: 'required-string',
+      default: '',
+      sensitive: true,
+      env: 'COGNITO_CLIENT_ID'
+    },
+    cognitoClientSecret: {
+      doc: 'APHA Cognito OAuth2 client secret',
+      format: 'required-string',
+      default: '',
+      sensitive: true,
+      env: 'COGNITO_CLIENT_SECRET'
+    },
+    cognitoUrl: {
+      doc: 'APHA Cognito token endpoint URL',
+      format: 'required-string',
+      default: '',
+      env: 'APHA_COGNITO_URL'
+    },
+    apiBaseUrl: {
+      doc: 'APHA API base URL',
+      format: 'required-string',
+      default: '',
+      env: 'APHA_API_BASE_URL'
+    }
+  },
+  cdp: {
+    devApiKey: {
+      doc: 'Developer API key, used in non-production environments',
+      format: String,
+      nullable: true,
+      default: null,
+      env: 'DEV_API_KEY'
     }
   }
 })
