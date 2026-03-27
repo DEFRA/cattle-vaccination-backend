@@ -1,6 +1,5 @@
 import Hapi from '@hapi/hapi'
 import { secureContext } from '@defra/hapi-secure-context'
-
 import { config } from './config.js'
 import { router } from './plugins/router.js'
 import { requestLogger } from './common/helpers/logging/request-logger.js'
@@ -9,7 +8,7 @@ import { pulse } from './common/helpers/pulse.js'
 import { requestTracing } from './common/helpers/request-tracing.js'
 import { setupProxy } from './common/helpers/proxy/setup-proxy.js'
 
-async function createServer() {
+export async function createServer() {
   setupProxy()
   const server = Hapi.server({
     host: config.get('host'),
@@ -53,5 +52,3 @@ async function createServer() {
 
   return server
 }
-
-export { createServer }

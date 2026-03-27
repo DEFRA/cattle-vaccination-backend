@@ -1,5 +1,4 @@
 import process from 'node:process'
-
 import { createLogger } from './common/helpers/logging/logger.js'
 import { startServer } from './common/helpers/start-server.js'
 

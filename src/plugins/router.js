@@ -1,12 +1,12 @@
 import { health } from '../routes/health.js'
+import { holdings } from '../routes/holdings.js'
+import { workorders } from '../routes/workorders.js'
 
-const router = {
+export const router = {
   plugin: {
     name: 'router',
     register: (server, _options) => {
-      server.route([health])
+      server.route([health, holdings, workorders])
     }
   }
 }
-
-export { router }
