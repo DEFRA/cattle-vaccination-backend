@@ -146,7 +146,7 @@ docker build --target development --no-cache --tag cattle-vaccination-backend:de
 Run:
 
 ```bash
-docker run -e PORT=3001 -p 3001:3001 cattle-vaccination-backend:development
+docker run -e PORT=3002 -p 3002:3002 cattle-vaccination-backend:development
 ```
 
 ### Production image
@@ -160,7 +160,7 @@ docker build --no-cache --tag cattle-vaccination-backend .
 Run:
 
 ```bash
-docker run -e PORT=3001 -p 3001:3001 cattle-vaccination-backend
+docker run -e PORT=3002 -p 3002:3002 cattle-vaccination-backend
 ```
 
 ### Docker Compose

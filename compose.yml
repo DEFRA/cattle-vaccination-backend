@@ -52,7 +52,7 @@ services:
       context: .
       target: development
     ports:
-      - '3001:3001'
+      - '3002:3002'
     links:
       - 'localstack:localstack'
     depends_on:
@@ -61,7 +61,7 @@ services:
     env_file:
       - 'compose/aws.env'
     environment:
-      PORT: 3001
+      PORT: 3002
       NODE_ENV: development
       LOCALSTACK_ENDPOINT: http://localstack:4566
     networks:
