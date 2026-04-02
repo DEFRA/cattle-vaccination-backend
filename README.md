@@ -9,17 +9,11 @@ Core delivery platform Node.js Backend Template.
   - [Development](#development)
   - [Testing](#testing)
   - [Production](#production)
-  - [Npm scripts](#npm-scripts)
-  - [Update dependencies](#update-dependencies)
-  - [Formatting](#formatting)
-    - [Windows prettier issue](#windows-prettier-issue)
-- [API endpoints](#api-endpoints)
 - [Development helpers](#development-helpers)
   - [Proxy](#proxy)
 - [Docker](#docker)
   - [Development image](#development-image)
   - [Production image](#production-image)
-  - [Docker Compose](#docker-compose)
   - [Dependabot](#dependabot)
   - [SonarCloud](#sonarcloud)
 - [Licence](#licence)
@@ -49,6 +43,10 @@ Install application dependencies:
 npm install
 ```
 
+### Environment Variables
+
+Create a .env in the root of the repo, based on the .env.template . Ask another developer for the values you need.
+
 ### Development
 
 To run the application in `development` mode run:
@@ -72,42 +70,6 @@ To mimic the application running in `production` mode locally run:
 ```bash
 npm start
 ```
-
-### Npm scripts
-
-All available Npm scripts can be seen in [package.json](./package.json).
-To view them in your command line run:
-
-```bash
-npm run
-```
-
-### Update dependencies
-
-To update dependencies use [npm-check-updates](https://github.com/raineorshine/npm-check-updates):
-
-> The following script is a good start. Check out all the options on
-> the [npm-check-updates](https://github.com/raineorshine/npm-check-updates)
-
-```bash
-ncu --interactive --format group
-```
-
-### Formatting
-
-#### Windows prettier issue
-
-If you are having issues with formatting of line breaks on Windows update your global git config by running:
-
-```bash
-git config --global core.autocrlf false
-```
-
-## API endpoints
-
-| Endpoint       | Description |
-| :------------- | :---------- |
-| `GET: /health` | Health      |
 
 ## Development helpers
 
@@ -161,19 +123,6 @@ Run:
 
 ```bash
 docker run -e PORT=3002 -p 3002:3002 cattle-vaccination-backend
-```
-
-### Docker Compose
-
-A local environment with:
-
-- Localstack for AWS services (S3, SQS)
-- Redis
-- This service.
-- A commented out frontend example.
-
-```bash
-docker compose up --build -d
 ```
 
 ### Dependabot
