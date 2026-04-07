@@ -1,6 +1,6 @@
 import { config } from '../config.js'
 
-export async function livestockRequest(
+async function livestockRequest(
   path,
   method = 'GET',
   body = undefined,
@@ -27,4 +27,10 @@ export async function livestockRequest(
   }
 
   return response.json()
+}
+
+export async function getCattleOnHolding({ holdingId }) {
+  return livestockRequest(
+    `/cattle-on-holding?LocationID=${encodeURIComponent(holdingId)}&IncludeDeadAnimals=N`
+  )
 }

@@ -1,9 +1,9 @@
 import Hapi from '@hapi/hapi'
 import { holdings } from './holdings.js'
-import { aphaRequest } from '../services/apha-api.js'
+import { findHoldings } from '../services/apha-api.js'
 
 vi.mock('../services/apha-api.js', () => ({
-  aphaRequest: vi.fn()
+  findHoldings: vi.fn()
 }))
 vi.mock('../common/helpers/logging/logger.js', () => ({
   createLogger: () => ({ error: vi.fn() })
@@ -24,7 +24,7 @@ describe('#holdings route', () => {
 
   test('Should return holdings from APHA API', async () => {
     const mockResult = { holdings: [{ id: '12/345/6789', name: 'Test Farm' }] }
-    aphaRequest.mockResolvedValue(mockResult)
+    findHoldings.mockResolvedValue(mockResult)
 
     const response = await server.inject({
       method: 'POST',
@@ -37,7 +37,7 @@ describe('#holdings route', () => {
   })
 
   test('Should call APHA API with correct path and payload', async () => {
-    aphaRequest.mockResolvedValue({})
+    findHoldings.mockResolvedValue({})
 
     await server.inject({
       method: 'POST',
@@ -45,7 +45,7 @@ describe('#holdings route', () => {
       payload: { ids: ['12/345/6789', '98/765/4321'] }
     })
 
-    expect(aphaRequest).toHaveBeenCalledWith('/holdings/find', 'POST', {
+    expect(findHoldings).toHaveBeenCalledWith({
       ids: ['12/345/6789', '98/765/4321']
     })
   })
@@ -71,7 +71,7 @@ describe('#holdings route', () => {
   })
 
   test('Should return 502 when APHA API throws', async () => {
-    aphaRequest.mockRejectedValue(
+    findHoldings.mockRejectedValue(
       new Error('APHA API error 503: Service Unavailable')
     )
 

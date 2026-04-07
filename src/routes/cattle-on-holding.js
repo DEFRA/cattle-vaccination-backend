@@ -1,6 +1,6 @@
 import Joi from 'joi'
 import Boom from '@hapi/boom'
-import { livestockRequest } from '../services/livestock-api.js'
+import { getCattleOnHolding } from '../services/livestock-api.js'
 import { createLogger } from '../common/helpers/logging/logger.js'
 
 const logger = createLogger()
@@ -19,9 +19,7 @@ export const cattleOnHolding = {
     const { holdingId } = request.query
 
     try {
-      const result = await livestockRequest(
-        `/cattle-on-holding?holdingId=${encodeURIComponent(holdingId)}`
-      )
+      const result = await getCattleOnHolding({ holdingId })
       return h.response(result)
     } catch (err) {
       logger.error(err, 'Livestock cattle-on-holding request failed')

@@ -1,6 +1,6 @@
 import Joi from 'joi'
 import Boom from '@hapi/boom'
-import { aphaRequest } from '../services/apha-api.js'
+import { findHoldings } from '../services/apha-api.js'
 import { createLogger } from '../common/helpers/logging/logger.js'
 
 const logger = createLogger()
@@ -17,9 +17,7 @@ export const holdings = {
   },
   handler: async (request, h) => {
     try {
-      const result = await aphaRequest('/holdings/find', 'POST', {
-        ids: request.payload.ids
-      })
+      const result = await findHoldings({ ids: request.payload.ids })
       return h.response(result)
     } catch (err) {
       logger.error(err, 'APHA holdings request failed')
