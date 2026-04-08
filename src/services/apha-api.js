@@ -1,7 +1,7 @@
 import { config } from '../config.js'
 import { getCognitoToken } from './cognito-auth.js'
 
-export async function aphaRequest(
+async function aphaRequest(
   path,
   method = 'GET',
   body = undefined,
@@ -35,4 +35,14 @@ export async function aphaRequest(
   }
 
   return response.json()
+}
+
+export async function getWorkorders({ startDate, endDate, country }) {
+  return aphaRequest(
+    `/workorders?startActivationDate=${startDate}T00:00:00.000Z&endActivationDate=${endDate}T00:00:00.000Z&country=${encodeURIComponent(country)}`
+  )
+}
+
+export async function findHoldings({ ids }) {
+  return aphaRequest('/holdings/find', 'POST', { ids })
 }

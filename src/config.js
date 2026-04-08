@@ -132,6 +132,21 @@ const config = convict({
       env: 'APHA_API_BASE_URL'
     }
   },
+  livestock: {
+    apiBaseUrl: {
+      doc: 'Livestock API base URL',
+      format: 'required-string',
+      default: '',
+      env: 'LIVESTOCK_API_BASE_URL'
+    },
+    apiToken: {
+      doc: 'Livestock API authentication token',
+      format: 'required-string',
+      default: '',
+      sensitive: true,
+      env: 'LIVESTOCK_API_TOKEN'
+    }
+  },
   cdp: {
     devApiKey: {
       doc: 'Developer API key, used in non-production environments',

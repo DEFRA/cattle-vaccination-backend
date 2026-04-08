@@ -1,9 +1,9 @@
 import Hapi from '@hapi/hapi'
 import { workorders } from './workorders.js'
-import { aphaRequest } from '../services/apha-api.js'
+import { getWorkorders } from '../services/apha-api.js'
 
 vi.mock('../services/apha-api.js', () => ({
-  aphaRequest: vi.fn()
+  getWorkorders: vi.fn()
 }))
 vi.mock('../common/helpers/logging/logger.js', () => ({
   createLogger: () => ({ error: vi.fn() })
@@ -24,7 +24,7 @@ describe('#workorders route', () => {
 
   test('Should return workorders from APHA API', async () => {
     const mockResult = { data: [{ id: 'WO-001' }] }
-    aphaRequest.mockResolvedValue(mockResult)
+    getWorkorders.mockResolvedValue(mockResult)
 
     const response = await server.inject({
       method: 'GET',
@@ -36,16 +36,18 @@ describe('#workorders route', () => {
   })
 
   test('Should call APHA API with correctly formatted URI', async () => {
-    aphaRequest.mockResolvedValue({ data: [] })
+    getWorkorders.mockResolvedValue({ data: [] })
 
     await server.inject({
       method: 'GET',
       url: '/workorders?startDate=2026-01-01&endDate=2026-03-27&country=England'
     })
 
-    expect(aphaRequest).toHaveBeenCalledWith(
-      '/workorders?startActivationDate=2026-01-01T00:00:00.000Z&endActivationDate=2026-03-27T00:00:00.000Z&country=England'
-    )
+    expect(getWorkorders).toHaveBeenCalledWith({
+      startDate: '2026-01-01',
+      endDate: '2026-03-27',
+      country: 'England'
+    })
   })
 
   test('Should return 400 when startDate is missing', async () => {
@@ -85,7 +87,7 @@ describe('#workorders route', () => {
   })
 
   test('Should return 502 when APHA API throws', async () => {
-    aphaRequest.mockRejectedValue(
+    getWorkorders.mockRejectedValue(
       new Error('APHA API error 500: Internal Server Error')
     )
 

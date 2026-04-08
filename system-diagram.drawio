@@ -1,0 +1,135 @@
+<mxfile host="65bd71144e">
+    <diagram id="fZc_FPsgExG_ALeZbge-" name="Page-1">
+        <mxGraphModel dx="1010" dy="470" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+            <root>
+                <mxCell id="0"/>
+                <mxCell id="1" parent="0"/>
+                <mxCell id="3" value="&lt;b&gt;&lt;font style=&quot;color: rgb(255, 0, 0);&quot;&gt;CDP&lt;/font&gt;&lt;/b&gt;" style="whiteSpace=wrap;html=1;aspect=fixed;rounded=1;" parent="1" vertex="1">
+                    <mxGeometry x="450" y="10" width="350" height="350" as="geometry"/>
+                </mxCell>
+                <mxCell id="2" value="cattle-vaccination-backend" style="whiteSpace=wrap;html=1;aspect=fixed;" parent="1" vertex="1">
+                    <mxGeometry x="480" y="260" width="80" height="80" as="geometry"/>
+                </mxCell>
+                <mxCell id="4" value="apha-integration-bridge" style="whiteSpace=wrap;html=1;aspect=fixed;" parent="1" vertex="1">
+                    <mxGeometry x="480" y="30" width="80" height="80" as="geometry"/>
+                </mxCell>
+                <mxCell id="7" value="&lt;b&gt;&lt;font style=&quot;color: rgb(0, 0, 255);&quot;&gt;AWS Cognito&lt;/font&gt;&lt;/b&gt;" style="whiteSpace=wrap;html=1;aspect=fixed;rounded=1;" parent="1" vertex="1">
+                    <mxGeometry x="310" y="240" width="110" height="110" as="geometry"/>
+                </mxCell>
+                <mxCell id="5" value="" style="endArrow=classic;startArrow=classic;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" parent="1" source="4" target="2" edge="1">
+                    <mxGeometry width="50" height="50" relative="1" as="geometry">
+                        <mxPoint x="85" y="340" as="sourcePoint"/>
+                        <mxPoint x="135" y="290" as="targetPoint"/>
+                        <Array as="points"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="9" value="" style="endArrow=classic;startArrow=classic;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;exitX=1;exitY=0.547;exitDx=0;exitDy=0;exitPerimeter=0;" parent="1" source="7" target="2" edge="1">
+                    <mxGeometry width="50" height="50" relative="1" as="geometry">
+                        <mxPoint x="180" y="430" as="sourcePoint"/>
+                        <mxPoint x="400" y="370" as="targetPoint"/>
+                        <Array as="points"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="11" value="cattle-vaccination-prototype" style="whiteSpace=wrap;html=1;aspect=fixed;" parent="1" vertex="1">
+                    <mxGeometry x="700" y="260" width="80" height="80" as="geometry"/>
+                </mxCell>
+                <mxCell id="13" value="&lt;b&gt;&lt;font style=&quot;color: rgb(0, 204, 0);&quot;&gt;Livestock&lt;/font&gt;&lt;/b&gt;" style="whiteSpace=wrap;html=1;aspect=fixed;rounded=1;" vertex="1" parent="1">
+                    <mxGeometry x="380" y="420" width="270" height="270" as="geometry"/>
+                </mxCell>
+                <mxCell id="16" value="&lt;b&gt;&lt;font style=&quot;color: rgb(255, 153, 51);&quot;&gt;SAM&lt;/font&gt;&lt;/b&gt;" style="whiteSpace=wrap;html=1;aspect=fixed;rounded=1;" vertex="1" parent="1">
+                    <mxGeometry x="10" y="10" width="270" height="270" as="geometry"/>
+                </mxCell>
+                <mxCell id="17" value="" style="endArrow=classic;startArrow=classic;html=1;" edge="1" parent="1" source="19" target="4">
+                    <mxGeometry width="50" height="50" relative="1" as="geometry">
+                        <mxPoint x="270" y="120" as="sourcePoint"/>
+                        <mxPoint x="400" y="370" as="targetPoint"/>
+                        <Array as="points"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="19" value="SAM Update APIs" style="whiteSpace=wrap;html=1;aspect=fixed;" vertex="1" parent="1">
+                    <mxGeometry x="180" y="40" width="70" height="70" as="geometry"/>
+                </mxCell>
+                <mxCell id="20" value="Integration Layer" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+                    <mxGeometry x="400" y="430" width="100" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="21" value="CADS" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+                    <mxGeometry x="530" y="430" width="100" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="23" value="" style="endArrow=classic;startArrow=classic;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.6;entryY=0.033;entryDx=0;entryDy=0;entryPerimeter=0;" edge="1" parent="1" source="2" target="20">
+                    <mxGeometry width="50" height="50" relative="1" as="geometry">
+                        <mxPoint x="440" y="409.5" as="sourcePoint"/>
+                        <mxPoint x="510" y="410" as="targetPoint"/>
+                        <Array as="points">
+                            <mxPoint x="490" y="390"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="24" value="" style="endArrow=none;dashed=1;html=1;dashPattern=1 3;strokeWidth=2;" edge="1" parent="1">
+                    <mxGeometry width="50" height="50" relative="1" as="geometry">
+                        <mxPoint x="460" y="250" as="sourcePoint"/>
+                        <mxPoint x="790" y="250" as="targetPoint"/>
+                        <Array as="points">
+                            <mxPoint x="540" y="250"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="25" value="" style="endArrow=classic;startArrow=classic;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;" edge="1" parent="1" source="2" target="11">
+                    <mxGeometry width="50" height="50" relative="1" as="geometry">
+                        <mxPoint x="660" y="290" as="sourcePoint"/>
+                        <mxPoint x="660" y="382" as="targetPoint"/>
+                        <Array as="points"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="26" value="Cattle Vax Team&amp;nbsp;" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+                    <mxGeometry x="600" y="260" width="60" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="27" value="User" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;" vertex="1" parent="1">
+                    <mxGeometry x="725" y="430" width="30" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="29" value="" style="endArrow=classic;startArrow=classic;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;" edge="1" parent="1" source="11">
+                    <mxGeometry width="50" height="50" relative="1" as="geometry">
+                        <mxPoint x="710" y="350" as="sourcePoint"/>
+                        <mxPoint x="740" y="420" as="targetPoint"/>
+                        <Array as="points"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="31" value="" style="image;points=[];aspect=fixed;html=1;align=center;shadow=0;dashed=0;image=img/lib/allied_telesis/computer_and_terminals/Laptop.svg;" vertex="1" parent="1">
+                    <mxGeometry x="750" y="438.7" width="42" height="42.599999999999994" as="geometry"/>
+                </mxCell>
+                <mxCell id="32" value="SAM DB" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=15;" vertex="1" parent="1">
+                    <mxGeometry x="30" y="145" width="60" height="80" as="geometry"/>
+                </mxCell>
+                <mxCell id="33" value="" style="endArrow=classic;startArrow=classic;html=1;exitX=0.855;exitY=0;exitDx=0;exitDy=4.35;exitPerimeter=0;" edge="1" parent="1" source="32" target="19">
+                    <mxGeometry width="50" height="50" relative="1" as="geometry">
+                        <mxPoint x="80" y="103" as="sourcePoint"/>
+                        <mxPoint x="310" y="100" as="targetPoint"/>
+                        <Array as="points"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="35" value="CTS" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+                    <mxGeometry x="390" y="585" width="70" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="36" value="&lt;span style=&quot;color: rgb(23, 43, 77); font-family: sans-serif; font-size: 14px; text-align: left; text-wrap-mode: nowrap; background-color: rgb(255, 255, 255);&quot;&gt;ScotEID&lt;/span&gt;" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+                    <mxGeometry x="460" y="640" width="70" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="37" value="" style="outlineConnect=0;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;shape=mxgraph.aws3.cognito;fillColor=#AD688B;gradientColor=none;" vertex="1" parent="1">
+                    <mxGeometry x="350" y="247" width="30" height="33" as="geometry"/>
+                </mxCell>
+                <mxCell id="38" value="" style="endArrow=classic;startArrow=classic;html=1;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" edge="1" parent="1" source="35" target="20">
+                    <mxGeometry width="50" height="50" relative="1" as="geometry">
+                        <mxPoint x="530" y="350" as="sourcePoint"/>
+                        <mxPoint x="470" y="442" as="targetPoint"/>
+                        <Array as="points"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="39" value="" style="endArrow=classic;startArrow=classic;html=1;entryX=0.67;entryY=1;entryDx=0;entryDy=0;entryPerimeter=0;" edge="1" parent="1" source="36" target="20">
+                    <mxGeometry width="50" height="50" relative="1" as="geometry">
+                        <mxPoint x="435" y="595" as="sourcePoint"/>
+                        <mxPoint x="460" y="500" as="targetPoint"/>
+                        <Array as="points"/>
+                    </mxGeometry>
+                </mxCell>
+            </root>
+        </mxGraphModel>
+    </diagram>
+</mxfile>
