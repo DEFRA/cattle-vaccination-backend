@@ -16,7 +16,7 @@ async function livestockRequest(
   const dispatcher = proxyUrl ? new ProxyAgent(proxyUrl) : undefined
 
   const url = `${apiBaseUrl}${path}`
-  logger.debug(
+  logger.info(
     { url, method, usingProxy: Boolean(proxyUrl) },
     'Livestock API request'
   )
