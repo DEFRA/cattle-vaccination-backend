@@ -17,8 +17,8 @@ async function livestockRequest(
 
   const url = `${apiBaseUrl}${path}`
   logger.info(
-    { url, method, usingProxy: Boolean(proxyUrl) },
-    'Livestock API request'
+    'Livestock API request: ' +
+      JSON.stringify({ url, method, usingProxy: Boolean(proxyUrl), proxyUrl })
   )
 
   let response
