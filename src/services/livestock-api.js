@@ -1,8 +1,5 @@
 import { ProxyAgent } from 'undici'
 import { config } from '../config.js'
-import { createLogger } from '../common/helpers/logging/logger.js'
-
-const logger = createLogger()
 
 async function livestockRequest(
   path,
@@ -15,42 +12,21 @@ async function livestockRequest(
   const proxyUrl = config.get('httpProxy')
   const dispatcher = proxyUrl ? new ProxyAgent(proxyUrl) : undefined
 
-  const url = `${apiBaseUrl}${path}`
-  logger.info(
-    'Livestock API request: ' +
-      JSON.stringify({ url, method, usingProxy: Boolean(proxyUrl), proxyUrl })
-  )
-
-  let response
-  try {
-    response = await fetch(
-      url,
-      /** @type {RequestInit} */ ({
-        ...options,
-        method,
-        body: body !== undefined ? JSON.stringify(body) : undefined,
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json',
-          'Accept-Encoding': 'identity',
-          ...options.headers
-        },
-        ...(dispatcher ? { dispatcher } : {})
-      })
-    )
-  } catch (err) {
-    logger.error(
-      {
-        err,
-        cause: err.cause,
-        url,
-        usingProxy: Boolean(proxyUrl),
-        proxyUrl: proxyUrl ?? null
+  const response = await fetch(
+    `${apiBaseUrl}${path}`,
+    /** @type {RequestInit} */ ({
+      ...options,
+      method,
+      body: body !== undefined ? JSON.stringify(body) : undefined,
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+        'Accept-Encoding': 'identity',
+        ...options.headers
       },
-      'Livestock API fetch failed'
-    )
-    throw err
-  }
+      ...(dispatcher ? { dispatcher } : {})
+    })
+  )
 
   if (!response.ok) {
     const error = await response.text()
