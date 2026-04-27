@@ -47,6 +47,7 @@ export async function createCase({
     3 +
     testParts.length +
     testParts.reduce((sum, tp) => sum + tp.results.length, 0)
+
   if (totalRequests > 25) {
     throw new Error(
       `Payload requires ${totalRequests} composite sub-requests, exceeding the Salesforce limit of 25`
