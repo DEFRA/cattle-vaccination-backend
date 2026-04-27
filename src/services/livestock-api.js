@@ -29,8 +29,7 @@ async function livestockRequest(
   )
 
   if (!response.ok) {
-    const error = await response.text()
-    throw new Error(`Livestock API error ${response.status}: ${error}`)
+    throw new Error(`Livestock API error ${response.status}`)
   }
 
   return response.json()

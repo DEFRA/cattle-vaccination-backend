@@ -14,12 +14,6 @@ describe('#getCognitoToken', () => {
     config.set('apha.cognitoUrl', 'https://cognito.example.com/oauth2/token')
   })
 
-  afterEach(() => {
-    config.set('apha.cognitoClientId', null)
-    config.set('apha.cognitoClientSecret', null)
-    config.set('apha.cognitoUrl', null)
-  })
-
   test('Should fetch and return token', async () => {
     fetchMock.mockResponseOnce(JSON.stringify(validTokenResponse))
 
@@ -48,8 +42,8 @@ describe('#getCognitoToken', () => {
     const [, options] = fetchMock.mock.calls[0]
     const body = new URLSearchParams(options.body)
     expect(body.get('grant_type')).toBe('client_credentials')
-    expect(body.get('client_id')).toBe('test-client-id')
-    expect(body.get('client_secret')).toBe('test-client-secret')
+    expect(body.get('client_id')).toBeNull()
+    expect(body.get('client_secret')).toBeNull()
   })
 
   test('Should return cached token on subsequent calls', async () => {
@@ -83,7 +77,7 @@ describe('#getCognitoToken', () => {
     fetchMock.mockResponseOnce('Unauthorized', { status: 401 })
 
     await expect(getCognitoToken()).rejects.toThrow(
-      'Failed to fetch Cognito token: 401 Unauthorized'
+      'Failed to fetch Cognito token: 401'
     )
   })
 })

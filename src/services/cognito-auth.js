@@ -3,12 +3,9 @@ import { config } from '../config.js'
 
 let cachedToken = null
 let tokenExpiresAt = null
+let tokenRefreshPromise = null
 
-export async function getCognitoToken() {
-  if (cachedToken && tokenExpiresAt && Date.now() < tokenExpiresAt) {
-    return cachedToken
-  }
-
+async function fetchNewToken() {
   const clientId = config.get('apha.cognitoClientId')
   const clientSecret = config.get('apha.cognitoClientSecret')
   const cognitoUrl = config.get('apha.cognitoUrl')
@@ -30,28 +27,37 @@ export async function getCognitoToken() {
       'Content-Type': 'application/x-www-form-urlencoded'
     },
     body: new URLSearchParams({
-      grant_type: 'client_credentials',
-      client_id: clientId,
-      client_secret: clientSecret
+      grant_type: 'client_credentials'
     })
   })
 
   if (!response.ok) {
-    const error = await response.text()
-    throw new Error(
-      `Failed to fetch Cognito token: ${response.status} ${error}`
-    )
+    throw new Error(`Failed to fetch Cognito token: ${response.status}`)
   }
 
   const data = await response.json()
-
   cachedToken = data.access_token
   tokenExpiresAt = Date.now() + (data.expires_in - 60) * 1000
 
   return cachedToken
 }
 
+export async function getCognitoToken() {
+  if (cachedToken && tokenExpiresAt && Date.now() < tokenExpiresAt) {
+    return cachedToken
+  }
+
+  if (!tokenRefreshPromise) {
+    tokenRefreshPromise = fetchNewToken().finally(() => {
+      tokenRefreshPromise = null
+    })
+  }
+
+  return tokenRefreshPromise
+}
+
 export function clearTokenCache() {
   cachedToken = null
   tokenExpiresAt = null
+  tokenRefreshPromise = null
 }
