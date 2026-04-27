@@ -49,7 +49,7 @@ describe('#getCattleOnHolding', () => {
 
     await expect(
       getCattleOnHolding({ holdingId: '12/345/6789' })
-    ).rejects.toThrow('Livestock API error 404: Not Found')
+    ).rejects.toThrow('Livestock API error 404')
   })
 
   test('Should include a ProxyAgent dispatcher when httpProxy is configured', async () => {
