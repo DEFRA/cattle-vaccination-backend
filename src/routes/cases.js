@@ -50,8 +50,7 @@ const testPartResultSchema = Joi.object({
     is: 'DIVA',
     then: divaDayField,
     otherwise: nullField
-  }),
-  resultAfterReview: Joi.string().allow(null, '').default(null)
+  })
 })
 
 const testPartSchema = Joi.object({

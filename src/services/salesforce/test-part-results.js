@@ -20,8 +20,7 @@ export async function addTestPartResults(testPartId, results) {
           APHA_TestDay1DIVA__c: result.day1Diva ?? null,
           APHA_TestDay2Avian__c: result.day2Avian ?? null,
           APHA_TestDay2Bovine__c: result.day2Bovine ?? null,
-          APHA_TestDay2DIVA__c: result.day2Diva ?? null,
-          APHA_ResultAfterReview__c: result.resultAfterReview ?? null
+          APHA_TestDay2DIVA__c: result.day2Diva ?? null
         }
       }))
     }

@@ -98,7 +98,7 @@ export async function getCase(caseId) {
     testPartsResult.records.map(async (tp) => {
       const escapedTpId = tp.Id.replace(/'/g, "''")
       const resultsResult = await query(
-        `SELECT Id, APHA_TestType__c, APHA_EarTagNo__c, APHA_BatchAvian__c, APHA_BatchBovine__c, APHA_BatchDIVA__c, APHA_TestDay1Avian__c, APHA_TestDay1Bovine__c, APHA_TestDay1DIVA__c, APHA_TestDay2Avian__c, APHA_TestDay2Bovine__c, APHA_TestDay2DIVA__c, APHA_ResultAfterReview__c FROM APHA_TestPartResult__c WHERE APHA_TestPart__c='${escapedTpId}'`
+        `SELECT Id, APHA_TestType__c, APHA_EarTagNo__c, APHA_BatchAvian__c, APHA_BatchBovine__c, APHA_BatchDIVA__c, APHA_TestDay1Avian__c, APHA_TestDay1Bovine__c, APHA_TestDay1DIVA__c, APHA_TestDay2Avian__c, APHA_TestDay2Bovine__c, APHA_TestDay2DIVA__c FROM APHA_TestPartResult__c WHERE APHA_TestPart__c='${escapedTpId}'`
       )
 
       return {
@@ -119,8 +119,7 @@ export async function getCase(caseId) {
           day1Diva: r.APHA_TestDay1DIVA__c,
           day2Avian: r.APHA_TestDay2Avian__c,
           day2Bovine: r.APHA_TestDay2Bovine__c,
-          day2Diva: r.APHA_TestDay2DIVA__c,
-          resultAfterReview: r.APHA_ResultAfterReview__c
+          day2Diva: r.APHA_TestDay2DIVA__c
         }))
       }
     })

@@ -238,8 +238,7 @@ describe('#getCase', () => {
             APHA_TestDay1DIVA__c: null,
             APHA_TestDay2Avian__c: null,
             APHA_TestDay2Bovine__c: null,
-            APHA_TestDay2DIVA__c: null,
-            APHA_ResultAfterReview__c: null
+            APHA_TestDay2DIVA__c: null
           }
         ]
       })
@@ -277,8 +276,7 @@ describe('#getCase', () => {
               day1Diva: null,
               day2Avian: null,
               day2Bovine: null,
-              day2Diva: null,
-              resultAfterReview: null
+              day2Diva: null
             }
           ]
         }

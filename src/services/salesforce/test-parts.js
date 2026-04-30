@@ -75,8 +75,7 @@ function buildSubRequests(caseId, testParts) {
           APHA_TestDay1DIVA__c: result.day1Diva,
           APHA_TestDay2Avian__c: result.day2Avian,
           APHA_TestDay2Bovine__c: result.day2Bovine,
-          APHA_TestDay2DIVA__c: result.day2Diva,
-          APHA_ResultAfterReview__c: null
+          APHA_TestDay2DIVA__c: result.day2Diva
         }
       })
     }

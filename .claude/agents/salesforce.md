@@ -41,7 +41,7 @@ You are the expert on the Salesforce integration in this codebase.
 - **Case** — `RecordTypeId` (looked up by `DeveloperName='APHA_CattleVax'`), `APHA_CPH__c` (CPH lookup), `APHA_ReasonForTest__c`, `APHA_TestWindowStartDate__c`, `APHA_TestWindowEndDate__c`, `Status`, `Priority`
 - **APHA_CPH\_\_c** — looked up by `Name` (CPH number e.g. `'01/001/0006'`)
 - **APHA_TestPart\_\_c** — `Case__c` (Case ID), `APHA_Day1__c`, `APHA_Day2__c`, `APHA_IdentityOfCertifiyngVet__c`, `APHA_IdentityOfTester__c`
-- **APHA_TestPartResult\_\_c** — `APHA_TestPart__c` (TestPart ID), `APHA_TestType__c`, `APHA_EarTagNo__c`, batch fields (`APHA_BatchAvian__c`, `APHA_BatchBovine__c`, `APHA_BatchDIVA__c`), measurement fields (`APHA_TestDay1Avian__c`, `APHA_TestDay1Bovine__c`, `APHA_TestDay1DIVA__c`, `APHA_TestDay2Avian__c`, `APHA_TestDay2Bovine__c`, `APHA_TestDay2DIVA__c`), `APHA_ResultAfterReview__c`
+- **APHA_TestPartResult\_\_c** — `APHA_TestPart__c` (TestPart ID), `APHA_TestType__c`, `APHA_EarTagNo__c`, batch fields (`APHA_BatchAvian__c`, `APHA_BatchBovine__c`, `APHA_BatchDIVA__c`), measurement fields (`APHA_TestDay1Avian__c`, `APHA_TestDay1Bovine__c`, `APHA_TestDay1DIVA__c`, `APHA_TestDay2Avian__c`, `APHA_TestDay2Bovine__c`, `APHA_TestDay2DIVA__c`)
 
 ## Case flow
 
@@ -63,17 +63,17 @@ Accepts a **case number** (numeric string, e.g. `'00001234'`) — NOT a Salesfor
 2. Query `APHA_TestPart__c WHERE Case__c='${caseRecord.Id}'` — uses `caseRecord.Id` obtained from step 1.
 3. For each TestPart in parallel (`Promise.all`): query `APHA_TestPartResult__c WHERE APHA_TestPart__c='${tp.Id}'`.
 
-Returns the full nested object with camelCase field names: `{ id, caseNumber, status, priority, reasonForTest, testWindowStart, testWindowEnd, cph, openedDate, openedBy, testParts: [{ id, day1, day2, certifyingVet, tester, results: [{ id, testType, earTagNo, batchAvian, batchBovine, batchDiva, day1Avian, day1Bovine, day1Diva, day2Avian, day2Bovine, day2Diva, resultAfterReview }] }] }`.
+Returns the full nested object with camelCase field names: `{ id, caseNumber, status, priority, reasonForTest, testWindowStart, testWindowEnd, cph, openedDate, openedBy, testParts: [{ id, day1, day2, certifyingVet, tester, results: [{ id, testType, earTagNo, batchAvian, batchBovine, batchDiva, day1Avian, day1Bovine, day1Diva, day2Avian, day2Bovine, day2Diva }] }] }`.
 
 `cph` is the CPH number string from `APHA_CPH__r.Name` (relationship traversal, not the raw lookup ID). `openedDate` is `CreatedDate`. `openedBy` is `CreatedBy.Name`. Both `cph` and `openedBy` default to `null` if the relationship is absent.
 
 ### `submitTestParts(caseId, testParts)` — `src/services/salesforce/test-parts.js`
 
-Submits new TestParts and their results to an existing Case using `compositeGraph` (single node, `graphId: 'Graph_0'`). Private helper `buildSubRequests` interleaves `APHA_TestPart__c` POSTs (referenceId `TestPart_${i}`) with `APHA_TestPartResult__c` POSTs (referenceId `TestPartResult_${i}_${j}`); results cross-reference the TestPart via `@{TestPart_${i}.id}`. `APHA_ResultAfterReview__c` is always hardcoded to `null` in the POST body (unlike `addTestPartResults` which reads it from the input). Private helper `extractResults` walks the flat composite response sequentially to reconstruct the return shape. Returns `{ testParts: [{ testPartId, resultIds }] }`. Throws `Salesforce graph request failed at step: <referenceId>` (or without the step suffix if no failed step is found) on failure.
+Submits new TestParts and their results to an existing Case using `compositeGraph` (single node, `graphId: 'Graph_0'`). Private helper `buildSubRequests` interleaves `APHA_TestPart__c` POSTs (referenceId `TestPart_${i}`) with `APHA_TestPartResult__c` POSTs (referenceId `TestPartResult_${i}_${j}`); results cross-reference the TestPart via `@{TestPart_${i}.id}`. Private helper `extractResults` walks the flat composite response sequentially to reconstruct the return shape. Returns `{ testParts: [{ testPartId, resultIds }] }`. Throws `Salesforce graph request failed at step: <referenceId>` (or without the step suffix if no failed step is found) on failure.
 
 ### `addTestPartResults(testPartId, results)` — `src/services/salesforce/test-part-results.js`
 
-Adds results to an **already-existing** TestPart (does not create the TestPart). Uses `compositeGraph` with a single node; one sub-request per result, referenceIds `Result_0`, `Result_1`, etc. All optional result fields (`batchAvian`, `batchBovine`, `batchDiva`, `day1Avian`, `day1Bovine`, `day1Diva`, `day2Avian`, `day2Bovine`, `day2Diva`, `resultAfterReview`) default to `null` via `?? null` — unlike `submitTestParts` which passes optional fields through directly. Returns `{ resultIds: string[] }`.
+Adds results to an **already-existing** TestPart (does not create the TestPart). Uses `compositeGraph` with a single node; one sub-request per result, referenceIds `Result_0`, `Result_1`, etc. All optional result fields (`batchAvian`, `batchBovine`, `batchDiva`, `day1Avian`, `day1Bovine`, `day1Diva`, `day2Avian`, `day2Bovine`, `day2Diva`) default to `null` via `?? null` — unlike `submitTestParts` which passes optional fields through directly. Returns `{ resultIds: string[] }`.
 
 Error handling differs from `submitTestParts`: on graph failure it looks for a `FIELD_CUSTOM_VALIDATION_EXCEPTION` error code in the failed step's body array and extracts its `message`, falling back to `'Salesforce validation failed'`. Throws `Salesforce graph request failed - ${errorMessage}`.
 
@@ -118,7 +118,6 @@ Adds results to an existing TestPart. Both path params are Salesforce IDs (alpha
 - `batchAvian`, `batchBovine`, `batchDiva` — string max 20, nullable, default `null`
 - `day1Avian`, `day1Bovine`, `day2Avian`, `day2Bovine` — integer 0–999, required when `testType='SICCT'`, `null` otherwise
 - `day1Diva`, `day2Diva` — integer 0–999, required when `testType='DIVA'`, `null` otherwise
-- `resultAfterReview` — string, nullable, default `null`
 
 ## Adding new functionality
 
