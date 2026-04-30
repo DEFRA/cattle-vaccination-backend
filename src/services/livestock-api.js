@@ -12,21 +12,18 @@ async function livestockRequest(
   const proxyUrl = config.get('httpProxy')
   const dispatcher = proxyUrl ? new ProxyAgent(proxyUrl) : undefined
 
-  const response = await fetch(
-    `${apiBaseUrl}${path}`,
-    /** @type {RequestInit} */ ({
-      ...options,
-      method,
-      body: body !== undefined ? JSON.stringify(body) : undefined,
-      headers: {
-        Authorization: `Bearer ${token}`,
-        'Content-Type': 'application/json',
-        'Accept-Encoding': 'identity',
-        ...options.headers
-      },
-      ...(dispatcher ? { dispatcher } : {})
-    })
-  )
+  const response = await fetch(`${apiBaseUrl}${path}`, {
+    ...options,
+    method,
+    body: body !== undefined ? JSON.stringify(body) : undefined,
+    headers: {
+      Authorization: `Bearer ${token}`,
+      'Content-Type': 'application/json',
+      'Accept-Encoding': 'identity',
+      ...options.headers
+    },
+    ...(dispatcher ? { dispatcher } : {})
+  })
 
   if (!response.ok) {
     throw new Error(`Livestock API error ${response.status}`)

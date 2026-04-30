@@ -116,3 +116,7 @@ export async function composite(compositeRequest) {
     compositeRequest
   })
 }
+
+export async function compositeGraph(graphs) {
+  return sfRequest('/composite/graph', 'POST', { graphs })
+}

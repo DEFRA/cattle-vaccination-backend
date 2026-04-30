@@ -6,7 +6,8 @@ import {
   createRecord,
   updateRecord,
   deleteRecord,
-  composite
+  composite,
+  compositeGraph
 } from './index.js'
 
 const validTokenResponse = {
@@ -78,6 +79,22 @@ describe('Salesforce service', () => {
       await expect(query('SELECT Id FROM Case')).rejects.toThrow(
         'Salesforce auth error 401'
       )
+    })
+
+    test('Should fetch new token when existing token has expired', async () => {
+      const expiredTokenResponse = { ...validTokenResponse, expires_in: 1 }
+      fetchMock.mockResponseOnce(JSON.stringify(expiredTokenResponse))
+      fetchMock.mockResponseOnce(JSON.stringify({ records: [] }))
+      await query('SELECT Id FROM Case LIMIT 1')
+
+      fetchMock.mockResponseOnce(JSON.stringify(validTokenResponse))
+      fetchMock.mockResponseOnce(JSON.stringify({ records: [] }))
+      await query('SELECT Id FROM Case LIMIT 1')
+
+      const tokenCalls = fetchMock.mock.calls.filter(([url]) =>
+        url.includes('/oauth2/token')
+      )
+      expect(tokenCalls).toHaveLength(2)
     })
 
     test('Should fetch new token after cache is cleared', async () => {
@@ -246,6 +263,53 @@ describe('Salesforce service', () => {
       mockTokenThenResponse(mockResponse)
 
       const result = await composite([])
+
+      expect(result).toEqual(mockResponse)
+    })
+  })
+
+  describe('#compositeGraph', () => {
+    test('Should POST to composite/graph endpoint with graphs array', async () => {
+      const mockResponse = { graphs: [] }
+      mockTokenThenResponse(mockResponse)
+
+      const graphs = [
+        {
+          graphId: 'Graph_0',
+          compositeRequest: [
+            {
+              method: 'POST',
+              referenceId: 'CaseRef',
+              url: '/services/data/v62.0/sobjects/Case',
+              body: { Status: 'New' }
+            }
+          ]
+        }
+      ]
+      await compositeGraph(graphs)
+
+      const [url, options] = fetchMock.mock.calls[1]
+      expect(url).toBe(
+        'https://instance.salesforce.example.com/services/data/v62.0/composite/graph'
+      )
+      expect(options.method).toBe('POST')
+      const body = JSON.parse(options.body)
+      expect(body.graphs).toEqual(graphs)
+    })
+
+    test('Should return the graph response body', async () => {
+      const mockResponse = {
+        graphs: [
+          {
+            graphId: 'Graph_0',
+            isSuccessful: true,
+            graphResponse: { compositeResponse: [] }
+          }
+        ]
+      }
+      mockTokenThenResponse(mockResponse)
+
+      const result = await compositeGraph([])
 
       expect(result).toEqual(mockResponse)
     })

@@ -1,60 +1,12 @@
-import { composite, SF_API_PATH } from './index.js'
+import { composite, query, SF_API_PATH } from './index.js'
 
-/**
- * @typedef {Object} TestPartResult
- * @property {string} testType - e.g. 'DIVA'
- * @property {string} earTagNo - e.g. 'UK-000001-000010'
- * @property {string|null} [batchAvian]
- * @property {string|null} [batchBovine]
- * @property {string|null} [batchDiva]
- * @property {number|null} [day1Avian]
- * @property {number|null} [day1Bovine]
- * @property {number|null} [day1Diva]
- * @property {number|null} [day2Avian]
- * @property {number|null} [day2Bovine]
- * @property {number|null} [day2Diva]
- * @property {string|null} [resultAfterReview]
- */
-
-/**
- * @typedef {Object} TestPart
- * @property {string} day1 - ISO date string e.g. '2026-04-16'
- * @property {string} day2 - ISO date string e.g. '2026-04-13'
- * @property {string} certifyingVet
- * @property {string} tester
- * @property {TestPartResult[]} results
- */
-
-/**
- * Creates a Case with one or more TestParts and their results in a single atomic Composite API call.
- *
- * @param {Object} params
- * @param {string} params.cphNumber - CPH identifier e.g. '01/001/0006'
- * @param {string} params.reasonForTest - e.g. 'Pre-Movement'
- * @param {string} params.testWindowStart - ISO datetime
- * @param {string} params.testWindowEnd - ISO datetime
- * @param {TestPart[]} params.testParts
- * @returns {Promise<{ caseId: string, testParts: Array<{ testPartId: string, resultIds: string[] }> }>}
- */
 export async function createCase({
   cphNumber,
   reasonForTest,
   testWindowStart,
-  testWindowEnd,
-  testParts
+  testWindowEnd
 }) {
-  const totalRequests =
-    3 +
-    testParts.length +
-    testParts.reduce((sum, tp) => sum + tp.results.length, 0)
-
-  if (totalRequests > 25) {
-    throw new Error(
-      `Payload requires ${totalRequests} composite sub-requests, exceeding the Salesforce limit of 25`
-    )
-  }
-
-  const compositeRequest = [
+  const { compositeResponse } = await composite([
     {
       method: 'GET',
       referenceId: 'CaseRecordType',
@@ -79,63 +31,19 @@ export async function createCase({
         APHA_ReasonForTest__c: reasonForTest,
         APHA_TestWindowStartDate__c: testWindowStart,
         APHA_TestWindowEndDate__c: testWindowEnd,
-        Status: 'New',
+        Status: 'Draft',
         Priority: 'Medium'
       }
     }
-  ]
+  ])
 
-  for (
-    let testPartIndex = 0;
-    testPartIndex < testParts.length;
-    testPartIndex++
-  ) {
-    const testPart = testParts[testPartIndex]
-    const testPartRefId = `TestPart_${testPartIndex}`
+  const failedStep = compositeResponse.find((r) => r.httpStatusCode >= 400)
 
-    compositeRequest.push({
-      method: 'POST',
-      referenceId: testPartRefId,
-      url: `${SF_API_PATH}/sobjects/APHA_TestPart__c`,
-      body: {
-        Case__c: '@{CaseRef.id}',
-        APHA_Day1__c: testPart.day1,
-        APHA_Day2__c: testPart.day2,
-        APHA_IdentityOfCertifiyngVet__c: testPart.certifyingVet,
-        APHA_IdentityOfTester__c: testPart.tester
-      }
-    })
-
-    for (
-      let resultIndex = 0;
-      resultIndex < testPart.results.length;
-      resultIndex++
-    ) {
-      const result = testPart.results[resultIndex]
-      compositeRequest.push({
-        method: 'POST',
-        referenceId: `TestPartResult_${testPartIndex}_${resultIndex}`,
-        url: `${SF_API_PATH}/sobjects/APHA_TestPartResult__c`,
-        body: {
-          APHA_TestPart__c: `@{${testPartRefId}.id}`,
-          APHA_TestType__c: result.testType,
-          APHA_EarTagNo__c: result.earTagNo,
-          APHA_BatchAvian__c: result.batchAvian,
-          APHA_BatchBovine__c: result.batchBovine,
-          APHA_BatchDIVA__c: result.batchDiva,
-          APHA_TestDay1Avian__c: result.day1Avian,
-          APHA_TestDay1Bovine__c: result.day1Bovine,
-          APHA_TestDay1DIVA__c: result.day1Diva,
-          APHA_TestDay2Avian__c: result.day2Avian,
-          APHA_TestDay2Bovine__c: result.day2Bovine,
-          APHA_TestDay2DIVA__c: result.day2Diva,
-          APHA_ResultAfterReview__c: result.resultAfterReview
-        }
-      })
-    }
+  if (failedStep) {
+    throw new Error(
+      `Salesforce composite request failed at step: ${failedStep.referenceId}`
+    )
   }
-
-  const { compositeResponse } = await composite(compositeRequest)
 
   // SOQL queries return HTTP 200 even when nothing matches — empty records array is the failure signal
   if (compositeResponse[0].body.records.length === 0) {
@@ -146,40 +54,89 @@ export async function createCase({
     throw new Error(`CPH not found: ${cphNumber}`)
   }
 
-  const failedStep = compositeResponse.find((r) => r.httpStatusCode >= 400)
-
-  if (failedStep) {
-    throw new Error(
-      `Salesforce composite request failed at step: ${failedStep.referenceId}`
-    )
-  }
-
   const caseId = compositeResponse[2].body.id
 
-  let responseIdx = 3
-  const createdTestParts = []
+  const caseNumberResult = await query(
+    `SELECT CaseNumber FROM Case WHERE Id='${caseId.replace(/'/g, "''")}' LIMIT 1`
+  )
 
-  for (
-    let testPartIndex = 0;
-    testPartIndex < testParts.length;
-    testPartIndex++
-  ) {
-    const testPartId = compositeResponse[responseIdx].body.id
-    responseIdx++
+  const caseNumber = caseNumberResult.records[0]?.CaseNumber
 
-    const resultIds = []
+  return { caseId, caseNumber }
+}
 
-    for (
-      let resultIndex = 0;
-      resultIndex < testParts[testPartIndex].results.length;
-      resultIndex++
-    ) {
-      resultIds.push(compositeResponse[responseIdx].body.id)
-      responseIdx++
-    }
+export async function getCaseByCaseNumber(caseNumber) {
+  const escaped = caseNumber.replace(/'/g, "''")
+  const result = await query(
+    `SELECT Id, CaseNumber FROM Case WHERE CaseNumber='${escaped}' LIMIT 1`
+  )
+  if (result.records.length === 0) {
+    throw new Error(`Case not found: ${caseNumber}`)
+  }
+  return { id: result.records[0].Id, caseNumber: result.records[0].CaseNumber }
+}
 
-    createdTestParts.push({ testPartId, resultIds })
+export async function getCase(caseId) {
+  const escapedCaseId = caseId.replace(/'/g, "''")
+
+  const caseResult = await query(
+    `SELECT Id, CaseNumber, Status, Priority, APHA_ReasonForTest__c, APHA_TestWindowStartDate__c, APHA_TestWindowEndDate__c, APHA_CPH__r.Name, CreatedDate, Owner.Name FROM Case WHERE Id='${escapedCaseId}' LIMIT 1`
+  )
+
+  if (caseResult.records.length === 0) {
+    throw new Error(`Case not found: ${caseId}`)
   }
 
-  return { caseId, testParts: createdTestParts }
+  const caseRecord = caseResult.records[0]
+  const escapedId = caseRecord.Id.replace(/'/g, "''")
+
+  const testPartsResult = await query(
+    `SELECT Id, APHA_Day1__c, APHA_Day2__c, APHA_IdentityOfCertifiyngVet__c, APHA_IdentityOfTester__c FROM APHA_TestPart__c WHERE Case__c='${escapedId}'`
+  )
+
+  const testParts = await Promise.all(
+    testPartsResult.records.map(async (tp) => {
+      const escapedTpId = tp.Id.replace(/'/g, "''")
+      const resultsResult = await query(
+        `SELECT Id, APHA_TestType__c, APHA_EarTagNo__c, APHA_BatchAvian__c, APHA_BatchBovine__c, APHA_BatchDIVA__c, APHA_TestDay1Avian__c, APHA_TestDay1Bovine__c, APHA_TestDay1DIVA__c, APHA_TestDay2Avian__c, APHA_TestDay2Bovine__c, APHA_TestDay2DIVA__c, APHA_ResultAfterReview__c FROM APHA_TestPartResult__c WHERE APHA_TestPart__c='${escapedTpId}'`
+      )
+
+      return {
+        id: tp.Id,
+        day1: tp.APHA_Day1__c,
+        day2: tp.APHA_Day2__c,
+        certifyingVet: tp.APHA_IdentityOfCertifiyngVet__c,
+        tester: tp.APHA_IdentityOfTester__c,
+        results: resultsResult.records.map((r) => ({
+          id: r.Id,
+          testType: r.APHA_TestType__c,
+          earTagNo: r.APHA_EarTagNo__c,
+          batchAvian: r.APHA_BatchAvian__c,
+          batchBovine: r.APHA_BatchBovine__c,
+          batchDiva: r.APHA_BatchDIVA__c,
+          day1Avian: r.APHA_TestDay1Avian__c,
+          day1Bovine: r.APHA_TestDay1Bovine__c,
+          day1Diva: r.APHA_TestDay1DIVA__c,
+          day2Avian: r.APHA_TestDay2Avian__c,
+          day2Bovine: r.APHA_TestDay2Bovine__c,
+          day2Diva: r.APHA_TestDay2DIVA__c,
+          resultAfterReview: r.APHA_ResultAfterReview__c
+        }))
+      }
+    })
+  )
+
+  return {
+    id: caseRecord.Id,
+    caseNumber: caseRecord.CaseNumber,
+    status: caseRecord.Status,
+    priority: caseRecord.Priority,
+    reasonForTest: caseRecord.APHA_ReasonForTest__c,
+    testWindowStart: caseRecord.APHA_TestWindowStartDate__c,
+    testWindowEnd: caseRecord.APHA_TestWindowEndDate__c,
+    cph: caseRecord.APHA_CPH__r?.Name ?? null,
+    openedDate: caseRecord.CreatedDate,
+    openedBy: caseRecord.Owner?.Name ?? null,
+    testParts
+  }
 }

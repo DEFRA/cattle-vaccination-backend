@@ -1,8 +1,9 @@
-import { createCase } from './cases.js'
-import { composite } from './index.js'
+import { createCase, getCase } from './cases.js'
+import { composite, query } from './index.js'
 
 vi.mock('./index.js', () => ({
   composite: vi.fn(),
+  query: vi.fn(),
   SF_API_PATH: '/services/data/v62.0'
 }))
 
@@ -10,62 +11,30 @@ const validInput = {
   cphNumber: '01/001/0006',
   reasonForTest: 'Pre-Movement',
   testWindowStart: '2026-04-22T14:30:00.000Z',
-  testWindowEnd: '2026-04-22T14:30:00.000Z',
-  testParts: [
-    {
-      day1: '2026-04-16',
-      day2: '2026-04-13',
-      certifyingVet: 'Vet Identity',
-      tester: 'Tester Identity',
-      results: [
-        {
-          testType: 'DIVA',
-          earTagNo: 'UK-000001-000010',
-          batchDiva: 'D1112',
-          day1Avian: 6,
-          day1Bovine: 4
-        }
-      ]
-    }
-  ]
+  testWindowEnd: '2026-04-22T14:30:00.000Z'
 }
 
-function mockComposite(
-  testPartIds = ['test-part-id'],
-  resultIdGroups = [['result-id']]
-) {
-  const responses = [
-    {
-      referenceId: 'CaseRecordType',
-      httpStatusCode: 200,
-      body: { records: [{ Id: 'record-type-id' }] }
-    },
-    {
-      referenceId: 'CPHRef',
-      httpStatusCode: 200,
-      body: { records: [{ Id: 'cph-id' }] }
-    },
-    {
-      referenceId: 'CaseRef',
-      httpStatusCode: 201,
-      body: { id: 'case-id', success: true }
-    }
-  ]
-  testPartIds.forEach((testPartId, tpIdx) => {
-    responses.push({
-      referenceId: `TestPart_${tpIdx}`,
-      httpStatusCode: 201,
-      body: { id: testPartId, success: true }
-    })
-    resultIdGroups[tpIdx].forEach((resultId, rIdx) => {
-      responses.push({
-        referenceId: `TestPartResult_${tpIdx}_${rIdx}`,
+function mockComposite() {
+  composite.mockResolvedValue({
+    compositeResponse: [
+      {
+        referenceId: 'CaseRecordType',
+        httpStatusCode: 200,
+        body: { records: [{ Id: 'record-type-id' }] }
+      },
+      {
+        referenceId: 'CPHRef',
+        httpStatusCode: 200,
+        body: { records: [{ Id: 'cph-id' }] }
+      },
+      {
+        referenceId: 'CaseRef',
         httpStatusCode: 201,
-        body: { id: resultId, success: true }
-      })
-    })
+        body: { id: 'case-id', success: true }
+      }
+    ]
   })
-  composite.mockResolvedValue({ compositeResponse: responses })
+  query.mockResolvedValue({ records: [{ CaseNumber: '00001234' }] })
 }
 
 describe('#createCase', () => {
@@ -73,15 +42,12 @@ describe('#createCase', () => {
     vi.clearAllMocks()
   })
 
-  test('Should return caseId and testPart IDs', async () => {
+  test('Should return caseId and caseNumber', async () => {
     mockComposite()
 
     const result = await createCase(validInput)
 
-    expect(result).toEqual({
-      caseId: 'case-id',
-      testParts: [{ testPartId: 'test-part-id', resultIds: ['result-id'] }]
-    })
+    expect(result).toEqual({ caseId: 'case-id', caseNumber: '00001234' })
   })
 
   test('Should send a single composite request', async () => {
@@ -90,6 +56,16 @@ describe('#createCase', () => {
     await createCase(validInput)
 
     expect(composite).toHaveBeenCalledTimes(1)
+  })
+
+  test('Should query CaseNumber for the newly created case ID', async () => {
+    mockComposite()
+
+    await createCase(validInput)
+
+    expect(query).toHaveBeenCalledWith(
+      expect.stringContaining("WHERE Id='case-id'")
+    )
   })
 
   test('Should query RecordType and CPH as first two sub-requests', async () => {
@@ -126,81 +102,6 @@ describe('#createCase', () => {
         APHA_ReasonForTest__c: 'Pre-Movement'
       })
     })
-  })
-
-  test('Should create TestPart linked to Case via reference', async () => {
-    mockComposite()
-
-    await createCase(validInput)
-
-    const [compositeRequest] = composite.mock.calls[0]
-    expect(compositeRequest[3]).toMatchObject({
-      method: 'POST',
-      referenceId: 'TestPart_0',
-      body: expect.objectContaining({ Case__c: '@{CaseRef.id}' })
-    })
-  })
-
-  test('Should create TestPartResult linked to TestPart via reference', async () => {
-    mockComposite()
-
-    await createCase(validInput)
-
-    const [compositeRequest] = composite.mock.calls[0]
-    expect(compositeRequest[4]).toMatchObject({
-      method: 'POST',
-      referenceId: 'TestPartResult_0_0',
-      body: expect.objectContaining({
-        APHA_TestPart__c: '@{TestPart_0.id}',
-        APHA_TestType__c: 'DIVA',
-        APHA_EarTagNo__c: 'UK-000001-000010'
-      })
-    })
-  })
-
-  test('Should handle multiple test parts', async () => {
-    mockComposite(['test-part-1', 'test-part-2'], [['result-1'], ['result-2']])
-
-    const input = {
-      ...validInput,
-      testParts: [
-        { ...validInput.testParts[0] },
-        { ...validInput.testParts[0] }
-      ]
-    }
-
-    const result = await createCase(input)
-
-    expect(result.testParts).toHaveLength(2)
-    expect(result.testParts[0]).toEqual({
-      testPartId: 'test-part-1',
-      resultIds: ['result-1']
-    })
-    expect(result.testParts[1]).toEqual({
-      testPartId: 'test-part-2',
-      resultIds: ['result-2']
-    })
-  })
-
-  test('Should use unique referenceIds for each TestPart in a multi-part request', async () => {
-    mockComposite(['tp-1', 'tp-2'], [['r-1'], ['r-2']])
-
-    const input = {
-      ...validInput,
-      testParts: [
-        { ...validInput.testParts[0] },
-        { ...validInput.testParts[0] }
-      ]
-    }
-
-    await createCase(input)
-
-    const [compositeRequest] = composite.mock.calls[0]
-    const refIds = compositeRequest.map((r) => r.referenceId)
-    expect(refIds).toContain('TestPart_0')
-    expect(refIds).toContain('TestPart_1')
-    expect(refIds).toContain('TestPartResult_0_0')
-    expect(refIds).toContain('TestPartResult_1_0')
   })
 
   test('Should throw when RecordType is not found', async () => {
@@ -241,22 +142,6 @@ describe('#createCase', () => {
     )
   })
 
-  test('Should throw when composite sub-request limit would be exceeded', async () => {
-    const manyResults = Array.from({ length: 23 }, (_, i) => ({
-      testType: 'DIVA',
-      earTagNo: `UK-000001-0000${String(i).padStart(2, '0')}`
-    }))
-
-    const input = {
-      ...validInput,
-      testParts: [{ ...validInput.testParts[0], results: manyResults }]
-    }
-
-    await expect(createCase(input)).rejects.toThrow(
-      'exceeding the Salesforce limit of 25'
-    )
-  })
-
   test('Should throw when a composite step fails', async () => {
     composite.mockResolvedValue({
       compositeResponse: [
@@ -281,5 +166,257 @@ describe('#createCase', () => {
     await expect(createCase(validInput)).rejects.toThrow(
       'Salesforce composite request failed at step: CaseRef'
     )
+  })
+
+  test('Should throw when a SOQL sub-request itself returns 4xx', async () => {
+    composite.mockResolvedValue({
+      compositeResponse: [
+        {
+          referenceId: 'CaseRecordType',
+          httpStatusCode: 400,
+          body: [{ errorCode: 'INSUFFICIENT_ACCESS', message: 'No access' }]
+        },
+        {
+          referenceId: 'CPHRef',
+          httpStatusCode: 400,
+          body: [{ errorCode: 'INSUFFICIENT_ACCESS', message: 'No access' }]
+        }
+      ]
+    })
+
+    await expect(createCase(validInput)).rejects.toThrow(
+      'Salesforce composite request failed at step: CaseRecordType'
+    )
+  })
+})
+
+describe('#getCase', () => {
+  afterEach(() => {
+    vi.clearAllMocks()
+  })
+
+  test('Should return case with nested test parts and results', async () => {
+    query
+      .mockResolvedValueOnce({
+        records: [
+          {
+            Id: 'case-id',
+            CaseNumber: '00001234',
+            Status: 'New',
+            Priority: 'Medium',
+            APHA_ReasonForTest__c: 'Pre-Movement',
+            APHA_TestWindowStartDate__c: '2026-04-22',
+            APHA_TestWindowEndDate__c: '2026-04-22',
+            APHA_CPH__r: { Name: '01/001/0006' },
+            CreatedDate: '2026-04-22T10:00:00.000Z',
+            Owner: { Name: 'John Smith' }
+          }
+        ]
+      })
+      .mockResolvedValueOnce({
+        records: [
+          {
+            Id: 'tp-id',
+            APHA_Day1__c: '2026-04-16',
+            APHA_Day2__c: '2026-04-19',
+            APHA_IdentityOfCertifiyngVet__c: 'Vet Identity',
+            APHA_IdentityOfTester__c: 'Tester Identity'
+          }
+        ]
+      })
+      .mockResolvedValueOnce({
+        records: [
+          {
+            Id: 'result-id',
+            APHA_TestType__c: 'DIVA',
+            APHA_EarTagNo__c: 'UK-000001-000010',
+            APHA_BatchAvian__c: null,
+            APHA_BatchBovine__c: null,
+            APHA_BatchDIVA__c: 'D1112',
+            APHA_TestDay1Avian__c: 6,
+            APHA_TestDay1Bovine__c: 4,
+            APHA_TestDay1DIVA__c: null,
+            APHA_TestDay2Avian__c: null,
+            APHA_TestDay2Bovine__c: null,
+            APHA_TestDay2DIVA__c: null,
+            APHA_ResultAfterReview__c: null
+          }
+        ]
+      })
+
+    const result = await getCase('00001234')
+
+    expect(result).toEqual({
+      id: 'case-id',
+      caseNumber: '00001234',
+      status: 'New',
+      priority: 'Medium',
+      reasonForTest: 'Pre-Movement',
+      testWindowStart: '2026-04-22',
+      testWindowEnd: '2026-04-22',
+      cph: '01/001/0006',
+      openedDate: '2026-04-22T10:00:00.000Z',
+      openedBy: 'John Smith',
+      testParts: [
+        {
+          id: 'tp-id',
+          day1: '2026-04-16',
+          day2: '2026-04-19',
+          certifyingVet: 'Vet Identity',
+          tester: 'Tester Identity',
+          results: [
+            {
+              id: 'result-id',
+              testType: 'DIVA',
+              earTagNo: 'UK-000001-000010',
+              batchAvian: null,
+              batchBovine: null,
+              batchDiva: 'D1112',
+              day1Avian: 6,
+              day1Bovine: 4,
+              day1Diva: null,
+              day2Avian: null,
+              day2Bovine: null,
+              day2Diva: null,
+              resultAfterReview: null
+            }
+          ]
+        }
+      ]
+    })
+  })
+
+  test('Should query Case by Id with the correct SOQL', async () => {
+    query
+      .mockResolvedValueOnce({
+        records: [
+          {
+            Id: 'case-id',
+            CaseNumber: '00001234',
+            Status: 'New',
+            Priority: 'Medium',
+            APHA_ReasonForTest__c: 'Pre-Movement',
+            APHA_TestWindowStartDate__c: '2026-04-22',
+            APHA_TestWindowEndDate__c: '2026-04-22',
+            APHA_CPH__r: { Name: '01/001/0006' },
+            CreatedDate: '2026-04-22T10:00:00.000Z',
+            Owner: { Name: 'John Smith' }
+          }
+        ]
+      })
+      .mockResolvedValueOnce({ records: [] })
+
+    await getCase('a00000000000001')
+
+    expect(query).toHaveBeenCalledWith(
+      expect.stringContaining("WHERE Id='a00000000000001'")
+    )
+  })
+
+  test('Should select CPH name, CreatedDate and Owner name in the Case SOQL query', async () => {
+    query
+      .mockResolvedValueOnce({
+        records: [
+          {
+            Id: 'case-id',
+            CaseNumber: '00001234',
+            Status: 'New',
+            Priority: 'Medium',
+            APHA_ReasonForTest__c: 'Pre-Movement',
+            APHA_TestWindowStartDate__c: '2026-04-22',
+            APHA_TestWindowEndDate__c: '2026-04-22',
+            APHA_CPH__r: { Name: '01/001/0006' },
+            CreatedDate: '2026-04-22T10:00:00.000Z',
+            Owner: { Name: 'John Smith' }
+          }
+        ]
+      })
+      .mockResolvedValueOnce({ records: [] })
+
+    await getCase('00001234')
+
+    const caseQuery = query.mock.calls[0][0]
+    expect(caseQuery).toContain('APHA_CPH__r.Name')
+    expect(caseQuery).toContain('CreatedDate')
+    expect(caseQuery).toContain('Owner.Name')
+  })
+
+  test('Should return empty testParts array when case has no test parts', async () => {
+    query
+      .mockResolvedValueOnce({
+        records: [
+          {
+            Id: 'case-id',
+            CaseNumber: '00001234',
+            Status: 'New',
+            Priority: 'Medium',
+            APHA_ReasonForTest__c: 'Pre-Movement',
+            APHA_TestWindowStartDate__c: '2026-04-22',
+            APHA_TestWindowEndDate__c: '2026-04-22',
+            APHA_CPH__r: { Name: '01/001/0006' },
+            CreatedDate: '2026-04-22T10:00:00.000Z',
+            Owner: { Name: 'John Smith' }
+          }
+        ]
+      })
+      .mockResolvedValueOnce({ records: [] })
+
+    const result = await getCase('00001234')
+
+    expect(result.testParts).toEqual([])
+  })
+
+  test('Should throw when case is not found', async () => {
+    query.mockResolvedValueOnce({ records: [] })
+
+    await expect(getCase('99999999')).rejects.toThrow(
+      'Case not found: 99999999'
+    )
+  })
+
+  test('Should query TestPartResults for each TestPart', async () => {
+    query
+      .mockResolvedValueOnce({
+        records: [
+          {
+            Id: 'case-id',
+            CaseNumber: '00001234',
+            Status: 'New',
+            Priority: 'Medium',
+            APHA_ReasonForTest__c: 'Pre-Movement',
+            APHA_TestWindowStartDate__c: '2026-04-22',
+            APHA_TestWindowEndDate__c: '2026-04-22',
+            APHA_CPH__r: { Name: '01/001/0006' },
+            CreatedDate: '2026-04-22T10:00:00.000Z',
+            Owner: { Name: 'John Smith' }
+          }
+        ]
+      })
+      .mockResolvedValueOnce({
+        records: [
+          {
+            Id: 'tp-id-1',
+            APHA_Day1__c: '2026-04-16',
+            APHA_Day2__c: '2026-04-19',
+            APHA_IdentityOfCertifiyngVet__c: 'Vet',
+            APHA_IdentityOfTester__c: 'Tester'
+          },
+          {
+            Id: 'tp-id-2',
+            APHA_Day1__c: '2026-04-17',
+            APHA_Day2__c: '2026-04-20',
+            APHA_IdentityOfCertifiyngVet__c: 'Vet 2',
+            APHA_IdentityOfTester__c: 'Tester 2'
+          }
+        ]
+      })
+      .mockResolvedValueOnce({ records: [] })
+      .mockResolvedValueOnce({ records: [] })
+
+    const result = await getCase('00001234')
+
+    expect(result.testParts).toHaveLength(2)
+    // One query for Case, one for TestParts, one per TestPart for results
+    expect(query).toHaveBeenCalledTimes(4)
   })
 })
