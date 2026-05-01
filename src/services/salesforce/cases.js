@@ -70,10 +70,12 @@ export async function getCaseByCaseNumber(caseNumber) {
   const result = await query(
     `SELECT Id, CaseNumber FROM Case WHERE CaseNumber='${escaped}' LIMIT 1`
   )
+
   if (result.records.length === 0) {
     throw new Error(`Case not found: ${caseNumber}`)
   }
-  return { id: result.records[0].Id, caseNumber: result.records[0].CaseNumber }
+
+  return { caseId: result.records[0].Id }
 }
 
 export async function getCase(caseId) {

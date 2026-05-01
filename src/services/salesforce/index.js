@@ -5,7 +5,7 @@ export const SF_API_PATH = `/services/data/${SF_API_VERSION}`
 
 let cachedToken = null
 let cachedInstanceUrl = null
-let tokenExpiresAt = null
+let refreshTokenAt = null
 let tokenRefreshPromise = null
 
 async function fetchNewToken() {
@@ -36,7 +36,7 @@ async function fetchNewToken() {
   const data = await response.json()
   cachedToken = data.access_token
   cachedInstanceUrl = data.instance_url
-  tokenExpiresAt = Date.now() + ((data.expires_in ?? 3600) - 60) * 1000
+  refreshTokenAt = Date.now() + ((data.expires_in ?? 3600) - 60) * 1000
   return { token: cachedToken, instanceUrl: cachedInstanceUrl }
 }
 
@@ -44,8 +44,8 @@ async function getSalesforceToken() {
   if (
     cachedToken &&
     cachedInstanceUrl &&
-    tokenExpiresAt &&
-    Date.now() < tokenExpiresAt
+    refreshTokenAt &&
+    Date.now() < refreshTokenAt
   ) {
     return { token: cachedToken, instanceUrl: cachedInstanceUrl }
   }
@@ -62,7 +62,7 @@ async function getSalesforceToken() {
 export function clearTokenCache() {
   cachedToken = null
   cachedInstanceUrl = null
-  tokenExpiresAt = null
+  refreshTokenAt = null
   tokenRefreshPromise = null
 }
 

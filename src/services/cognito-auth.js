@@ -2,7 +2,7 @@ import { Buffer } from 'node:buffer'
 import { config } from '../config.js'
 
 let cachedToken = null
-let tokenExpiresAt = null
+let refreshTokenAt = null
 let tokenRefreshPromise = null
 
 async function fetchNewToken() {
@@ -37,13 +37,13 @@ async function fetchNewToken() {
 
   const data = await response.json()
   cachedToken = data.access_token
-  tokenExpiresAt = Date.now() + (data.expires_in - 60) * 1000
+  refreshTokenAt = Date.now() + (data.expires_in - 60) * 1000
 
   return cachedToken
 }
 
 export async function getCognitoToken() {
-  if (cachedToken && tokenExpiresAt && Date.now() < tokenExpiresAt) {
+  if (cachedToken && refreshTokenAt && Date.now() < refreshTokenAt) {
     return cachedToken
   }
 
@@ -58,6 +58,6 @@ export async function getCognitoToken() {
 
 export function clearTokenCache() {
   cachedToken = null
-  tokenExpiresAt = null
+  refreshTokenAt = null
   tokenRefreshPromise = null
 }

@@ -1,6 +1,7 @@
 import { compositeGraph, SF_API_PATH } from './index.js'
 
 export async function addTestPartResults(testPartId, results) {
+  // add step here to error if testPartId doesnt belong to the provided caseId (needs to be added as a param)
   const graphResponse = await compositeGraph([
     {
       graphId: 'Graph_0',
