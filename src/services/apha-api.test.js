@@ -15,7 +15,7 @@ describe('#getWorkorders', () => {
   afterEach(() => {
     config.set('apha.apiBaseUrl', null)
     config.set('cdp.devApiKey', null)
-    config.set('cdpEnvironment', 'local')
+    config.set('cdpEnvironment', 'dev')
   })
 
   test('Should make GET request with bearer token', async () => {
@@ -63,6 +63,20 @@ describe('#getWorkorders', () => {
     expect(options.headers['x-api-key']).toBe('my-dev-key')
   })
 
+  test('Should not include x-api-key header when devApiKey is null in local env', async () => {
+    config.set('cdpEnvironment', 'local')
+    fetchMock.mockResponseOnce(JSON.stringify({}))
+
+    await getWorkorders({
+      startDate: '2026-01-01',
+      endDate: '2026-03-27',
+      country: 'England'
+    })
+
+    const [, options] = fetchMock.mock.calls[0]
+    expect(options.headers['x-api-key']).toBeUndefined()
+  })
+
   test('Should not include x-api-key header in non-local environments', async () => {
     config.set('cdp.devApiKey', 'my-dev-key')
     config.set('cdpEnvironment', 'dev')
@@ -99,7 +113,7 @@ describe('#getWorkorders', () => {
         endDate: '2026-03-27',
         country: 'England'
       })
-    ).rejects.toThrow('APHA API error 404: Not Found')
+    ).rejects.toThrow('APHA API error 404')
   })
 })
 
@@ -113,7 +127,7 @@ describe('#findHoldings', () => {
   afterEach(() => {
     config.set('apha.apiBaseUrl', null)
     config.set('cdp.devApiKey', null)
-    config.set('cdpEnvironment', 'local')
+    config.set('cdpEnvironment', 'dev')
   })
 
   test('Should make POST request with JSON body', async () => {

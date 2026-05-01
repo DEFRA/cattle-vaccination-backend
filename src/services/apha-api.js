@@ -24,14 +24,16 @@ async function aphaRequest(
       Authorization: `Bearer ${token}`,
       'Content-Type': 'application/json',
       'Accept-Encoding': 'identity',
-      ...(env === 'local' && { 'x-api-key': config.get('cdp.devApiKey') }),
+      ...(env === 'local' &&
+        config.get('cdp.devApiKey') && {
+          'x-api-key': config.get('cdp.devApiKey')
+        }),
       ...options.headers
     }
   })
 
   if (!response.ok) {
-    const error = await response.text()
-    throw new Error(`APHA API error ${response.status}: ${error}`)
+    throw new Error(`APHA API error ${response.status}`)
   }
 
   return response.json()

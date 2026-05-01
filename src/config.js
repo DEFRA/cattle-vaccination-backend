@@ -147,6 +147,28 @@ const config = convict({
       env: 'LIVESTOCK_API_TOKEN'
     }
   },
+  salesforce: {
+    url: {
+      doc: 'Salesforce URL',
+      format: 'required-string',
+      default: '',
+      env: 'SALESFORCE_URL'
+    },
+    clientId: {
+      doc: 'Salesforce connected app client ID',
+      format: 'required-string',
+      default: '',
+      sensitive: true,
+      env: 'SALESFORCE_CLIENT_ID'
+    },
+    clientSecret: {
+      doc: 'Salesforce connected app client secret',
+      format: 'required-string',
+      default: '',
+      sensitive: true,
+      env: 'SALESFORCE_CLIENT_SECRET'
+    }
+  },
   cdp: {
     devApiKey: {
       doc: 'Developer API key, used in non-production environments',
