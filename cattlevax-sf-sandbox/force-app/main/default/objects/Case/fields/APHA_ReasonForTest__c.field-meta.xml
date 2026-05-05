@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>APHA_ReasonForTest__c</fullName>
+    <description>The reason for this test.</description>
+    <label>Reason for test</label>
+    <required>false</required>
+    <trackFeedHistory>false</trackFeedHistory>
+    <trackHistory>false</trackHistory>
+    <trackTrending>false</trackTrending>
+    <type>Picklist</type>
+    <valueSet>
+        <restricted>true</restricted>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value>
+                <fullName>Radial</fullName>
+                <default>false</default>
+                <label>Radial</label>
+            </value>
+            <value>
+                <fullName>6W</fullName>
+                <default>false</default>
+                <label>6W</label>
+            </value>
+            <value>
+                <fullName>6M</fullName>
+                <default>false</default>
+                <label>6M</label>
+            </value>
+            <value>
+                <fullName>12M</fullName>
+                <default>false</default>
+                <label>12M</label>
+            </value>
+            <value>
+                <fullName>48M</fullName>
+                <default>false</default>
+                <label>48M</label>
+            </value>
+            <value>
+                <fullName>Pre-Movement</fullName>
+                <default>false</default>
+                <label>Pre-Movement</label>
+            </value>
+            <value>
+                <fullName>Post-Movement</fullName>
+                <default>false</default>
+                <label>Post-Movement</label>
+            </value>
+        </valueSetDefinition>
+    </valueSet>
+</CustomField>

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<PermissionSetGroup xmlns="http://soap.sforce.com/2006/04/metadata">
+    <description>Data Viewer for Cattle Vax</description>
+    <hasActivationRequired>false</hasActivationRequired>
+    <label>PSG003-CattleVax-Data-Viewer</label>
+    <permissionSets>APHA_PS002CattleVaxUserInterface</permissionSets>
+    <permissionSets>PS004_CattleVaxDataViewer</permissionSets>
+    <status>Updated</status>
+</PermissionSetGroup>

@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>APHA_ResponseOutcome__c</fullName>
+    <description>The reason for this test.</description>
+    <label>Response Outcome</label>
+    <required>false</required>
+    <trackFeedHistory>false</trackFeedHistory>
+    <trackHistory>false</trackHistory>
+    <trackTrending>false</trackTrending>
+    <type>Picklist</type>
+    <valueSet>
+        <restricted>true</restricted>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value>
+                <fullName>Accept</fullName>
+                <default>false</default>
+                <label>Accept</label>
+            </value>
+            <value>
+                <fullName>Refuse</fullName>
+                <default>false</default>
+                <label>Refuse</label>
+            </value>
+        </valueSetDefinition>
+    </valueSet>
+</CustomField>

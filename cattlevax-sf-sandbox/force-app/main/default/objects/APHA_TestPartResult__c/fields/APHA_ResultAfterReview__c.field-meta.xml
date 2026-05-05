@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>APHA_ResultAfterReview__c</fullName>
+    <label>Result - After Review</label>
+    <required>false</required>
+    <trackHistory>true</trackHistory>
+    <trackTrending>false</trackTrending>
+    <type>Picklist</type>
+    <valueSet>
+        <restricted>true</restricted>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value>
+                <fullName>Reaction</fullName>
+                <default>false</default>
+                <label>Reaction</label>
+            </value>
+            <value>
+                <fullName>Inconclusive Reaction</fullName>
+                <default>false</default>
+                <label>Inconclusive Reaction</label>
+            </value>
+            <value>
+                <fullName>No Reaction</fullName>
+                <default>false</default>
+                <label>No Reaction</label>
+            </value>
+        </valueSetDefinition>
+    </valueSet>
+</CustomField>
