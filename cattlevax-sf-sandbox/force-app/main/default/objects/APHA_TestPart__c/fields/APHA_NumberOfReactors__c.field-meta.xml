@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>APHA_NumberOfReactors__c</fullName>
+    <description>Rollup to Ear Tag Info - Result - Calculated = Reaction</description>
+    <label>Number of Reactors</label>
+    <summaryFilterItems>
+        <field>APHA_TestPartResult__c.APHA_ResultCalculated__c</field>
+        <operation>equals</operation>
+        <value>Reaction</value>
+    </summaryFilterItems>
+    <summaryForeignKey>APHA_TestPartResult__c.APHA_TestPart__c</summaryForeignKey>
+    <summaryOperation>count</summaryOperation>
+    <trackHistory>false</trackHistory>
+    <trackTrending>false</trackTrending>
+    <type>Summary</type>
+</CustomField>

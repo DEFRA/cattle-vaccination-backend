@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ValidationRule xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>APHA_TestDay1MeasurementRequired</fullName>
+    <active>true</active>
+    <description>Either (Test Day 1 Bovine AND Test Day 1 Avian) Or Test Day 1 DIVA is required</description>
+    <errorConditionFormula>OR(
+    AND(
+        OR(NOT(ISBLANK(APHA_TestDay1Avian__c)), NOT(ISBLANK(APHA_TestDay1Bovine__c))),
+        NOT(ISBLANK(APHA_TestDay1DIVA__c))
+    ),
+    
+    AND(
+        ISBLANK(APHA_TestDay1DIVA__c),
+        OR(
+            AND(NOT(ISBLANK(APHA_TestDay1Avian__c)), ISBLANK(APHA_TestDay1Bovine__c)),
+            AND(ISBLANK(APHA_TestDay1Avian__c), NOT(ISBLANK(APHA_TestDay1Bovine__c)))
+        )
+    )
+)</errorConditionFormula>
+    <errorMessage>Either (Test Day 1 Bovine AND Test Day 1 Avian) Or Test Day 1 DIVA is required</errorMessage>
+</ValidationRule>

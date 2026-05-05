@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>APHA_ResultCalculated__c</fullName>
+    <description>Result of test for individual animal</description>
+    <externalId>false</externalId>
+    <formula>IF(  
+    TEXT(APHA_TestType__c) == &apos;SICCT&apos;,
+    IF ( (APHA_TestDay2Bovine__c -  APHA_TestDay1Bovine__c) &gt; (APHA_TestDay2Avian__c - APHA_TestDay1Avian__c),
+    &quot;Reaction&quot;,
+    IF( (APHA_TestDay2Bovine__c-APHA_TestDay1Bovine__c)==(APHA_TestDay2Avian__c-APHA_TestDay1Avian__c),&quot;Inconclusive Reaction&quot;,&quot;No Reaction&quot;) 
+    ), 
+    IF( 
+        TEXT(APHA_TestType__c) == &apos;DIVA&apos;,
+        IF( APHA_TestDay2DIVA__c &gt;(2*APHA_TestDay1DIVA__c), &quot;Reaction&quot;,  IF( APHA_TestDay2DIVA__c &gt;(1.5*APHA_TestDay1DIVA__c) , &quot;Inconclusive Reaction&quot;,&quot;No Reaction&quot; )  ) , &quot;&quot;
+    )
+)</formula>
+    <formulaTreatBlanksAs>BlankAsZero</formulaTreatBlanksAs>
+    <label>Result - Calculated</label>
+    <required>false</required>
+    <trackHistory>false</trackHistory>
+    <trackTrending>false</trackTrending>
+    <type>Text</type>
+    <unique>false</unique>
+</CustomField>

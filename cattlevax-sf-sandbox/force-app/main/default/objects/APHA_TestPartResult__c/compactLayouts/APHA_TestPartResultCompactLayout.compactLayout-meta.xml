@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CompactLayout xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>APHA_TestPartResultCompactLayout</fullName>
+    <fields>Name</fields>
+    <fields>APHA_EarTagNo__c</fields>
+    <fields>APHA_ResultCalculated__c</fields>
+    <fields>APHA_ResultAfterReview__c</fields>
+    <fields>APHA_TestType__c</fields>
+    <label>Test Part Result Compact Layout</label>
+</CompactLayout>
