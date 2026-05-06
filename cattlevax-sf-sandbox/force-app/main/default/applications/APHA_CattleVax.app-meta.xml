@@ -39,6 +39,24 @@
     <actionOverrides>
         <actionName>View</actionName>
         <comment>Action override created by Lightning App Builder during activation.</comment>
+        <content>Vaccination_Invitation_Record_Page</content>
+        <formFactor>Large</formFactor>
+        <skipRecordTypeSelect>false</skipRecordTypeSelect>
+        <type>Flexipage</type>
+        <pageOrSobjectType>APHA_VaccinationInvitation__c</pageOrSobjectType>
+    </actionOverrides>
+    <actionOverrides>
+        <actionName>View</actionName>
+        <comment>Action override created by Lightning App Builder during activation.</comment>
+        <content>Vaccination_Invitation_Record_Page</content>
+        <formFactor>Small</formFactor>
+        <skipRecordTypeSelect>false</skipRecordTypeSelect>
+        <type>Flexipage</type>
+        <pageOrSobjectType>APHA_VaccinationInvitation__c</pageOrSobjectType>
+    </actionOverrides>
+    <actionOverrides>
+        <actionName>View</actionName>
+        <comment>Action override created by Lightning App Builder during activation.</comment>
         <content>APHA_CPHRecordPage</content>
         <formFactor>Large</formFactor>
         <skipRecordTypeSelect>false</skipRecordTypeSelect>
@@ -153,7 +171,8 @@
     <tabs>APHA_CPH__c</tabs>
     <tabs>APHA_TestPart__c</tabs>
     <tabs>standard-report</tabs>
-    <tabs>APHA_VaccinationInvitationSent__c</tabs>
+    <tabs>APHA_VaccinationInvitation__c</tabs>
+    <tabs>APHA_BackgroundAction__c</tabs>
     <uiType>Lightning</uiType>
     <utilityBar>Cattle_Vax_UtilityBar</utilityBar>
 </CustomApplication>
