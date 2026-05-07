@@ -58,6 +58,16 @@
         <viewAllFields>true</viewAllFields>
         <viewAllRecords>false</viewAllRecords>
     </objectPermissions>
+    <objectPermissions>
+        <allowCreate>false</allowCreate>
+        <allowDelete>false</allowDelete>
+        <allowEdit>false</allowEdit>
+        <allowRead>true</allowRead>
+        <modifyAllRecords>false</modifyAllRecords>
+        <object>Location</object>
+        <viewAllFields>false</viewAllFields>
+        <viewAllRecords>false</viewAllRecords>
+    </objectPermissions>
     <recordTypeVisibilities>
         <recordType>Case.APHA_CattleVax</recordType>
         <visible>true</visible>
@@ -77,5 +87,9 @@
     <tabSettings>
         <tab>standard-Case</tab>
         <visibility>Visible</visibility>
+    </tabSettings>
+    <tabSettings>
+        <tab>standard-Location</tab>
+        <visibility>Available</visibility>
     </tabSettings>
 </PermissionSet>

@@ -113,6 +113,11 @@
     </fieldPermissions>
     <fieldPermissions>
         <editable>true</editable>
+        <field>Case.APHA_InvitationCode__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
         <field>Case.APHA_TestWindowEndDate__c</field>
         <readable>true</readable>
     </fieldPermissions>
@@ -323,6 +328,16 @@
         <viewAllFields>true</viewAllFields>
         <viewAllRecords>false</viewAllRecords>
     </objectPermissions>
+    <objectPermissions>
+        <allowCreate>false</allowCreate>
+        <allowDelete>false</allowDelete>
+        <allowEdit>false</allowEdit>
+        <allowRead>true</allowRead>
+        <modifyAllRecords>false</modifyAllRecords>
+        <object>Location</object>
+        <viewAllFields>true</viewAllFields>
+        <viewAllRecords>true</viewAllRecords>
+    </objectPermissions>
     <recordTypeVisibilities>
         <recordType>Case.APHA_CattleVax</recordType>
         <visible>true</visible>
@@ -346,5 +361,9 @@
     <tabSettings>
         <tab>standard-Case</tab>
         <visibility>Visible</visibility>
+    </tabSettings>
+    <tabSettings>
+        <tab>standard-Location</tab>
+        <visibility>Available</visibility>
     </tabSettings>
 </PermissionSet>
