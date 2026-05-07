@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ValidationRule xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>APHA_ReasonForTestRequiredForCattleVax</fullName>
+    <active>false</active>
+    <description>Reason for Test is required for Cattle Vax Cases</description>
+    <errorConditionFormula>AND(ISBLANK(TEXT(APHA_ReasonForTest__c)), RecordType.DeveloperName = &apos;APHA_CattleVax&apos;)</errorConditionFormula>
+    <errorMessage>Reason for Test is required for Cattle Vax Cases</errorMessage>
+</ValidationRule>
