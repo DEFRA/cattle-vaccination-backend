@@ -15,7 +15,7 @@
     <filters>
         <field>CASES.TYPE</field>
         <operation>equals</operation>
-        <value>Bovine TB Vaccination Invitation</value>
+        <value>TB Vaccination Invitation</value>
     </filters>
     <filters>
         <field>APHA_ResponseExpectedBy__c</field>

@@ -81,30 +81,10 @@
             <fieldInstance>
                 <fieldInstanceProperties>
                     <name>uiBehavior</name>
-                    <value>required</value>
+                    <value>none</value>
                 </fieldInstanceProperties>
-                <fieldItem>Record.APHA_CPH__c</fieldItem>
-                <identifier>RecordAPHA_CPH_cField</identifier>
-            </fieldInstance>
-        </itemInstances>
-        <itemInstances>
-            <fieldInstance>
-                <fieldInstanceProperties>
-                    <name>uiBehavior</name>
-                    <value>readonly</value>
-                </fieldInstanceProperties>
-                <fieldItem>Record.CreatedDate</fieldItem>
-                <identifier>RecordCreatedDateField</identifier>
-            </fieldInstance>
-        </itemInstances>
-        <itemInstances>
-            <fieldInstance>
-                <fieldInstanceProperties>
-                    <name>uiBehavior</name>
-                    <value>readonly</value>
-                </fieldInstanceProperties>
-                <fieldItem>Record.ClosedDate</fieldItem>
-                <identifier>RecordClosedDateField</identifier>
+                <fieldItem>Record.Priority</fieldItem>
+                <identifier>RecordPriorityField</identifier>
             </fieldInstance>
         </itemInstances>
         <itemInstances>
@@ -127,16 +107,6 @@
                 <identifier>RecordTypeField</identifier>
             </fieldInstance>
         </itemInstances>
-        <itemInstances>
-            <fieldInstance>
-                <fieldInstanceProperties>
-                    <name>uiBehavior</name>
-                    <value>none</value>
-                </fieldInstanceProperties>
-                <fieldItem>Record.APHA_ResponseExpectedBy__c</fieldItem>
-                <identifier>RecordAPHA_ResponseExpectedBy__cField</identifier>
-            </fieldInstance>
-        </itemInstances>
         <name>Facet-62665d0a-64a2-4222-9f0e-1a12c41df780</name>
         <type>Facet</type>
     </flexiPageRegions>
@@ -155,30 +125,10 @@
             <fieldInstance>
                 <fieldInstanceProperties>
                     <name>uiBehavior</name>
-                    <value>none</value>
+                    <value>required</value>
                 </fieldInstanceProperties>
-                <fieldItem>Record.Priority</fieldItem>
-                <identifier>RecordPriorityField</identifier>
-            </fieldInstance>
-        </itemInstances>
-        <itemInstances>
-            <fieldInstance>
-                <fieldInstanceProperties>
-                    <name>uiBehavior</name>
-                    <value>readonly</value>
-                </fieldInstanceProperties>
-                <fieldItem>Record.ContactPhone</fieldItem>
-                <identifier>RecordContactPhoneField</identifier>
-            </fieldInstance>
-        </itemInstances>
-        <itemInstances>
-            <fieldInstance>
-                <fieldInstanceProperties>
-                    <name>uiBehavior</name>
-                    <value>readonly</value>
-                </fieldInstanceProperties>
-                <fieldItem>Record.ContactEmail</fieldItem>
-                <identifier>RecordContactEmailField</identifier>
+                <fieldItem>Record.APHA_CPH__c</fieldItem>
+                <identifier>RecordAPHA_CPH_cField</identifier>
             </fieldInstance>
         </itemInstances>
         <itemInstances>
@@ -189,6 +139,16 @@
                 </fieldInstanceProperties>
                 <fieldItem>Record.Reason</fieldItem>
                 <identifier>RecordReasonField</identifier>
+            </fieldInstance>
+        </itemInstances>
+        <itemInstances>
+            <fieldInstance>
+                <fieldInstanceProperties>
+                    <name>uiBehavior</name>
+                    <value>readonly</value>
+                </fieldInstanceProperties>
+                <fieldItem>Record.ClosedDate</fieldItem>
+                <identifier>RecordClosedDateField</identifier>
             </fieldInstance>
         </itemInstances>
         <name>Facet-c0bc695e-edec-4dd6-8660-47a278e5802d</name>
@@ -359,16 +319,6 @@
                     <name>uiBehavior</name>
                     <value>none</value>
                 </fieldInstanceProperties>
-                <fieldItem>Record.APHA_InvitationCode__c</fieldItem>
-                <identifier>RecordAPHA_InvitationCode__cField</identifier>
-            </fieldInstance>
-        </itemInstances>
-        <itemInstances>
-            <fieldInstance>
-                <fieldInstanceProperties>
-                    <name>uiBehavior</name>
-                    <value>none</value>
-                </fieldInstanceProperties>
                 <fieldItem>Record.APHA_ResponseDate__c</fieldItem>
                 <identifier>RecordAPHA_ResponseDate__cField</identifier>
             </fieldInstance>
@@ -415,16 +365,6 @@
                 </fieldInstanceProperties>
                 <fieldItem>Record.APHA_ResponseTimescalePreference__c</fieldItem>
                 <identifier>RecordAPHA_ResponseTimescalePreference__cField</identifier>
-            </fieldInstance>
-        </itemInstances>
-        <itemInstances>
-            <fieldInstance>
-                <fieldInstanceProperties>
-                    <name>uiBehavior</name>
-                    <value>none</value>
-                </fieldInstanceProperties>
-                <fieldItem>Record.APHA_ReviewedBy__c</fieldItem>
-                <identifier>RecordAPHA_ReviewedBy__cField</identifier>
             </fieldInstance>
         </itemInstances>
         <name>Facet-081a563e-78c3-4b0e-8b66-c04ea7fadb79</name>
@@ -545,7 +485,7 @@
                     <criteria>
                         <leftValue>{!Record.Type}</leftValue>
                         <operator>EQUAL</operator>
-                        <rightValue>Bovine TB Skin Test</rightValue>
+                        <rightValue>TB Skin Test</rightValue>
                     </criteria>
                 </visibilityRule>
             </componentInstance>
@@ -570,7 +510,7 @@
                     <criteria>
                         <leftValue>{!Record.Type}</leftValue>
                         <operator>EQUAL</operator>
-                        <rightValue>Bovine TB Skin Test</rightValue>
+                        <rightValue>TB Skin Test</rightValue>
                     </criteria>
                 </visibilityRule>
             </componentInstance>
@@ -595,7 +535,7 @@
                     <criteria>
                         <leftValue>{!Record.Type}</leftValue>
                         <operator>EQUAL</operator>
-                        <rightValue>Bovine TB Vaccination Invitation</rightValue>
+                        <rightValue>TB Vaccination Invitation</rightValue>
                     </criteria>
                 </visibilityRule>
             </componentInstance>
@@ -640,7 +580,7 @@
                 </componentInstanceProperties>
                 <componentInstanceProperties>
                     <name>relatedListApiName</name>
-                    <value>APHA_VaccinationInvitationsSent__r</value>
+                    <value>APHA_Invitations__r</value>
                 </componentInstanceProperties>
                 <componentInstanceProperties>
                     <name>relatedListDisplayType</name>
@@ -665,10 +605,7 @@
                             <value>APHA_Status__c</value>
                         </valueListItems>
                         <valueListItems>
-                            <value>APHA_InvitationId__c</value>
-                        </valueListItems>
-                        <valueListItems>
-                            <value>APHA_TemplateId__c</value>
+                            <value>CREATED_DATE</value>
                         </valueListItems>
                     </valueList>
                 </componentInstanceProperties>
@@ -795,7 +732,7 @@
                     <criteria>
                         <leftValue>{!Record.Type}</leftValue>
                         <operator>EQUAL</operator>
-                        <rightValue>Bovine TB Vaccination Invitation</rightValue>
+                        <rightValue>TB Vaccination Invitation</rightValue>
                     </criteria>
                 </visibilityRule>
             </componentInstance>
@@ -816,7 +753,7 @@
                     <criteria>
                         <leftValue>{!Record.Type}</leftValue>
                         <operator>EQUAL</operator>
-                        <rightValue>Bovine TB Skin Test</rightValue>
+                        <rightValue>TB Skin Test</rightValue>
                     </criteria>
                 </visibilityRule>
             </componentInstance>

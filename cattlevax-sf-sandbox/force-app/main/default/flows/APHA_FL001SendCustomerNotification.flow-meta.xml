@@ -209,7 +209,7 @@
             </value>
         </assignmentItems>
         <assignmentItems>
-            <assignToReference>vaccinationInvitationRecord.APHA_InvitationId__c</assignToReference>
+            <assignToReference>vaccinationInvitationRecord.APHA_InvitationRequestId__c</assignToReference>
             <operator>Assign</operator>
             <value>
                 <elementReference>Generate_UUID</elementReference>
@@ -644,7 +644,7 @@
         <inputAssignments>
             <field>Type</field>
             <value>
-                <stringValue>Bovine TB Vaccination Invitation</stringValue>
+                <stringValue>TB Vaccination Invitation</stringValue>
             </value>
         </inputAssignments>
         <object>Case</object>
@@ -775,6 +775,7 @@
         <object>Contact</object>
         <storeOutputAutomatically>true</storeOutputAutomatically>
     </recordLookups>
+    <runInMode>SystemModeWithoutSharing</runInMode>
     <screens>
         <name>Customer_Not_Found</name>
         <label>Customer Not Found</label>
@@ -991,7 +992,7 @@
         <isCollection>false</isCollection>
         <isInput>false</isInput>
         <isOutput>false</isOutput>
-        <objectType>APHA_VaccinationInvitation__c</objectType>
+        <objectType>APHA_Invitation__c</objectType>
     </variables>
     <variables>
         <name>vaccinationInvitationRecords</name>
@@ -999,6 +1000,6 @@
         <isCollection>true</isCollection>
         <isInput>false</isInput>
         <isOutput>false</isOutput>
-        <objectType>APHA_VaccinationInvitation__c</objectType>
+        <objectType>APHA_Invitation__c</objectType>
     </variables>
 </Flow>

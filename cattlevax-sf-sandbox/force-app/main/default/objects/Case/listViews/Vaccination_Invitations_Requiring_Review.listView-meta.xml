@@ -16,7 +16,7 @@
     <filters>
         <field>CASES.TYPE</field>
         <operation>equals</operation>
-        <value>Bovine TB Vaccination Invitation</value>
+        <value>TB Vaccination Invitation</value>
     </filters>
     <label>Vaccination Invitations Requiring Review</label>
 </ListView>
