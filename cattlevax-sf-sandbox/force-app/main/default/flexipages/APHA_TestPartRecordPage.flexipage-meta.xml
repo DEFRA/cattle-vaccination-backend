@@ -85,7 +85,7 @@
                     <name>uiBehavior</name>
                     <value>required</value>
                 </fieldInstanceProperties>
-                <fieldItem>Record.APHA_IdentityOfCertifiyngVet__c</fieldItem>
+                <fieldItem>Record.APHA_IdentityOfCertifyingVet__c</fieldItem>
                 <identifier>RecordAPHA_IdentityOfCertifiyngVet_cField</identifier>
             </fieldInstance>
         </itemInstances>

@@ -63,7 +63,7 @@
     <format>Summary</format>
     <groupingsDown>
         <dateGranularity>Day</dateGranularity>
-        <field>Case.APHA_TestParts__r$APHA_IdentityOfCertifiyngVet__c</field>
+        <field>Case.APHA_TestParts__r$APHA_IdentityOfCertifyingVet__c</field>
         <sortOrder>Asc</sortOrder>
     </groupingsDown>
     <name>Test Results by Certifying Vet</name>

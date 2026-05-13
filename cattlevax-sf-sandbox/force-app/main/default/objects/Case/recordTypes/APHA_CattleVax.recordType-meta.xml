@@ -6,6 +6,63 @@
     <description>Cattle Vax</description>
     <label>Cattle Vax</label>
     <picklistValues>
+        <picklist>APHA_ReasonForTest__c</picklist>
+        <values>
+            <fullName>12M</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>48M</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>6M</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>6W</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Post-Movement</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Pre-Movement</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Radial</fullName>
+            <default>false</default>
+        </values>
+    </picklistValues>
+    <picklistValues>
+        <picklist>APHA_ResponseOutcome__c</picklist>
+        <values>
+            <fullName>Accept</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Refuse</fullName>
+            <default>false</default>
+        </values>
+    </picklistValues>
+    <picklistValues>
+        <picklist>APHA_ResponseSchedulingPreference__c</picklist>
+        <values>
+            <fullName>No Preference</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Standalone</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Test Day 2</fullName>
+            <default>false</default>
+        </values>
+    </picklistValues>
+    <picklistValues>
         <picklist>Origin</picklist>
         <values>
             <fullName>Email</fullName>
@@ -74,6 +131,37 @@
         </values>
         <values>
             <fullName>TB Vaccination Invitation</fullName>
+            <default>false</default>
+        </values>
+    </picklistValues>
+    <picklistValues>
+        <picklist>wkdw__TicketCategory__c</picklist>
+        <values>
+            <fullName>HR - Benefits</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>HR - Employee Relations</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>HR - General</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>HR - Leave</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>HR - Onboarding</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>HR - Payroll</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>IT</fullName>
             <default>false</default>
         </values>
     </picklistValues>

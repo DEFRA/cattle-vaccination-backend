@@ -16,7 +16,7 @@
         <field>Case.APHA_TestParts__r.APHA_TestPartResults__r$APHA_TestType__c</field>
     </columns>
     <columns>
-        <field>Case.APHA_TestParts__r$APHA_IdentityOfCertifiyngVet__c</field>
+        <field>Case.APHA_TestParts__r$APHA_IdentityOfCertifyingVet__c</field>
     </columns>
     <columns>
         <field>Case.APHA_TestParts__r$APHA_IdentityOfReviewer__c</field>

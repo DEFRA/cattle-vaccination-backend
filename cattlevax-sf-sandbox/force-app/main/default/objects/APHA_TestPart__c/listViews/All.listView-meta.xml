@@ -7,7 +7,7 @@
     <columns>APHA_Day1__c</columns>
     <columns>APHA_Day2__c</columns>
     <columns>APHA_IdentityOfTester__c</columns>
-    <columns>APHA_IdentityOfCertifiyngVet__c</columns>
+    <columns>APHA_IdentityOfCertifyingVet__c</columns>
     <filterScope>Everything</filterScope>
     <label>All</label>
 </ListView>

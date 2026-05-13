@@ -289,7 +289,7 @@
                 <drillToDetailEnabled>false</drillToDetailEnabled>
                 <enableHover>false</enableHover>
                 <expandOthers>false</expandOthers>
-                <groupingColumn>Case.APHA_TestParts__r$APHA_IdentityOfCertifiyngVet__c</groupingColumn>
+                <groupingColumn>Case.APHA_TestParts__r$APHA_IdentityOfCertifyingVet__c</groupingColumn>
                 <groupingSortProperties>
                     <groupingSorts>
                         <groupingLevel>g1</groupingLevel>
