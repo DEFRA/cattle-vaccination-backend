@@ -1,4 +1,8 @@
-import { compositeGraph, SF_API_PATH } from './index.js'
+import {
+  compositeGraph,
+  getSalesforceApiErrorFromCompositeResponse,
+  SF_API_PATH
+} from './index.js'
 
 export async function addTestPartResults(testPartId, results) {
   // add step here to error if testPartId doesnt belong to the provided caseId (needs to be added as a param)
@@ -30,14 +34,9 @@ export async function addTestPartResults(testPartId, results) {
   const graphResult = graphResponse.graphs[0]
 
   if (!graphResult.isSuccessful) {
-    const failedStep = graphResult.graphResponse.compositeResponse.find(
-      (r) => r.httpStatusCode >= 400
+    const errorMessage = getSalesforceApiErrorFromCompositeResponse(
+      graphResult.graphResponse.compositeResponse
     )
-
-    const errorMessage =
-      failedStep.body.find(
-        (step) => step.errorCode === 'FIELD_CUSTOM_VALIDATION_EXCEPTION'
-      )?.message ?? 'Salesforce validation failed'
 
     throw new Error(`Salesforce graph request failed - ${errorMessage}`)
   }

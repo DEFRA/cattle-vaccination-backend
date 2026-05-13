@@ -1,10 +1,12 @@
 {
   "compilerOptions": {
     "module": "ESNext",
-    "moduleResolution": "Bundler",
+    "moduleResolution": "NodeNext",
     "target": "ESNext",
-    "checkJs": false,
-    "baseUrl": "."
+    "checkJs": true,
+    "noImplicitAny": false,
+    "baseUrl": ".",
+    "types": ["vitest/globals"]
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules"]

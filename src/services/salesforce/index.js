@@ -120,3 +120,16 @@ export async function composite(compositeRequest) {
 export async function compositeGraph(graphs) {
   return sfRequest('/composite/graph', 'POST', { graphs })
 }
+
+export function getSalesforceApiErrorFromCompositeResponse(compositeResponse) {
+  const usefulErrorChunk = compositeResponse.find(
+    (errorChunk) => errorChunk.body[0].errorCode !== 'PROCESSING_HALTED'
+  )
+  let errorMessage = 'Unknown reason'
+
+  if (usefulErrorChunk) {
+    errorMessage = usefulErrorChunk.body[0].message
+  }
+
+  return errorMessage
+}

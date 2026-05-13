@@ -1,11 +1,14 @@
 import { createCase, getCase } from './cases.js'
 import { composite, query } from './index.js'
 
-vi.mock('./index.js', () => ({
-  composite: vi.fn(),
-  query: vi.fn(),
-  SF_API_PATH: '/services/data/v62.0'
-}))
+vi.mock('./index.js', async (importOriginal) => {
+  const actual = await importOriginal()
+  return {
+    ...actual,
+    composite: vi.fn(),
+    query: vi.fn()
+  }
+})
 
 const validInput = {
   cphNumber: '01/001/0006',
@@ -15,7 +18,7 @@ const validInput = {
 }
 
 function mockComposite() {
-  composite.mockResolvedValue({
+  vi.mocked(composite).mockResolvedValue({
     compositeResponse: [
       {
         referenceId: 'CaseRecordType',
@@ -34,7 +37,7 @@ function mockComposite() {
       }
     ]
   })
-  query.mockResolvedValue({ records: [{ CaseNumber: '00001234' }] })
+  vi.mocked(query).mockResolvedValue({ records: [{ CaseNumber: '00001234' }] })
 }
 
 describe('#createCase', () => {
@@ -73,7 +76,7 @@ describe('#createCase', () => {
 
     await createCase(validInput)
 
-    const [compositeRequest] = composite.mock.calls[0]
+    const [compositeRequest] = vi.mocked(composite).mock.calls[0]
     expect(compositeRequest[0]).toMatchObject({
       method: 'GET',
       referenceId: 'CaseRecordType',
@@ -91,7 +94,7 @@ describe('#createCase', () => {
 
     await createCase(validInput)
 
-    const [compositeRequest] = composite.mock.calls[0]
+    const [compositeRequest] = vi.mocked(composite).mock.calls[0]
     expect(compositeRequest[2]).toMatchObject({
       method: 'POST',
       referenceId: 'CaseRef',
@@ -105,7 +108,7 @@ describe('#createCase', () => {
   })
 
   test('Should throw when RecordType is not found', async () => {
-    composite.mockResolvedValue({
+    vi.mocked(composite).mockResolvedValue({
       compositeResponse: [
         {
           referenceId: 'CaseRecordType',
@@ -126,7 +129,7 @@ describe('#createCase', () => {
   })
 
   test('Should throw when CPH is not found', async () => {
-    composite.mockResolvedValue({
+    vi.mocked(composite).mockResolvedValue({
       compositeResponse: [
         {
           referenceId: 'CaseRecordType',
@@ -143,33 +146,28 @@ describe('#createCase', () => {
   })
 
   test('Should throw when a composite step fails', async () => {
-    composite.mockResolvedValue({
+    vi.mocked(composite).mockResolvedValue({
       compositeResponse: [
-        {
-          referenceId: 'CaseRecordType',
-          httpStatusCode: 200,
-          body: { records: [{ Id: 'rt-id' }] }
-        },
-        {
-          referenceId: 'CPHRef',
-          httpStatusCode: 200,
-          body: { records: [{ Id: 'cph-id' }] }
-        },
         {
           referenceId: 'CaseRef',
           httpStatusCode: 400,
-          body: [{ errorCode: 'REQUIRED_FIELD_MISSING' }]
+          body: [
+            {
+              errorCode: 'REQUIRED_FIELD_MISSING',
+              message: 'Required fields missing'
+            }
+          ]
         }
       ]
     })
 
     await expect(createCase(validInput)).rejects.toThrow(
-      'Salesforce composite request failed at step: CaseRef'
+      'Salesforce composite request failed: Required fields missing'
     )
   })
 
   test('Should throw when a SOQL sub-request itself returns 4xx', async () => {
-    composite.mockResolvedValue({
+    vi.mocked(composite).mockResolvedValue({
       compositeResponse: [
         {
           referenceId: 'CaseRecordType',
@@ -185,7 +183,7 @@ describe('#createCase', () => {
     })
 
     await expect(createCase(validInput)).rejects.toThrow(
-      'Salesforce composite request failed at step: CaseRecordType'
+      'Salesforce composite request failed: No access'
     )
   })
 })
@@ -219,7 +217,7 @@ describe('#getCase', () => {
             Id: 'tp-id',
             APHA_Day1__c: '2026-04-16',
             APHA_Day2__c: '2026-04-19',
-            APHA_IdentityOfCertifiyngVet__c: 'Vet Identity',
+            APHA_IdentityOfCertifyingVet__c: 'Vet Identity',
             APHA_IdentityOfTester__c: 'Tester Identity'
           }
         ]
@@ -333,7 +331,7 @@ describe('#getCase', () => {
 
     await getCase('00001234')
 
-    const caseQuery = query.mock.calls[0][0]
+    const caseQuery = vi.mocked(query).mock.calls[0][0]
     expect(caseQuery).toContain('APHA_CPH__r.Name')
     expect(caseQuery).toContain('CreatedDate')
     expect(caseQuery).toContain('Owner.Name')
@@ -365,7 +363,7 @@ describe('#getCase', () => {
   })
 
   test('Should throw when case is not found', async () => {
-    query.mockResolvedValueOnce({ records: [] })
+    vi.mocked(query).mockResolvedValueOnce({ records: [] })
 
     await expect(getCase('99999999')).rejects.toThrow(
       'Case not found: 99999999'
@@ -396,14 +394,14 @@ describe('#getCase', () => {
             Id: 'tp-id-1',
             APHA_Day1__c: '2026-04-16',
             APHA_Day2__c: '2026-04-19',
-            APHA_IdentityOfCertifiyngVet__c: 'Vet',
+            APHA_IdentityOfCertifyingVet__c: 'Vet',
             APHA_IdentityOfTester__c: 'Tester'
           },
           {
             Id: 'tp-id-2',
             APHA_Day1__c: '2026-04-17',
             APHA_Day2__c: '2026-04-20',
-            APHA_IdentityOfCertifiyngVet__c: 'Vet 2',
+            APHA_IdentityOfCertifyingVet__c: 'Vet 2',
             APHA_IdentityOfTester__c: 'Tester 2'
           }
         ]
