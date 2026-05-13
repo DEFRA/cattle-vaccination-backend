@@ -1,11 +1,14 @@
 import { submitTestParts } from './test-parts.js'
 import { composite, compositeGraph } from './index.js'
 
-vi.mock('./index.js', () => ({
-  composite: vi.fn(),
-  compositeGraph: vi.fn(),
-  SF_API_PATH: '/services/data/v62.0'
-}))
+vi.mock('./index.js', async (importOriginal) => {
+  const actual = await importOriginal()
+  return {
+    ...actual,
+    composite: vi.fn(),
+    compositeGraph: vi.fn()
+  }
+})
 
 const validTestParts = [
   {
@@ -31,7 +34,7 @@ describe('#submitTestParts', () => {
   })
 
   function mockGraph(compositeResponse) {
-    compositeGraph.mockResolvedValue({
+    vi.mocked(compositeGraph).mockResolvedValue({
       graphs: [
         {
           graphId: 'Graph_0',
@@ -102,7 +105,7 @@ describe('#submitTestParts', () => {
 
     await submitTestParts('case-id-123', validTestParts)
 
-    const [graphRequest] = compositeGraph.mock.calls[0]
+    const [graphRequest] = vi.mocked(compositeGraph).mock.calls[0]
     expect(graphRequest[0].compositeRequest[0]).toMatchObject({
       method: 'POST',
       referenceId: 'TestPart_0',
@@ -111,7 +114,7 @@ describe('#submitTestParts', () => {
   })
 
   test('Should throw when graph request is not successful', async () => {
-    compositeGraph.mockResolvedValue({
+    vi.mocked(compositeGraph).mockResolvedValue({
       graphs: [
         {
           graphId: 'Graph_0',
@@ -121,7 +124,12 @@ describe('#submitTestParts', () => {
               {
                 referenceId: 'TestPart_0',
                 httpStatusCode: 400,
-                body: [{ errorCode: 'FIELD_INTEGRITY_EXCEPTION' }]
+                body: [
+                  {
+                    errorCode: 'FIELD_INTEGRITY_EXCEPTION',
+                    message: 'Field integrity violation'
+                  }
+                ]
               }
             ]
           }
@@ -130,7 +138,7 @@ describe('#submitTestParts', () => {
     })
 
     await expect(submitTestParts('case-id', validTestParts)).rejects.toThrow(
-      'Salesforce graph request failed at step: TestPart_0'
+      'Salesforce graph request failed: Field integrity violation'
     )
   })
 })

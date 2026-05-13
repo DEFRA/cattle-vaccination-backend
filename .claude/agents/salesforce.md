@@ -40,7 +40,7 @@ You are the expert on the Salesforce integration in this codebase.
 
 - **Case** — `RecordTypeId` (looked up by `DeveloperName='APHA_CattleVax'`), `APHA_CPH__c` (CPH lookup), `APHA_ReasonForTest__c`, `APHA_TestWindowStartDate__c`, `APHA_TestWindowEndDate__c`, `Status`, `Priority`
 - **APHA_CPH\_\_c** — looked up by `Name` (CPH number e.g. `'01/001/0006'`)
-- **APHA_TestPart\_\_c** — `Case__c` (Case ID), `APHA_Day1__c`, `APHA_Day2__c`, `APHA_IdentityOfCertifiyngVet__c`, `APHA_IdentityOfTester__c`
+- **APHA_TestPart\_\_c** — `Case__c` (Case ID), `APHA_Day1__c`, `APHA_Day2__c`, `APHA_IdentityOfCertifyingVet__c`, `APHA_IdentityOfTester__c`
 - **APHA_TestPartResult\_\_c** — `APHA_TestPart__c` (TestPart ID), `APHA_TestType__c`, `APHA_EarTagNo__c`, batch fields (`APHA_BatchAvian__c`, `APHA_BatchBovine__c`, `APHA_BatchDIVA__c`), measurement fields (`APHA_TestDay1Avian__c`, `APHA_TestDay1Bovine__c`, `APHA_TestDay1DIVA__c`, `APHA_TestDay2Avian__c`, `APHA_TestDay2Bovine__c`, `APHA_TestDay2DIVA__c`)
 
 ## Case flow

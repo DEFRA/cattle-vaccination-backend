@@ -1,4 +1,9 @@
-import { composite, query, SF_API_PATH } from './index.js'
+import {
+  composite,
+  query,
+  SF_API_PATH,
+  getSalesforceApiErrorFromCompositeResponse
+} from './index.js'
 
 export async function createCase({
   cphNumber,
@@ -32,7 +37,8 @@ export async function createCase({
         APHA_TestWindowStartDate__c: testWindowStart,
         APHA_TestWindowEndDate__c: testWindowEnd,
         Status: 'Draft',
-        Priority: 'Medium'
+        Priority: 'Medium',
+        Type: 'TB Skin Test'
       }
     }
   ])
@@ -40,8 +46,11 @@ export async function createCase({
   const failedStep = compositeResponse.find((r) => r.httpStatusCode >= 400)
 
   if (failedStep) {
+    const errorMessage =
+      getSalesforceApiErrorFromCompositeResponse(compositeResponse)
+
     throw new Error(
-      `Salesforce composite request failed at step: ${failedStep.referenceId}`
+      `Salesforce composite request failed: ${errorMessage ?? 'Unknown reason'}`
     )
   }
 
@@ -93,7 +102,7 @@ export async function getCase(caseId) {
   const escapedId = caseRecord.Id.replace(/'/g, "''")
 
   const testPartsResult = await query(
-    `SELECT Id, APHA_Day1__c, APHA_Day2__c, APHA_IdentityOfCertifiyngVet__c, APHA_IdentityOfTester__c FROM APHA_TestPart__c WHERE Case__c='${escapedId}'`
+    `SELECT Id, APHA_Day1__c, APHA_Day2__c, APHA_IdentityOfCertifyingVet__c, APHA_IdentityOfTester__c FROM APHA_TestPart__c WHERE Case__c='${escapedId}'`
   )
 
   const testParts = await Promise.all(
@@ -107,7 +116,7 @@ export async function getCase(caseId) {
         id: tp.Id,
         day1: tp.APHA_Day1__c,
         day2: tp.APHA_Day2__c,
-        certifyingVet: tp.APHA_IdentityOfCertifiyngVet__c,
+        certifyingVet: tp.APHA_IdentityOfCertifyingVet__c,
         tester: tp.APHA_IdentityOfTester__c,
         results: resultsResult.records.map((r) => ({
           id: r.Id,

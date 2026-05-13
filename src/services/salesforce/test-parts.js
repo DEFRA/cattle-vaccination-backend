@@ -1,4 +1,8 @@
-import { compositeGraph, SF_API_PATH } from './index.js'
+import {
+  compositeGraph,
+  getSalesforceApiErrorFromCompositeResponse,
+  SF_API_PATH
+} from './index.js'
 
 export async function submitTestParts(caseId, testParts) {
   const graphResponse = await compositeGraph([
@@ -11,13 +15,11 @@ export async function submitTestParts(caseId, testParts) {
   const graphResult = graphResponse.graphs[0]
 
   if (!graphResult.isSuccessful) {
-    const failedStep = graphResult.graphResponse.compositeResponse.find(
-      (r) => r.httpStatusCode >= 400
+    const errorMessage = getSalesforceApiErrorFromCompositeResponse(
+      graphResult.graphResponse.compositeResponse
     )
 
-    throw new Error(
-      `Salesforce graph request failed${failedStep ? ` at step: ${failedStep.referenceId}` : ''}`
-    )
+    throw new Error(`Salesforce graph request failed: ${errorMessage}`)
   }
 
   return {
@@ -47,7 +49,7 @@ function buildSubRequests(caseId, testParts) {
         Case__c: caseId,
         APHA_Day1__c: testPart.day1,
         APHA_Day2__c: testPart.day2,
-        APHA_IdentityOfCertifiyngVet__c: testPart.certifyingVet,
+        APHA_IdentityOfCertifyingVet__c: testPart.certifyingVet,
         APHA_IdentityOfTester__c: testPart.tester
       }
     })

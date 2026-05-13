@@ -87,7 +87,7 @@ describe('#cases route', () => {
   describe('POST /cases', () => {
     test('Should return 201 with created IDs', async () => {
       const mockResult = { caseId: 'case-id' }
-      createCase.mockResolvedValue(mockResult)
+      vi.mocked(createCase).mockResolvedValue(mockResult)
 
       const response = await server.inject({
         method: 'POST',
@@ -100,7 +100,7 @@ describe('#cases route', () => {
     })
 
     test('Should call createCase with payload', async () => {
-      createCase.mockResolvedValue({ caseId: 'case-id' })
+      vi.mocked(createCase).mockResolvedValue({ caseId: 'case-id' })
 
       await server.inject({
         method: 'POST',
@@ -159,7 +159,9 @@ describe('#cases route', () => {
     })
 
     test('Should return 502 when createCase throws', async () => {
-      createCase.mockRejectedValue(new Error('Salesforce API error 500'))
+      vi.mocked(createCase).mockRejectedValue(
+        new Error('Salesforce API error 500')
+      )
 
       const response = await server.inject({
         method: 'POST',
@@ -175,7 +177,7 @@ describe('#cases route', () => {
     const mockSearchResult = { id: 'a00000000000001', caseNumber: '00001234' }
 
     test('Should return 200 with id and caseNumber', async () => {
-      getCaseByCaseNumber.mockResolvedValue(mockSearchResult)
+      vi.mocked(getCaseByCaseNumber).mockResolvedValue(mockSearchResult)
 
       const response = await server.inject({
         method: 'GET',
@@ -187,7 +189,7 @@ describe('#cases route', () => {
     })
 
     test('Should call getCaseByCaseNumber with the caseNumber query param', async () => {
-      getCaseByCaseNumber.mockResolvedValue(mockSearchResult)
+      vi.mocked(getCaseByCaseNumber).mockResolvedValue(mockSearchResult)
 
       await server.inject({ method: 'GET', url: '/cases?caseNumber=00001235' })
 
@@ -210,7 +212,7 @@ describe('#cases route', () => {
     })
 
     test('Should return 404 when case is not found', async () => {
-      getCaseByCaseNumber.mockRejectedValue(
+      vi.mocked(getCaseByCaseNumber).mockRejectedValue(
         new Error('Case not found: 99999999')
       )
 
@@ -223,7 +225,7 @@ describe('#cases route', () => {
     })
 
     test('Should return 502 when getCaseByCaseNumber throws a non-not-found error', async () => {
-      getCaseByCaseNumber.mockRejectedValue(
+      vi.mocked(getCaseByCaseNumber).mockRejectedValue(
         new Error('Salesforce API error 500')
       )
 
@@ -252,7 +254,7 @@ describe('#cases route', () => {
     }
 
     test('Should return 200 with case details', async () => {
-      getCase.mockResolvedValue(mockCase)
+      vi.mocked(getCase).mockResolvedValue(mockCase)
 
       const response = await server.inject({
         method: 'GET',
@@ -264,7 +266,7 @@ describe('#cases route', () => {
     })
 
     test('Should call getCase with the caseId param', async () => {
-      getCase.mockResolvedValue(mockCase)
+      vi.mocked(getCase).mockResolvedValue(mockCase)
 
       await server.inject({ method: 'GET', url: '/cases/a00000000000002' })
 
@@ -281,7 +283,9 @@ describe('#cases route', () => {
     })
 
     test('Should return 404 when case is not found', async () => {
-      getCase.mockRejectedValue(new Error('Case not found: a00000000000001'))
+      vi.mocked(getCase).mockRejectedValue(
+        new Error('Case not found: a00000000000001')
+      )
 
       const response = await server.inject({
         method: 'GET',
@@ -292,7 +296,9 @@ describe('#cases route', () => {
     })
 
     test('Should return 502 when getCase throws a non-not-found error', async () => {
-      getCase.mockRejectedValue(new Error('Salesforce API error 500'))
+      vi.mocked(getCase).mockRejectedValue(
+        new Error('Salesforce API error 500')
+      )
 
       const response = await server.inject({
         method: 'GET',
@@ -316,7 +322,7 @@ describe('#cases route', () => {
       const mockResult = {
         testParts: [{ testPartId: 'tp-id', resultIds: ['r-id'] }]
       }
-      submitTestParts.mockResolvedValue(mockResult)
+      vi.mocked(submitTestParts).mockResolvedValue(mockResult)
 
       const response = await server.inject({
         method: 'POST',
@@ -329,7 +335,7 @@ describe('#cases route', () => {
     })
 
     test('Should call submitTestParts with caseId and testParts', async () => {
-      submitTestParts.mockResolvedValue({ testParts: [] })
+      vi.mocked(submitTestParts).mockResolvedValue({ testParts: [] })
 
       await server.inject({
         method: 'POST',
@@ -404,7 +410,7 @@ describe('#cases route', () => {
     })
 
     test('Should accept a valid SICCT result with bovine and avian day fields', async () => {
-      submitTestParts.mockResolvedValue({ testParts: [] })
+      vi.mocked(submitTestParts).mockResolvedValue({ testParts: [] })
 
       const response = await server.inject({
         method: 'POST',
@@ -472,7 +478,7 @@ describe('#cases route', () => {
     })
 
     test('Should return 404 when case is not found', async () => {
-      submitTestParts.mockRejectedValue(
+      vi.mocked(submitTestParts).mockRejectedValue(
         new Error('Case not found: a00000000000001')
       )
 
@@ -486,7 +492,9 @@ describe('#cases route', () => {
     })
 
     test('Should return 502 when submitTestParts throws', async () => {
-      submitTestParts.mockRejectedValue(new Error('Salesforce API error 500'))
+      vi.mocked(submitTestParts).mockRejectedValue(
+        new Error('Salesforce API error 500')
+      )
 
       const response = await server.inject({
         method: 'POST',
@@ -509,7 +517,7 @@ describe('#cases route', () => {
 
     test('Should return 201 with created result IDs', async () => {
       const mockResult = { resultIds: ['result-id-1'] }
-      addTestPartResults.mockResolvedValue(mockResult)
+      vi.mocked(addTestPartResults).mockResolvedValue(mockResult)
 
       const response = await server.inject({
         method: 'POST',
@@ -522,7 +530,9 @@ describe('#cases route', () => {
     })
 
     test('Should call addTestPartResults with testPartId and results', async () => {
-      addTestPartResults.mockResolvedValue({ resultIds: ['result-id-1'] })
+      vi.mocked(addTestPartResults).mockResolvedValue({
+        resultIds: ['result-id-1']
+      })
 
       await server.inject({
         method: 'POST',
@@ -592,7 +602,9 @@ describe('#cases route', () => {
     })
 
     test('Should accept a valid SICCT result with bovine and avian day fields', async () => {
-      addTestPartResults.mockResolvedValue({ resultIds: ['result-id-1'] })
+      vi.mocked(addTestPartResults).mockResolvedValue({
+        resultIds: ['result-id-1']
+      })
 
       const response = await server.inject({
         method: 'POST',
@@ -660,7 +672,7 @@ describe('#cases route', () => {
     })
 
     test('Should return 502 when addTestPartResults throws', async () => {
-      addTestPartResults.mockRejectedValue(
+      vi.mocked(addTestPartResults).mockRejectedValue(
         new Error('Salesforce API error 500')
       )
 
