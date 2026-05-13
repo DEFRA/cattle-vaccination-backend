@@ -3,8 +3,8 @@
     <apiVersion>66.0</apiVersion>
     <areMetricsLoggedToDataCloud>false</areMetricsLoggedToDataCloud>
     <environments>Default</environments>
-    <interviewLabel>APHA_FL {!$Flow.CurrentDateTime}</interviewLabel>
-    <label>FL002-Set Vaccination Invitation Issued By</label>
+    <interviewLabel>APHA_FL003SendCustomerNotification {!$Flow.CurrentDateTime}</interviewLabel>
+    <label>FL003-Update Parent Case Record</label>
     <processMetadataValues>
         <name>BuilderType</name>
         <value>
@@ -25,37 +25,43 @@
     </processMetadataValues>
     <processType>AutoLaunchedFlow</processType>
     <recordUpdates>
-        <description>Sets Issued By to Current User</description>
-        <name>Set_Issued_By</name>
-        <label>Set Issued By</label>
+        <name>Update_Parent_Case</name>
+        <label>Update Parent Case</label>
         <locationX>0</locationX>
         <locationY>0</locationY>
-        <inputAssignments>
-            <field>APHA_IssuedBy__c</field>
+        <filterLogic>and</filterLogic>
+        <filters>
+            <field>Type</field>
+            <operator>EqualTo</operator>
             <value>
-                <elementReference>$User.Id</elementReference>
+                <stringValue>TB Vaccination Invitation</stringValue>
+            </value>
+        </filters>
+        <inputAssignments>
+            <field>APHA_ResponseExpectedBy__c</field>
+            <value>
+                <elementReference>$Record.APHA_ExpectedResponseDate__c</elementReference>
             </value>
         </inputAssignments>
-        <inputReference>$Record</inputReference>
+        <inputReference>$Record.APHA_Case__r</inputReference>
     </recordUpdates>
     <start>
         <locationX>0</locationX>
         <locationY>0</locationY>
         <connector>
-            <targetReference>Set_Issued_By</targetReference>
+            <targetReference>Update_Parent_Case</targetReference>
         </connector>
-        <doesRequireRecordChangedToMeetCriteria>true</doesRequireRecordChangedToMeetCriteria>
         <filterLogic>and</filterLogic>
         <filters>
-            <field>APHA_Status__c</field>
-            <operator>EqualTo</operator>
+            <field>APHA_Case__c</field>
+            <operator>NotEqualTo</operator>
             <value>
-                <stringValue>Sent</stringValue>
+                <stringValue></stringValue>
             </value>
         </filters>
-        <object>APHA_VaccinationInvitationSent__c</object>
-        <recordTriggerType>CreateAndUpdate</recordTriggerType>
-        <triggerType>RecordBeforeSave</triggerType>
+        <object>APHA_Invitation__c</object>
+        <recordTriggerType>Create</recordTriggerType>
+        <triggerType>RecordAfterSave</triggerType>
     </start>
-    <status>Obsolete</status>
+    <status>Active</status>
 </Flow>
