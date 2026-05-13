@@ -23,6 +23,10 @@
                 <behavior>Edit</behavior>
                 <field>APHA_BatchDIVA__c</field>
             </layoutItems>
+            <layoutItems>
+                <behavior>Edit</behavior>
+                <field>Not_Tested_Reason__c</field>
+            </layoutItems>
         </layoutColumns>
         <layoutColumns>
             <layoutItems>

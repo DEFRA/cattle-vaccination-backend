@@ -128,6 +128,23 @@
                 </visibilityRule>
             </fieldInstance>
         </itemInstances>
+        <itemInstances>
+            <fieldInstance>
+                <fieldInstanceProperties>
+                    <name>uiBehavior</name>
+                    <value>none</value>
+                </fieldInstanceProperties>
+                <fieldItem>Record.Not_Tested_Reason__c</fieldItem>
+                <identifier>RecordNot_Tested_Reason__cField</identifier>
+                <visibilityRule>
+                    <criteria>
+                        <leftValue>{!Record.APHA_TestType__c}</leftValue>
+                        <operator>EQUAL</operator>
+                        <rightValue>Not Tested</rightValue>
+                    </criteria>
+                </visibilityRule>
+            </fieldInstance>
+        </itemInstances>
         <name>Facet-93610b5a-149e-4b5f-a5ab-c6d181326caf</name>
         <type>Facet</type>
     </flexiPageRegions>
