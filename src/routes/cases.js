@@ -3,7 +3,7 @@ import Boom from '@hapi/boom'
 import {
   createCase,
   getCase,
-  getCaseByCaseNumber
+  getCaseIdByCaseNumber
 } from '../services/salesforce/cases.js'
 import { submitTestParts } from '../services/salesforce/test-parts.js'
 import { addTestPartResults } from '../services/salesforce/test-part-results.js'
@@ -14,13 +14,33 @@ const logger = createLogger()
 const sicctDayField = Joi.number().integer().min(0).max(999).required()
 const divaDayField = Joi.number().integer().min(0).max(999).required()
 const nullField = Joi.valid(null).default(null)
+const optionalBatchField = Joi.string().max(20).allow(null, '').default(null)
 
 const testPartResultSchema = Joi.object({
-  testType: Joi.string().valid('DIVA', 'SICCT').required(),
+  testType: Joi.string().valid('DIVA', 'SICCT', 'Not Tested').required(),
   earTagNo: Joi.string().max(20).required(),
-  batchAvian: Joi.string().max(20).allow(null, '').default(null),
-  batchBovine: Joi.string().max(20).allow(null, '').default(null),
-  batchDiva: Joi.string().max(20).allow(null, '').default(null),
+  notTestedReason: Joi.when('testType', {
+    is: 'Not Tested',
+    then: Joi.string()
+      .valid('Cattle too young', 'Cattle deceased', 'Other reason')
+      .required(),
+    otherwise: nullField
+  }),
+  batchAvian: Joi.when('testType', {
+    is: 'Not Tested',
+    then: nullField,
+    otherwise: optionalBatchField
+  }),
+  batchBovine: Joi.when('testType', {
+    is: 'Not Tested',
+    then: nullField,
+    otherwise: optionalBatchField
+  }),
+  batchDiva: Joi.when('testType', {
+    is: 'Not Tested',
+    then: nullField,
+    otherwise: optionalBatchField
+  }),
   day1Avian: Joi.when('testType', {
     is: 'SICCT',
     then: sicctDayField,
@@ -110,7 +130,7 @@ export const searchCasesRoute = {
   },
   handler: async (request, h) => {
     try {
-      const result = await getCaseByCaseNumber(request.query.caseNumber)
+      const result = await getCaseIdByCaseNumber(request.query.caseNumber)
       return h.response(result)
     } catch (err) {
       if (err.message.startsWith('Case not found:')) {
@@ -148,12 +168,12 @@ export const getCaseRoute = {
 
 export const submitTestPartsRoute = {
   method: 'POST',
-  path: '/cases/{id}/test-parts',
+  path: '/cases/{caseId}/test-parts',
   options: {
     validate: {
       options: { abortEarly: false },
       params: Joi.object({
-        id: Joi.string().alphanum().min(15).max(18).required()
+        caseId: Joi.string().alphanum().min(15).max(18).required()
       }),
       payload: Joi.object({
         testParts: Joi.array().items(testPartSchema).min(1).required()
@@ -163,7 +183,7 @@ export const submitTestPartsRoute = {
   handler: async (request, h) => {
     try {
       const result = await submitTestParts(
-        request.params.id,
+        request.params.caseId,
         request.payload.testParts
       )
       return h.response(result).code(201)

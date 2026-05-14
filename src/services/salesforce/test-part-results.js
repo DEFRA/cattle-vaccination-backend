@@ -17,6 +17,7 @@ export async function addTestPartResults(testPartId, results) {
           APHA_TestPart__c: testPartId,
           APHA_TestType__c: result.testType,
           APHA_EarTagNo__c: result.earTagNo,
+          Not_Tested_Reason__c: result.notTestedReason ?? null,
           APHA_BatchAvian__c: result.batchAvian ?? null,
           APHA_BatchBovine__c: result.batchBovine ?? null,
           APHA_BatchDIVA__c: result.batchDiva ?? null,
@@ -38,7 +39,7 @@ export async function addTestPartResults(testPartId, results) {
       graphResult.graphResponse.compositeResponse
     )
 
-    throw new Error(`Salesforce graph request failed - ${errorMessage}`)
+    throw new Error(`Salesforce graph request failed: ${errorMessage}`)
   }
 
   return {

@@ -74,10 +74,10 @@ export async function createCase({
   return { caseId, caseNumber }
 }
 
-export async function getCaseByCaseNumber(caseNumber) {
+export async function getCaseIdByCaseNumber(caseNumber) {
   const escaped = caseNumber.replace(/'/g, "''")
   const result = await query(
-    `SELECT Id, CaseNumber FROM Case WHERE CaseNumber='${escaped}' LIMIT 1`
+    `SELECT Id FROM Case WHERE CaseNumber='${escaped}' LIMIT 1`
   )
 
   if (result.records.length === 0) {
@@ -91,7 +91,10 @@ export async function getCase(caseId) {
   const escapedCaseId = caseId.replace(/'/g, "''")
 
   const caseResult = await query(
-    `SELECT Id, CaseNumber, Status, Priority, APHA_ReasonForTest__c, APHA_TestWindowStartDate__c, APHA_TestWindowEndDate__c, APHA_CPH__r.Name, CreatedDate, Owner.Name FROM Case WHERE Id='${escapedCaseId}' LIMIT 1`
+    `SELECT Id, CaseNumber, Status, Priority, Type, APHA_ReasonForTest__c, APHA_TestWindowStartDate__c, 
+     APHA_TestWindowEndDate__c, APHA_CPH__r.Name, CreatedDate, Owner.Name 
+     FROM Case WHERE Id='${escapedCaseId}' 
+     LIMIT 1`
   )
 
   if (caseResult.records.length === 0) {
@@ -109,7 +112,11 @@ export async function getCase(caseId) {
     testPartsResult.records.map(async (tp) => {
       const escapedTpId = tp.Id.replace(/'/g, "''")
       const resultsResult = await query(
-        `SELECT Id, APHA_TestType__c, APHA_EarTagNo__c, APHA_BatchAvian__c, APHA_BatchBovine__c, APHA_BatchDIVA__c, APHA_TestDay1Avian__c, APHA_TestDay1Bovine__c, APHA_TestDay1DIVA__c, APHA_TestDay2Avian__c, APHA_TestDay2Bovine__c, APHA_TestDay2DIVA__c FROM APHA_TestPartResult__c WHERE APHA_TestPart__c='${escapedTpId}'`
+        `SELECT Id, APHA_TestType__c, APHA_EarTagNo__c, APHA_BatchAvian__c, APHA_BatchBovine__c, 
+         APHA_BatchDIVA__c, APHA_TestDay1Avian__c, APHA_TestDay1Bovine__c, APHA_TestDay1DIVA__c, 
+         APHA_TestDay2Avian__c, APHA_TestDay2Bovine__c, APHA_TestDay2DIVA__c, Not_Tested_Reason__c 
+         FROM APHA_TestPartResult__c 
+         WHERE APHA_TestPart__c='${escapedTpId}'`
       )
 
       return {
@@ -130,7 +137,8 @@ export async function getCase(caseId) {
           day1Diva: r.APHA_TestDay1DIVA__c,
           day2Avian: r.APHA_TestDay2Avian__c,
           day2Bovine: r.APHA_TestDay2Bovine__c,
-          day2Diva: r.APHA_TestDay2DIVA__c
+          day2Diva: r.APHA_TestDay2DIVA__c,
+          notTestedReason: r.Not_Tested_Reason__c
         }))
       }
     })
@@ -141,6 +149,7 @@ export async function getCase(caseId) {
     caseNumber: caseRecord.CaseNumber,
     status: caseRecord.Status,
     priority: caseRecord.Priority,
+    type: caseRecord.Type,
     reasonForTest: caseRecord.APHA_ReasonForTest__c,
     testWindowStart: caseRecord.APHA_TestWindowStartDate__c,
     testWindowEnd: caseRecord.APHA_TestWindowEndDate__c,
