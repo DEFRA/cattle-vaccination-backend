@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<ValidationRule xmlns="http://soap.sforce.com/2006/04/metadata">
-    <fullName>Case_must_be_for_invitation</fullName>
-    <active>true</active>
-    <description>The case must be of type &quot;TB Vaccination Invitation&quot;</description>
-    <errorConditionFormula>ISPICKVAL(APHA_Case__r.Type, &quot;TB Vaccination Invitation&quot; )</errorConditionFormula>
-    <errorDisplayField>APHA_Case__c</errorDisplayField>
-    <errorMessage>The case must be of type &quot;TB Vaccination Invitation&quot;</errorMessage>
-</ValidationRule>
