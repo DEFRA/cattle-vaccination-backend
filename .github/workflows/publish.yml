@@ -21,7 +21,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out code
-        uses: actions/checkout@v4
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
 
       #      Uncomment this section if you are going to also run sonarqube as it
       #      requires the output from the test coverage.
@@ -37,7 +37,7 @@ jobs:
       #
 
       - name: Build and Publish
-        uses: DEFRA/cdp-build-action/build@main
+        uses: DEFRA/cdp-build-action/build@69fe830f0cd9fa6cfbf5c10919287bad4f6a2ffe # main
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
