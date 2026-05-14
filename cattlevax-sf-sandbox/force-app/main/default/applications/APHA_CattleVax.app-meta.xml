@@ -74,8 +74,8 @@
     </actionOverrides>
     <actionOverrides>
         <actionName>View</actionName>
-        <comment>Action override created by Lightning App Builder during activation.</comment>
-        <content>APHA_CPHRecordPage</content>
+        <comment>Action override updated by Lightning App Builder during activation.</comment>
+        <content>APHA_CPH_CattleVax_Record</content>
         <formFactor>Large</formFactor>
         <skipRecordTypeSelect>false</skipRecordTypeSelect>
         <type>Flexipage</type>
@@ -83,8 +83,8 @@
     </actionOverrides>
     <actionOverrides>
         <actionName>View</actionName>
-        <comment>Action override created by Lightning App Builder during activation.</comment>
-        <content>APHA_CPHRecordPage</content>
+        <comment>Action override updated by Lightning App Builder during activation.</comment>
+        <content>APHA_CPH_CattleVax_Record</content>
         <formFactor>Small</formFactor>
         <skipRecordTypeSelect>false</skipRecordTypeSelect>
         <type>Flexipage</type>
