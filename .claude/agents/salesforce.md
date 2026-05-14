@@ -10,7 +10,7 @@ You are the expert on the Salesforce integration in this codebase.
 ## What exists
 
 - **Base service:** `src/services/salesforce/index.js` — token caching, `sfRequest()` helper, and exported `query`, `getRecord`, `createRecord`, `updateRecord`, `deleteRecord`, `composite`, `compositeGraph`. Also exports `SF_API_PATH` (e.g. `/services/data/v62.0`) for use in composite sub-request URLs.
-- **Cases orchestration:** `src/services/salesforce/cases.js` — `createCase()` creates a Case and returns `{ caseId, caseNumber }`; `getCaseByCaseNumber()` looks up a Salesforce Case ID by case number; `getCase()` retrieves a Case by Salesforce ID with its TestParts and results
+- **Cases orchestration:** `src/services/salesforce/cases.js` — `createCase()` creates a Case and returns `{ caseId, caseNumber }`; `getCaseIdByCaseNumber()` looks up a Salesforce Case ID by case number; `getCase()` retrieves a Case by Salesforce ID with its TestParts and results
 - **Test parts:** `src/services/salesforce/test-parts.js` — `submitTestParts()` submits new TestParts and their results to an existing Case using the graph API
 - **Test part results:** `src/services/salesforce/test-part-results.js` — `addTestPartResults()` adds results to an already-existing TestPart using the graph API
 - **Config keys** (under `salesforce` in `src/config.js`, all nullable):
@@ -41,7 +41,7 @@ You are the expert on the Salesforce integration in this codebase.
 - **Case** — `RecordTypeId` (looked up by `DeveloperName='APHA_CattleVax'`), `APHA_CPH__c` (CPH lookup), `APHA_ReasonForTest__c`, `APHA_TestWindowStartDate__c`, `APHA_TestWindowEndDate__c`, `Status`, `Priority`
 - **APHA_CPH\_\_c** — looked up by `Name` (CPH number e.g. `'01/001/0006'`)
 - **APHA_TestPart\_\_c** — `Case__c` (Case ID), `APHA_Day1__c`, `APHA_Day2__c`, `APHA_IdentityOfCertifyingVet__c`, `APHA_IdentityOfTester__c`
-- **APHA_TestPartResult\_\_c** — `APHA_TestPart__c` (TestPart ID), `APHA_TestType__c`, `APHA_EarTagNo__c`, batch fields (`APHA_BatchAvian__c`, `APHA_BatchBovine__c`, `APHA_BatchDIVA__c`), measurement fields (`APHA_TestDay1Avian__c`, `APHA_TestDay1Bovine__c`, `APHA_TestDay1DIVA__c`, `APHA_TestDay2Avian__c`, `APHA_TestDay2Bovine__c`, `APHA_TestDay2DIVA__c`)
+- **APHA_TestPartResult\_\_c** — `APHA_TestPart__c` (TestPart ID), `APHA_TestType__c` (picklist: `'DIVA'`, `'SICCT'`, `'Not Tested'`), `APHA_EarTagNo__c`, `Not_Tested_Reason__c` (picklist: `'Cattle too young'`, `'Cattle deceased'`, `'Other reason'`; required when test type is `'Not Tested'`), batch fields (`APHA_BatchAvian__c`, `APHA_BatchBovine__c`, `APHA_BatchDIVA__c`), measurement fields (`APHA_TestDay1Avian__c`, `APHA_TestDay1Bovine__c`, `APHA_TestDay1DIVA__c`, `APHA_TestDay2Avian__c`, `APHA_TestDay2Bovine__c`, `APHA_TestDay2DIVA__c`)
 
 ## Case flow
 
@@ -59,7 +59,7 @@ Returns `{ caseId, caseNumber }`. Does NOT create TestParts or results.
 
 Error handling: throws `'Salesforce composite request failed at step: ${referenceId}'` if any sub-request returns HTTP 4xx/5xx; throws `'RecordType APHA_CattleVax not found'` if the RecordType query returns no records; throws `'CPH not found: ${cphNumber}'` if the CPH query returns no records.
 
-### `getCaseByCaseNumber(caseNumber)`
+### `getCaseIdByCaseNumber(caseNumber)`
 
 Accepts a **case number** (numeric string, e.g. `'00001234'`). Single SOQL query: `SELECT Id, CaseNumber FROM Case WHERE CaseNumber='${escaped}' LIMIT 1`. Throws `'Case not found: ${caseNumber}'` if no records returned. Returns `{ caseId }`.
 
@@ -71,7 +71,7 @@ Accepts a **Salesforce Case ID** (not a case number). Three sequential SOQL quer
 2. Query `APHA_TestPart__c WHERE Case__c='${escapedId}'` — uses the ID from step 1.
 3. For each TestPart in parallel (`Promise.all`): query `APHA_TestPartResult__c WHERE APHA_TestPart__c='${escapedTpId}'`.
 
-Returns the full nested object with camelCase field names: `{ id, caseNumber, status, priority, reasonForTest, testWindowStart, testWindowEnd, cph, openedDate, openedBy, testParts: [{ id, day1, day2, certifyingVet, tester, results: [{ id, testType, earTagNo, batchAvian, batchBovine, batchDiva, day1Avian, day1Bovine, day1Diva, day2Avian, day2Bovine, day2Diva }] }] }`.
+Returns the full nested object with camelCase field names: `{ id, caseNumber, status, priority, reasonForTest, testWindowStart, testWindowEnd, cph, openedDate, openedBy, testParts: [{ id, day1, day2, certifyingVet, tester, results: [{ id, testType, earTagNo, notTestedReason, batchAvian, batchBovine, batchDiva, day1Avian, day1Bovine, day1Diva, day2Avian, day2Bovine, day2Diva }] }] }`.
 
 `cph` is the CPH number string from `APHA_CPH__r?.Name` (relationship traversal, not the raw lookup ID). `openedDate` is `CreatedDate`. `openedBy` is `Owner?.Name` (NOT `CreatedBy.Name`). Both `cph` and `openedBy` default to `null` if the relationship is absent.
 
@@ -102,7 +102,7 @@ Returns `201` with `{ caseId, caseNumber }`.
 
 ### `GET /cases`
 
-Looks up a Case by case number. Query param `caseNumber` must match `/^\d+$/` (numeric digits only). Calls `getCaseByCaseNumber(caseNumber)` and returns `200` with `{ caseId }`. Returns `404` if the case is not found.
+Looks up a Case by case number. Query param `caseNumber` must match `/^\d+$/` (numeric digits only). Calls `getCaseIdByCaseNumber(caseNumber)` and returns `200` with `{ caseId }`. Returns `404` if the case is not found.
 
 ### `GET /cases/{caseId}`
 
@@ -125,9 +125,10 @@ Adds results to an existing TestPart. Both path params are Salesforce IDs (alpha
 
 ### `testPartResultSchema` (shared Joi schema)
 
-- `testType` — `'DIVA'` or `'SICCT'`
+- `testType` — `'DIVA'`, `'SICCT'`, or `'Not Tested'`
 - `earTagNo` — string, max 20 chars, required
-- `batchAvian`, `batchBovine`, `batchDiva` — string max 20, allows `null` or empty string `''`, default `null`
+- `notTestedReason` — one of `'Cattle too young'`, `'Cattle deceased'`, `'Other reason'`; required when `testType='Not Tested'`, forced to `null` otherwise
+- `batchAvian`, `batchBovine`, `batchDiva` — string max 20, allows `null` or empty string `''`, default `null`; forced to `null` when `testType='Not Tested'`
 - `day1Avian`, `day1Bovine`, `day2Avian`, `day2Bovine` — integer 0–999, required when `testType='SICCT'`, forced to `null` otherwise
 - `day1Diva`, `day2Diva` — integer 0–999, required when `testType='DIVA'`, forced to `null` otherwise
 

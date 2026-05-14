@@ -9,7 +9,7 @@ import {
 import {
   createCase,
   getCase,
-  getCaseByCaseNumber
+  getCaseIdByCaseNumber
 } from '../services/salesforce/cases.js'
 import { submitTestParts } from '../services/salesforce/test-parts.js'
 import { addTestPartResults } from '../services/salesforce/test-part-results.js'
@@ -17,7 +17,7 @@ import { addTestPartResults } from '../services/salesforce/test-part-results.js'
 vi.mock('../services/salesforce/cases.js', () => ({
   createCase: vi.fn(),
   getCase: vi.fn(),
-  getCaseByCaseNumber: vi.fn()
+  getCaseIdByCaseNumber: vi.fn()
 }))
 vi.mock('../services/salesforce/test-parts.js', () => ({
   submitTestParts: vi.fn()
@@ -50,6 +50,12 @@ const validSicctResult = {
   day1Avian: 5,
   day2Bovine: 4,
   day2Avian: 6
+}
+
+const validNotTestedResult = {
+  testType: 'Not Tested',
+  earTagNo: 'UK-000001-000010',
+  notTestedReason: 'Cattle too young'
 }
 
 const validTestPartsPayload = {
@@ -174,10 +180,10 @@ describe('#cases route', () => {
   })
 
   describe('GET /cases', () => {
-    const mockSearchResult = { id: 'a00000000000001', caseNumber: '00001234' }
+    const mockSearchResult = { caseId: 'a00000000000001' }
 
-    test('Should return 200 with id and caseNumber', async () => {
-      vi.mocked(getCaseByCaseNumber).mockResolvedValue(mockSearchResult)
+    test('Should return 200 with caseId', async () => {
+      vi.mocked(getCaseIdByCaseNumber).mockResolvedValue(mockSearchResult)
 
       const response = await server.inject({
         method: 'GET',
@@ -188,12 +194,12 @@ describe('#cases route', () => {
       expect(response.result).toEqual(mockSearchResult)
     })
 
-    test('Should call getCaseByCaseNumber with the caseNumber query param', async () => {
-      vi.mocked(getCaseByCaseNumber).mockResolvedValue(mockSearchResult)
+    test('Should call getCaseIdByCaseNumber with the caseNumber query param', async () => {
+      vi.mocked(getCaseIdByCaseNumber).mockResolvedValue(mockSearchResult)
 
       await server.inject({ method: 'GET', url: '/cases?caseNumber=00001235' })
 
-      expect(getCaseByCaseNumber).toHaveBeenCalledWith('00001235')
+      expect(getCaseIdByCaseNumber).toHaveBeenCalledWith('00001235')
     })
 
     test('Should return 400 when caseNumber contains non-numeric characters', async () => {
@@ -212,7 +218,7 @@ describe('#cases route', () => {
     })
 
     test('Should return 404 when case is not found', async () => {
-      vi.mocked(getCaseByCaseNumber).mockRejectedValue(
+      vi.mocked(getCaseIdByCaseNumber).mockRejectedValue(
         new Error('Case not found: 99999999')
       )
 
@@ -224,8 +230,8 @@ describe('#cases route', () => {
       expect(response.statusCode).toBe(404)
     })
 
-    test('Should return 502 when getCaseByCaseNumber throws a non-not-found error', async () => {
-      vi.mocked(getCaseByCaseNumber).mockRejectedValue(
+    test('Should return 502 when getCaseIdByCaseNumber throws a non-not-found error', async () => {
+      vi.mocked(getCaseIdByCaseNumber).mockRejectedValue(
         new Error('Salesforce API error 500')
       )
 
@@ -309,7 +315,7 @@ describe('#cases route', () => {
     })
   })
 
-  describe('POST /cases/{id}/test-parts', () => {
+  describe('POST /cases/{caseId}/test-parts', () => {
     function testPartsPayloadWith(result) {
       return {
         testParts: [
@@ -472,6 +478,69 @@ describe('#cases route', () => {
         method: 'POST',
         url: '/cases/a00000000000001/test-parts',
         payload: testPartsPayloadWith({ ...validSicctResult, day1Diva: 5 })
+      })
+
+      expect(response.statusCode).toBe(400)
+    })
+
+    test('Should accept a valid Not Tested result with notTestedReason', async () => {
+      vi.mocked(submitTestParts).mockResolvedValue({ testParts: [] })
+
+      const response = await server.inject({
+        method: 'POST',
+        url: '/cases/a00000000000001/test-parts',
+        payload: testPartsPayloadWith(validNotTestedResult)
+      })
+
+      expect(response.statusCode).toBe(201)
+    })
+
+    test('Should return 400 when Not Tested result is missing notTestedReason', async () => {
+      const { notTestedReason: _, ...result } = validNotTestedResult
+
+      const response = await server.inject({
+        method: 'POST',
+        url: '/cases/a00000000000001/test-parts',
+        payload: testPartsPayloadWith(result)
+      })
+
+      expect(response.statusCode).toBe(400)
+    })
+
+    test('Should return 400 when Not Tested result has an invalid notTestedReason', async () => {
+      const response = await server.inject({
+        method: 'POST',
+        url: '/cases/a00000000000001/test-parts',
+        payload: testPartsPayloadWith({
+          ...validNotTestedResult,
+          notTestedReason: 'Not a valid reason'
+        })
+      })
+
+      expect(response.statusCode).toBe(400)
+    })
+
+    test('Should return 400 when Not Tested result provides measurement fields', async () => {
+      const response = await server.inject({
+        method: 'POST',
+        url: '/cases/a00000000000001/test-parts',
+        payload: testPartsPayloadWith({
+          ...validNotTestedResult,
+          day1Bovine: 3
+        })
+      })
+
+      expect(response.statusCode).toBe(400)
+    })
+
+    test('Should return 400 when notTestedReason is provided for a non-Not-Tested type', async () => {
+      const response = await server.inject({
+        method: 'POST',
+        url: '/cases/a00000000000001/test-parts',
+        payload: testPartsPayloadWith({
+          ...validDivaResult,
+          notTestedReason: 'Cattle too young'
+        })
       })
 
       expect(response.statusCode).toBe(400)
@@ -666,6 +735,68 @@ describe('#cases route', () => {
         method: 'POST',
         url: resultsUrl,
         payload: resultsPayloadWith({ ...validSicctResult, day1Diva: 5 })
+      })
+
+      expect(response.statusCode).toBe(400)
+    })
+
+    test('Should accept a valid Not Tested result with notTestedReason', async () => {
+      vi.mocked(addTestPartResults).mockResolvedValue({
+        resultIds: ['result-id-1']
+      })
+
+      const response = await server.inject({
+        method: 'POST',
+        url: resultsUrl,
+        payload: resultsPayloadWith(validNotTestedResult)
+      })
+
+      expect(response.statusCode).toBe(201)
+    })
+
+    test('Should return 400 when Not Tested result is missing notTestedReason', async () => {
+      const { notTestedReason: _, ...result } = validNotTestedResult
+
+      const response = await server.inject({
+        method: 'POST',
+        url: resultsUrl,
+        payload: resultsPayloadWith(result)
+      })
+
+      expect(response.statusCode).toBe(400)
+    })
+
+    test('Should return 400 when Not Tested result has an invalid notTestedReason', async () => {
+      const response = await server.inject({
+        method: 'POST',
+        url: resultsUrl,
+        payload: resultsPayloadWith({
+          ...validNotTestedResult,
+          notTestedReason: 'Not a valid reason'
+        })
+      })
+
+      expect(response.statusCode).toBe(400)
+    })
+
+    test('Should return 400 when Not Tested result provides measurement fields', async () => {
+      const response = await server.inject({
+        method: 'POST',
+        url: resultsUrl,
+        payload: resultsPayloadWith({ ...validNotTestedResult, day1Bovine: 3 })
+      })
+
+      expect(response.statusCode).toBe(400)
+    })
+
+    test('Should return 400 when notTestedReason is provided for a non-Not-Tested type', async () => {
+      const response = await server.inject({
+        method: 'POST',
+        url: resultsUrl,
+        payload: resultsPayloadWith({
+          ...validDivaResult,
+          notTestedReason: 'Cattle too young'
+        })
       })
 
       expect(response.statusCode).toBe(400)

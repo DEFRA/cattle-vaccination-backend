@@ -69,6 +69,7 @@ function buildSubRequests(caseId, testParts) {
           APHA_TestPart__c: `@{${testPartRefId}.id}`,
           APHA_TestType__c: result.testType,
           APHA_EarTagNo__c: result.earTagNo,
+          Not_Tested_Reason__c: result.notTestedReason ?? null,
           APHA_BatchAvian__c: result.batchAvian,
           APHA_BatchBovine__c: result.batchBovine,
           APHA_BatchDIVA__c: result.batchDiva,

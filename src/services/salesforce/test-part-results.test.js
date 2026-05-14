@@ -129,7 +129,7 @@ describe('#addTestPartResults', () => {
     })
 
     await expect(addTestPartResults('tp-id', validResults)).rejects.toThrow(
-      'Salesforce graph request failed - Salesforce validation failed'
+      'Salesforce graph request failed: Salesforce validation failed'
     )
   })
 })
