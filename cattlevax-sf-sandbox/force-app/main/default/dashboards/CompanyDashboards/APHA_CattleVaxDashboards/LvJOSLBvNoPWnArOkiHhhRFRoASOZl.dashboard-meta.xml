@@ -289,7 +289,7 @@
                 <drillToDetailEnabled>false</drillToDetailEnabled>
                 <enableHover>false</enableHover>
                 <expandOthers>false</expandOthers>
-                <groupingColumn>Case.APHA_TestParts__r$APHA_IdentityOfCertifiyngVet__c</groupingColumn>
+                <groupingColumn>Case.APHA_TestParts__r$APHA_IdentityOfCertifyingVet__c</groupingColumn>
                 <groupingSortProperties>
                     <groupingSorts>
                         <groupingLevel>g1</groupingLevel>
@@ -317,7 +317,7 @@
     <owner>syed.usmanahmad@defra.gov.uk</owner>
     <runningUser>syed.usmanahmad@defra.gov.uk</runningUser>
     <textColor>#000000</textColor>
-    <title>Cattle Vax Dashboard</title>
+    <title>Bovine TB Skin Testing Dashboard</title>
     <titleColor>#000000</titleColor>
     <titleSize>12</titleSize>
 </Dashboard>

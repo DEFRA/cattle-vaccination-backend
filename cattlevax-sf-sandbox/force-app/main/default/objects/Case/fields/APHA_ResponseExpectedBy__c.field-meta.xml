@@ -3,15 +3,9 @@
     <fullName>APHA_ResponseExpectedBy__c</fullName>
     <description>Latest date response expected</description>
     <label>Response Expected By</label>
-    <summarizedField>APHA_VaccinationInvitationSent__c.APHA_ExpectedResponseDate__c</summarizedField>
-    <summaryFilterItems>
-        <field>APHA_VaccinationInvitationSent__c.APHA_Status__c</field>
-        <operation>equals</operation>
-        <value>Sent</value>
-    </summaryFilterItems>
-    <summaryForeignKey>APHA_VaccinationInvitationSent__c.APHA_Case__c</summaryForeignKey>
-    <summaryOperation>max</summaryOperation>
+    <required>false</required>
+    <trackFeedHistory>false</trackFeedHistory>
     <trackHistory>false</trackHistory>
     <trackTrending>false</trackTrending>
-    <type>Summary</type>
+    <type>Date</type>
 </CustomField>

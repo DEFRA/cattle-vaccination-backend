@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ListView xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Vaccination_Invitations_Requiring_Review</fullName>
+    <columns>CASES.CASE_NUMBER</columns>
+    <columns>APHA_CPH__c</columns>
+    <columns>CASES.STATUS</columns>
+    <columns>CASES.CREATED_DATE</columns>
+    <columns>APHA_ResponseDate__c</columns>
+    <columns>APHA_ResponseOutcome__c</columns>
+    <filterScope>Everything</filterScope>
+    <filters>
+        <field>CASES.STATUS</field>
+        <operation>equals</operation>
+        <value>Review</value>
+    </filters>
+    <filters>
+        <field>CASES.TYPE</field>
+        <operation>equals</operation>
+        <value>TB Vaccination Invitation</value>
+    </filters>
+    <label>Vaccination Invitations Requiring Review</label>
+</ListView>

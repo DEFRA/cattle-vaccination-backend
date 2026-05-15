@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>APHA_GOVUKNotifyAPIKey__c</fullName>
+    <fieldManageability>DeveloperControlled</fieldManageability>
+    <label>GOV.UK Notify API Key</label>
+    <referenceTo>APHA_GOVUKNotifyAPIKey__mdt</referenceTo>
+    <relationshipLabel>GOV.UK Notify Templates Id</relationshipLabel>
+    <relationshipName>GOV_UK_Notify_Templates_Id</relationshipName>
+    <required>false</required>
+    <type>MetadataRelationship</type>
+    <unique>false</unique>
+</CustomField>

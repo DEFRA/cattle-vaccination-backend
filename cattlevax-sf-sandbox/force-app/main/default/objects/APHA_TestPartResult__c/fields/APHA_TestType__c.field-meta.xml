@@ -21,6 +21,11 @@
                 <default>false</default>
                 <label>SICCT</label>
             </value>
+            <value>
+                <fullName>Not Tested</fullName>
+                <default>false</default>
+                <label>Not Tested</label>
+            </value>
         </valueSetDefinition>
     </valueSet>
 </CustomField>

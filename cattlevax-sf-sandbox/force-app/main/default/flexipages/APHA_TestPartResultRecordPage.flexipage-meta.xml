@@ -28,6 +28,10 @@
                     <value>false</value>
                 </componentInstanceProperties>
                 <componentInstanceProperties>
+                    <name>hideSlackAction</name>
+                    <value>false</value>
+                </componentInstanceProperties>
+                <componentInstanceProperties>
                     <name>numVisibleActions</name>
                     <value>3</value>
                 </componentInstanceProperties>
@@ -81,6 +85,13 @@
                 </fieldInstanceProperties>
                 <fieldItem>Record.APHA_BatchBovine__c</fieldItem>
                 <identifier>RecordAPHA_BatchBovine_cField</identifier>
+                <visibilityRule>
+                    <criteria>
+                        <leftValue>{!Record.APHA_TestType__c}</leftValue>
+                        <operator>EQUAL</operator>
+                        <rightValue>SICCT</rightValue>
+                    </criteria>
+                </visibilityRule>
             </fieldInstance>
         </itemInstances>
         <itemInstances>
@@ -91,6 +102,13 @@
                 </fieldInstanceProperties>
                 <fieldItem>Record.APHA_BatchAvian__c</fieldItem>
                 <identifier>RecordAPHA_BatchAvian_cField</identifier>
+                <visibilityRule>
+                    <criteria>
+                        <leftValue>{!Record.APHA_TestType__c}</leftValue>
+                        <operator>EQUAL</operator>
+                        <rightValue>SICCT</rightValue>
+                    </criteria>
+                </visibilityRule>
             </fieldInstance>
         </itemInstances>
         <itemInstances>
@@ -101,6 +119,30 @@
                 </fieldInstanceProperties>
                 <fieldItem>Record.APHA_BatchDIVA__c</fieldItem>
                 <identifier>RecordAPHA_BatchDIVA_cField</identifier>
+                <visibilityRule>
+                    <criteria>
+                        <leftValue>{!Record.APHA_TestType__c}</leftValue>
+                        <operator>EQUAL</operator>
+                        <rightValue>DIVA</rightValue>
+                    </criteria>
+                </visibilityRule>
+            </fieldInstance>
+        </itemInstances>
+        <itemInstances>
+            <fieldInstance>
+                <fieldInstanceProperties>
+                    <name>uiBehavior</name>
+                    <value>none</value>
+                </fieldInstanceProperties>
+                <fieldItem>Record.Not_Tested_Reason__c</fieldItem>
+                <identifier>RecordNot_Tested_Reason__cField</identifier>
+                <visibilityRule>
+                    <criteria>
+                        <leftValue>{!Record.APHA_TestType__c}</leftValue>
+                        <operator>EQUAL</operator>
+                        <rightValue>Not Tested</rightValue>
+                    </criteria>
+                </visibilityRule>
             </fieldInstance>
         </itemInstances>
         <name>Facet-93610b5a-149e-4b5f-a5ab-c6d181326caf</name>
@@ -139,6 +181,13 @@
                 </fieldInstanceProperties>
                 <fieldItem>Record.APHA_TestDay1Bovine__c</fieldItem>
                 <identifier>RecordAPHA_TestDay1Bovine_cField</identifier>
+                <visibilityRule>
+                    <criteria>
+                        <leftValue>{!Record.APHA_TestType__c}</leftValue>
+                        <operator>EQUAL</operator>
+                        <rightValue>SICCT</rightValue>
+                    </criteria>
+                </visibilityRule>
             </fieldInstance>
         </itemInstances>
         <itemInstances>
@@ -149,6 +198,13 @@
                 </fieldInstanceProperties>
                 <fieldItem>Record.APHA_TestDay1Avian__c</fieldItem>
                 <identifier>RecordAPHA_TestDay1Avian_cField</identifier>
+                <visibilityRule>
+                    <criteria>
+                        <leftValue>{!Record.APHA_TestType__c}</leftValue>
+                        <operator>EQUAL</operator>
+                        <rightValue>SICCT</rightValue>
+                    </criteria>
+                </visibilityRule>
             </fieldInstance>
         </itemInstances>
         <itemInstances>
@@ -159,6 +215,13 @@
                 </fieldInstanceProperties>
                 <fieldItem>Record.APHA_TestDay1DIVA__c</fieldItem>
                 <identifier>RecordAPHA_TestDay1DIVA_cField</identifier>
+                <visibilityRule>
+                    <criteria>
+                        <leftValue>{!Record.APHA_TestType__c}</leftValue>
+                        <operator>EQUAL</operator>
+                        <rightValue>DIVA</rightValue>
+                    </criteria>
+                </visibilityRule>
             </fieldInstance>
         </itemInstances>
         <name>Facet-61163faa-b072-40df-8fd8-f25f900fb1bd</name>
@@ -173,6 +236,13 @@
                 </fieldInstanceProperties>
                 <fieldItem>Record.APHA_TestDay2Bovine__c</fieldItem>
                 <identifier>RecordAPHA_TestDay2Bovine_cField</identifier>
+                <visibilityRule>
+                    <criteria>
+                        <leftValue>{!Record.APHA_TestType__c}</leftValue>
+                        <operator>EQUAL</operator>
+                        <rightValue>SICCT</rightValue>
+                    </criteria>
+                </visibilityRule>
             </fieldInstance>
         </itemInstances>
         <itemInstances>
@@ -183,6 +253,13 @@
                 </fieldInstanceProperties>
                 <fieldItem>Record.APHA_TestDay2Avian__c</fieldItem>
                 <identifier>RecordAPHA_TestDay2Avian_cField</identifier>
+                <visibilityRule>
+                    <criteria>
+                        <leftValue>{!Record.APHA_TestType__c}</leftValue>
+                        <operator>EQUAL</operator>
+                        <rightValue>SICCT</rightValue>
+                    </criteria>
+                </visibilityRule>
             </fieldInstance>
         </itemInstances>
         <itemInstances>
@@ -193,6 +270,13 @@
                 </fieldInstanceProperties>
                 <fieldItem>Record.APHA_TestDay2DIVA__c</fieldItem>
                 <identifier>RecordAPHA_TestDay2DIVA_cField</identifier>
+                <visibilityRule>
+                    <criteria>
+                        <leftValue>{!Record.APHA_TestType__c}</leftValue>
+                        <operator>EQUAL</operator>
+                        <rightValue>DIVA</rightValue>
+                    </criteria>
+                </visibilityRule>
             </fieldInstance>
         </itemInstances>
         <name>Facet-1c501cc8-1bab-4e9b-8c2a-d3a549773ebf</name>
@@ -357,7 +441,7 @@
                 </componentInstanceProperties>
                 <componentInstanceProperties>
                     <name>label</name>
-                    <value>Skin Measurement(mm)</value>
+                    <value>Skin Measurement (mm)</value>
                 </componentInstanceProperties>
                 <componentName>flexipage:fieldSection</componentName>
                 <identifier>flexipage_fieldSection3</identifier>
