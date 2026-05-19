@@ -40,7 +40,7 @@ You are the expert on the Salesforce integration in this codebase.
 
 - **Case** — `RecordTypeId` (looked up by `DeveloperName='APHA_CattleVax'`), `APHA_CPH__c` (CPH lookup), `APHA_ReasonForTest__c`, `APHA_TestWindowStartDate__c`, `APHA_TestWindowEndDate__c`, `Status`, `Priority`
 - **APHA_CPH\_\_c** — looked up by `Name` (CPH number e.g. `'01/001/0006'`)
-- **APHA_TestPart\_\_c** — `Case__c` (Case ID), `APHA_Day1__c`, `APHA_Day2__c`, `APHA_IdentityOfCertifyingVet__c`, `APHA_IdentityOfTester__c`
+- **APHA_TestPart\_\_c** — `Case__c` (Case ID), `APHA_Day1__c`, `APHA_Day2__c`, `Test_Start_Time__c` (optional HH:MM string, no timezone conversion), `APHA_IdentityOfCertifyingVet__c`, `APHA_IdentityOfTester__c`
 - **APHA_TestPartResult\_\_c** — `APHA_TestPart__c` (TestPart ID), `APHA_TestType__c` (picklist: `'DIVA'`, `'SICCT'`, `'Not Tested'`), `APHA_EarTagNo__c`, `Not_Tested_Reason__c` (picklist: `'Cattle too young'`, `'Cattle deceased'`, `'Other reason'`; required when test type is `'Not Tested'`), batch fields (`APHA_BatchAvian__c`, `APHA_BatchBovine__c`, `APHA_BatchDIVA__c`), measurement fields (`APHA_TestDay1Avian__c`, `APHA_TestDay1Bovine__c`, `APHA_TestDay1DIVA__c`, `APHA_TestDay2Avian__c`, `APHA_TestDay2Bovine__c`, `APHA_TestDay2DIVA__c`)
 
 ## Case flow
@@ -114,6 +114,7 @@ Submits new TestParts to an existing Case. Path param `id` is a Salesforce ID (a
 
 - `testParts` — array (min 1) of:
   - `day1`, `day2` — ISO date strings
+  - `day1StartTime` — optional HH:MM string; maps to `Test_Start_Time__c` in Salesforce (omitted from payload if not provided; no timezone conversion — offset handling is deferred to the SF side)
   - `certifyingVet`, `tester` — strings
   - `results` — array (min 1) of `testPartResultSchema` (see below)
 

@@ -49,6 +49,10 @@ function buildSubRequests(caseId, testParts) {
         Case__c: caseId,
         APHA_Day1__c: testPart.day1,
         APHA_Day2__c: testPart.day2,
+        // No timezone conversion — sent as entered (HH:MM). Salesforce display offset is a known issue to resolve on the SF side.
+        ...(testPart.day1StartTime != null && {
+          Test_Start_Time__c: testPart.day1StartTime
+        }),
         APHA_IdentityOfCertifyingVet__c: testPart.certifyingVet,
         APHA_IdentityOfTester__c: testPart.tester
       }

@@ -13,8 +13,8 @@ vi.mock('./index.js', async (importOriginal) => {
 const validInput = {
   cphNumber: '01/001/0006',
   reasonForTest: 'Pre-Movement',
-  testWindowStart: '2026-04-22T14:30:00.000Z',
-  testWindowEnd: '2026-04-22T14:30:00.000Z'
+  testWindowStart: '2026-04-22',
+  testWindowEnd: '2026-04-22'
 }
 
 function mockComposite() {

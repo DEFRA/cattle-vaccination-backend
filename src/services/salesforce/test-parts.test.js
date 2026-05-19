@@ -113,6 +113,52 @@ describe('#submitTestParts', () => {
     })
   })
 
+  test('Should include Test_Start_Time__c in the TestPart body when day1StartTime is provided', async () => {
+    mockGraph([
+      {
+        referenceId: 'TestPart_0',
+        httpStatusCode: 201,
+        body: { id: 'tp-id', success: true }
+      },
+      {
+        referenceId: 'TestPartResult_0_0',
+        httpStatusCode: 201,
+        body: { id: 'result-id', success: true }
+      }
+    ])
+
+    await submitTestParts('case-id', [
+      { ...validTestParts[0], day1StartTime: '09:30' }
+    ])
+
+    const [graphRequest] = vi.mocked(compositeGraph).mock.calls[0]
+    expect(graphRequest[0].compositeRequest[0].body).toMatchObject({
+      Test_Start_Time__c: '09:30'
+    })
+  })
+
+  test('Should not include Test_Start_Time__c in the TestPart body when day1StartTime is not provided', async () => {
+    mockGraph([
+      {
+        referenceId: 'TestPart_0',
+        httpStatusCode: 201,
+        body: { id: 'tp-id', success: true }
+      },
+      {
+        referenceId: 'TestPartResult_0_0',
+        httpStatusCode: 201,
+        body: { id: 'result-id', success: true }
+      }
+    ])
+
+    await submitTestParts('case-id', validTestParts)
+
+    const [graphRequest] = vi.mocked(compositeGraph).mock.calls[0]
+    expect(graphRequest[0].compositeRequest[0].body).not.toHaveProperty(
+      'Test_Start_Time__c'
+    )
+  })
+
   test('Should throw when graph request is not successful', async () => {
     vi.mocked(compositeGraph).mockResolvedValue({
       graphs: [
