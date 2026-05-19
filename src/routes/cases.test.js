@@ -144,7 +144,7 @@ describe('#cases route', () => {
       expect(response.statusCode).toBe(400)
     })
 
-    test('Should return 400 when testWindowStart is not an ISO date', async () => {
+    test('Should return 400 when testWindowStart is not a date string', async () => {
       const response = await server.inject({
         method: 'POST',
         url: '/cases',

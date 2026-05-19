@@ -75,6 +75,9 @@ const testPartResultSchema = Joi.object({
 
 const testPartSchema = Joi.object({
   day1: Joi.string().isoDate().required(),
+  day1StartTime: Joi.string()
+    .pattern(/^\d{2}:\d{2}$/)
+    .optional(),
   day2: Joi.string().isoDate().required(),
   certifyingVet: Joi.string().required(),
   tester: Joi.string().required(),
