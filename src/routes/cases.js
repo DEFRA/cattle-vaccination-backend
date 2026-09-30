@@ -8,6 +8,7 @@ import {
 import { submitTestParts } from '../services/salesforce/test-parts.js'
 import { addTestPartResults } from '../services/salesforce/test-part-results.js'
 import { createLogger } from '../common/helpers/logging/logger.js'
+import { getErrorMessage } from '../common/helpers/error-message.js'
 
 const logger = createLogger()
 
@@ -84,6 +85,7 @@ const testPartSchema = Joi.object({
   results: Joi.array().items(testPartResultSchema).min(1).required()
 })
 
+/** @type {import('@hapi/hapi').ServerRoute} */
 export const createCaseRoute = {
   method: 'POST',
   path: '/cases',
@@ -121,6 +123,7 @@ export const createCaseRoute = {
   }
 }
 
+/** @type {import('@hapi/hapi').ServerRoute} */
 export const searchCasesRoute = {
   method: 'GET',
   path: '/cases',
@@ -136,8 +139,9 @@ export const searchCasesRoute = {
       const result = await getCaseIdByCaseNumber(request.query.caseNumber)
       return h.response(result)
     } catch (err) {
-      if (err.message.startsWith('Case not found:')) {
-        throw Boom.notFound(err.message)
+      const message = getErrorMessage(err)
+      if (message.startsWith('Case not found:')) {
+        throw Boom.notFound(message)
       }
       logger.error(err, 'Salesforce search cases request failed')
       throw Boom.badGateway('Failed to search cases in Salesforce')
@@ -160,8 +164,9 @@ export const getCaseRoute = {
       const result = await getCase(request.params.caseId)
       return h.response(result)
     } catch (err) {
-      if (err.message.startsWith('Case not found:')) {
-        throw Boom.notFound(err.message)
+      const message = getErrorMessage(err)
+      if (message.startsWith('Case not found:')) {
+        throw Boom.notFound(message)
       }
       logger.error(err, 'Salesforce get case request failed')
       throw Boom.badGateway('Failed to retrieve case from Salesforce')
@@ -169,6 +174,7 @@ export const getCaseRoute = {
   }
 }
 
+/** @type {import('@hapi/hapi').ServerRoute} */
 export const submitTestPartsRoute = {
   method: 'POST',
   path: '/cases/{caseId}/test-parts',
@@ -191,8 +197,9 @@ export const submitTestPartsRoute = {
       )
       return h.response(result).code(201)
     } catch (err) {
-      if (err.message.startsWith('Case not found:')) {
-        throw Boom.notFound(err.message)
+      const message = getErrorMessage(err)
+      if (message.startsWith('Case not found:')) {
+        throw Boom.notFound(message)
       }
       logger.error(err, 'Salesforce submit test parts request failed')
       throw Boom.badGateway('Failed to submit test parts to Salesforce')
@@ -200,6 +207,7 @@ export const submitTestPartsRoute = {
   }
 }
 
+/** @type {import('@hapi/hapi').ServerRoute} */
 export const addTestPartResultsRoute = {
   method: 'POST',
   path: '/cases/{caseId}/test-parts/{testPartId}/results',

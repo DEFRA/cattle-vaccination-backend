@@ -5,6 +5,7 @@ import {
 } from 'aws-embedded-metrics'
 import { config } from '../../config.js'
 import { createLogger } from './logging/logger.js'
+import { getErrorMessage } from './error-message.js'
 
 export const metricsCounter = async (metricName, value = 1) => {
   if (!config.get('isMetricsEnabled')) {
@@ -21,6 +22,6 @@ export const metricsCounter = async (metricName, value = 1) => {
     )
     await metricsLogger.flush()
   } catch (error) {
-    createLogger().error(error, error.message)
+    createLogger().error(error, getErrorMessage(error))
   }
 }

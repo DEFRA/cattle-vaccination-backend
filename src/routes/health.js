@@ -1,3 +1,4 @@
+/** @type {import('@hapi/hapi').ServerRoute} */
 export const health = {
   method: 'GET',
   path: '/health',
