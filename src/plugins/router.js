@@ -7,7 +7,7 @@ import {
   createCaseRoute,
   getCaseRoute,
   searchCasesRoute,
-  submitTestPartsRoute
+  submitTestPartsRoute,
 } from '../routes/cases.js'
 
 export const router = {
@@ -23,8 +23,8 @@ export const router = {
         searchCasesRoute,
         getCaseRoute,
         submitTestPartsRoute,
-        addTestPartResultsRoute
+        addTestPartResultsRoute,
       ])
-    }
-  }
+    },
+  },
 }

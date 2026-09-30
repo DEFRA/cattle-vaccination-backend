@@ -6,7 +6,7 @@ vi.mock('./index.js', async (importOriginal) => {
   return {
     ...actual,
     composite: vi.fn(),
-    compositeGraph: vi.fn()
+    compositeGraph: vi.fn(),
   }
 })
 
@@ -16,8 +16,8 @@ const validResults = [
     earTagNo: 'UK-000001-000010',
     batchDiva: 'D1112',
     day1Avian: 6,
-    day1Bovine: 4
-  }
+    day1Bovine: 4,
+  },
 ]
 
 describe('#addTestPartResults', () => {
@@ -35,11 +35,11 @@ describe('#addTestPartResults', () => {
             compositeResponse: resultIds.map((id, index) => ({
               referenceId: `Result_${index}`,
               httpStatusCode: 201,
-              body: { id, success: true }
-            }))
-          }
-        }
-      ]
+              body: { id, success: true },
+            })),
+          },
+        },
+      ],
     })
   }
 
@@ -58,9 +58,7 @@ describe('#addTestPartResults', () => {
 
     expect(composite).not.toHaveBeenCalled()
     expect(compositeGraph).toHaveBeenCalledTimes(1)
-    expect(compositeGraph).toHaveBeenCalledWith([
-      expect.objectContaining({ graphId: 'Graph_0' })
-    ])
+    expect(compositeGraph).toHaveBeenCalledWith([expect.objectContaining({ graphId: 'Graph_0' })])
   })
 
   test('Should create one graph sub-request per result', async () => {
@@ -83,7 +81,7 @@ describe('#addTestPartResults', () => {
     expect(graphRequest[0].compositeRequest[0]).toMatchObject({
       method: 'POST',
       url: '/services/data/v62.0/sobjects/APHA_TestPartResult__c',
-      body: expect.objectContaining({ APHA_TestPart__c: 'tp-id-123' })
+      body: expect.objectContaining({ APHA_TestPart__c: 'tp-id-123' }),
     })
   })
 
@@ -100,7 +98,7 @@ describe('#addTestPartResults', () => {
       APHA_TestDay1Avian__c: 6,
       APHA_TestDay1Bovine__c: 4,
       APHA_BatchAvian__c: null,
-      APHA_BatchBovine__c: null
+      APHA_BatchBovine__c: null,
     })
   })
 
@@ -118,18 +116,18 @@ describe('#addTestPartResults', () => {
                 body: [
                   {
                     errorCode: 'FIELD_INTEGRITY_EXCEPTION',
-                    message: 'Salesforce validation failed'
-                  }
-                ]
-              }
-            ]
-          }
-        }
-      ]
+                    message: 'Salesforce validation failed',
+                  },
+                ],
+              },
+            ],
+          },
+        },
+      ],
     })
 
     await expect(addTestPartResults('tp-id', validResults)).rejects.toThrow(
-      'Salesforce graph request failed: Salesforce validation failed'
+      'Salesforce graph request failed: Salesforce validation failed',
     )
   })
 })

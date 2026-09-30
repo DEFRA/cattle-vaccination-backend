@@ -3,10 +3,10 @@ import { cattleOnHolding } from './cattle-on-holding.js'
 import { getCattleOnHolding } from '../services/livestock-api.js'
 
 vi.mock('../services/livestock-api.js', () => ({
-  getCattleOnHolding: vi.fn()
+  getCattleOnHolding: vi.fn(),
 }))
 vi.mock('../common/helpers/logging/logger.js', () => ({
-  createLogger: () => ({ error: vi.fn() })
+  createLogger: () => ({ error: vi.fn() }),
 }))
 
 describe('#cattleOnHolding route', () => {
@@ -29,7 +29,7 @@ describe('#cattleOnHolding route', () => {
 
     const response = await server.inject({
       method: 'GET',
-      url: '/cattle-on-holding?holdingId=12345'
+      url: '/cattle-on-holding?holdingId=12345',
     })
 
     expect(response.statusCode).toBe(200)
@@ -41,7 +41,7 @@ describe('#cattleOnHolding route', () => {
 
     await server.inject({
       method: 'GET',
-      url: '/cattle-on-holding?holdingId=12345'
+      url: '/cattle-on-holding?holdingId=12345',
     })
 
     expect(getCattleOnHolding).toHaveBeenCalledWith({ holdingId: '12345' })
@@ -50,7 +50,7 @@ describe('#cattleOnHolding route', () => {
   test('Should return 400 when holdingId is missing', async () => {
     const response = await server.inject({
       method: 'GET',
-      url: '/cattle-on-holding'
+      url: '/cattle-on-holding',
     })
 
     expect(response.statusCode).toBe(400)
@@ -61,7 +61,7 @@ describe('#cattleOnHolding route', () => {
 
     const response = await server.inject({
       method: 'GET',
-      url: '/cattle-on-holding?holdingId=12345'
+      url: '/cattle-on-holding?holdingId=12345',
     })
 
     expect(response.statusCode).toBe(502)

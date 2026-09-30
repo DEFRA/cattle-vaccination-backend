@@ -1,8 +1,4 @@
-import {
-  compositeGraph,
-  getSalesforceApiErrorFromCompositeResponse,
-  SF_API_PATH
-} from './index.js'
+import { compositeGraph, getSalesforceApiErrorFromCompositeResponse, SF_API_PATH } from './index.js'
 
 export async function addTestPartResults(testPartId, results) {
   // add step here to error if testPartId doesnt belong to the provided caseId (needs to be added as a param)
@@ -26,23 +22,23 @@ export async function addTestPartResults(testPartId, results) {
           APHA_TestDay1DIVA__c: result.day1Diva ?? null,
           APHA_TestDay2Avian__c: result.day2Avian ?? null,
           APHA_TestDay2Bovine__c: result.day2Bovine ?? null,
-          APHA_TestDay2DIVA__c: result.day2Diva ?? null
-        }
-      }))
-    }
+          APHA_TestDay2DIVA__c: result.day2Diva ?? null,
+        },
+      })),
+    },
   ])
 
   const graphResult = graphResponse.graphs[0]
 
   if (!graphResult.isSuccessful) {
     const errorMessage = getSalesforceApiErrorFromCompositeResponse(
-      graphResult.graphResponse.compositeResponse
+      graphResult.graphResponse.compositeResponse,
     )
 
     throw new Error(`Salesforce graph request failed: ${errorMessage}`)
   }
 
   return {
-    resultIds: graphResult.graphResponse.compositeResponse.map((r) => r.body.id)
+    resultIds: graphResult.graphResponse.compositeResponse.map((r) => r.body.id),
   }
 }

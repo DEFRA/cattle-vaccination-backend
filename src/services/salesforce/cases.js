@@ -2,29 +2,24 @@ import {
   composite,
   query,
   SF_API_PATH,
-  getSalesforceApiErrorFromCompositeResponse
+  getSalesforceApiErrorFromCompositeResponse,
 } from './index.js'
 
-export async function createCase({
-  cphNumber,
-  reasonForTest,
-  testWindowStart,
-  testWindowEnd
-}) {
+export async function createCase({ cphNumber, reasonForTest, testWindowStart, testWindowEnd }) {
   const { compositeResponse } = await composite([
     {
       method: 'GET',
       referenceId: 'CaseRecordType',
       url: `${SF_API_PATH}/query?q=${encodeURIComponent(
-        "SELECT Id FROM RecordType WHERE DeveloperName='APHA_CattleVax' AND SobjectType='Case' LIMIT 1"
-      )}`
+        "SELECT Id FROM RecordType WHERE DeveloperName='APHA_CattleVax' AND SobjectType='Case' LIMIT 1",
+      )}`,
     },
     {
       method: 'GET',
       referenceId: 'CPHRef',
       url: `${SF_API_PATH}/query?q=${encodeURIComponent(
-        `SELECT Id FROM APHA_CPH__c WHERE Name='${cphNumber.replace(/'/g, "''")}' LIMIT 1`
-      )}`
+        `SELECT Id FROM APHA_CPH__c WHERE Name='${cphNumber.replace(/'/g, "''")}' LIMIT 1`,
+      )}`,
     },
     {
       method: 'POST',
@@ -38,20 +33,17 @@ export async function createCase({
         APHA_TestWindowEndDate__c: testWindowEnd,
         Status: 'Draft',
         Priority: 'Medium',
-        Type: 'TB Skin Test'
-      }
-    }
+        Type: 'TB Skin Test',
+      },
+    },
   ])
 
   const failedStep = compositeResponse.find((r) => r.httpStatusCode >= 400)
 
   if (failedStep) {
-    const errorMessage =
-      getSalesforceApiErrorFromCompositeResponse(compositeResponse)
+    const errorMessage = getSalesforceApiErrorFromCompositeResponse(compositeResponse)
 
-    throw new Error(
-      `Salesforce composite request failed: ${errorMessage ?? 'Unknown reason'}`
-    )
+    throw new Error(`Salesforce composite request failed: ${errorMessage ?? 'Unknown reason'}`)
   }
 
   // SOQL queries return HTTP 200 even when nothing matches — empty records array is the failure signal
@@ -66,7 +58,7 @@ export async function createCase({
   const caseId = compositeResponse[2].body.id
 
   const caseNumberResult = await query(
-    `SELECT CaseNumber FROM Case WHERE Id='${caseId.replace(/'/g, "''")}' LIMIT 1`
+    `SELECT CaseNumber FROM Case WHERE Id='${caseId.replace(/'/g, "''")}' LIMIT 1`,
   )
 
   const caseNumber = caseNumberResult.records[0]?.CaseNumber
@@ -76,9 +68,7 @@ export async function createCase({
 
 export async function getCaseIdByCaseNumber(caseNumber) {
   const escaped = caseNumber.replace(/'/g, "''")
-  const result = await query(
-    `SELECT Id FROM Case WHERE CaseNumber='${escaped}' LIMIT 1`
-  )
+  const result = await query(`SELECT Id FROM Case WHERE CaseNumber='${escaped}' LIMIT 1`)
 
   if (result.records.length === 0) {
     throw new Error(`Case not found: ${caseNumber}`)
@@ -94,7 +84,7 @@ export async function getCase(caseId) {
     `SELECT Id, CaseNumber, Status, Priority, Type, APHA_ReasonForTest__c, APHA_TestWindowStartDate__c, 
      APHA_TestWindowEndDate__c, APHA_CPH__r.Name, CreatedDate, Owner.Name 
      FROM Case WHERE Id='${escapedCaseId}' 
-     LIMIT 1`
+     LIMIT 1`,
   )
 
   if (caseResult.records.length === 0) {
@@ -105,7 +95,7 @@ export async function getCase(caseId) {
   const escapedId = caseRecord.Id.replace(/'/g, "''")
 
   const testPartsResult = await query(
-    `SELECT Id, APHA_Day1__c, APHA_Day2__c, APHA_IdentityOfCertifyingVet__c, APHA_IdentityOfTester__c FROM APHA_TestPart__c WHERE Case__c='${escapedId}'`
+    `SELECT Id, APHA_Day1__c, APHA_Day2__c, APHA_IdentityOfCertifyingVet__c, APHA_IdentityOfTester__c FROM APHA_TestPart__c WHERE Case__c='${escapedId}'`,
   )
 
   const testParts = await Promise.all(
@@ -116,7 +106,7 @@ export async function getCase(caseId) {
          APHA_BatchDIVA__c, APHA_TestDay1Avian__c, APHA_TestDay1Bovine__c, APHA_TestDay1DIVA__c, 
          APHA_TestDay2Avian__c, APHA_TestDay2Bovine__c, APHA_TestDay2DIVA__c, Not_Tested_Reason__c 
          FROM APHA_TestPartResult__c 
-         WHERE APHA_TestPart__c='${escapedTpId}'`
+         WHERE APHA_TestPart__c='${escapedTpId}'`,
       )
 
       return {
@@ -138,10 +128,10 @@ export async function getCase(caseId) {
           day2Avian: r.APHA_TestDay2Avian__c,
           day2Bovine: r.APHA_TestDay2Bovine__c,
           day2Diva: r.APHA_TestDay2DIVA__c,
-          notTestedReason: r.Not_Tested_Reason__c
-        }))
+          notTestedReason: r.Not_Tested_Reason__c,
+        })),
       }
-    })
+    }),
   )
 
   return {
@@ -156,6 +146,6 @@ export async function getCase(caseId) {
     cph: caseRecord.APHA_CPH__r?.Name ?? null,
     openedDate: caseRecord.CreatedDate,
     openedBy: caseRecord.Owner?.Name ?? null,
-    testParts
+    testParts,
   }
 }

@@ -11,9 +11,9 @@ export const holdings = {
   options: {
     validate: {
       payload: Joi.object({
-        ids: Joi.array().items(Joi.string()).min(1).required()
-      })
-    }
+        ids: Joi.array().items(Joi.string()).min(1).required(),
+      }),
+    },
   },
   handler: async (request, h) => {
     try {
@@ -23,5 +23,5 @@ export const holdings = {
       logger.error(err, 'APHA holdings request failed')
       throw Boom.badGateway('Failed to retrieve holdings from APHA API')
     }
-  }
+  },
 }

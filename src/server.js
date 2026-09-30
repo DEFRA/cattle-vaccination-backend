@@ -16,24 +16,24 @@ export async function createServer() {
     routes: {
       validate: {
         options: {
-          abortEarly: false
+          abortEarly: false,
         },
-        failAction
+        failAction,
       },
       security: {
         hsts: {
           maxAge: 31536000,
           includeSubDomains: true,
-          preload: false
+          preload: false,
         },
         xss: 'enabled',
         noSniff: true,
-        xframe: true
-      }
+        xframe: true,
+      },
     },
     router: {
-      stripTrailingSlash: true
-    }
+      stripTrailingSlash: true,
+    },
   })
 
   // Hapi Plugins:
@@ -42,13 +42,7 @@ export async function createServer() {
   // secureContext  - loads CA certificates from environment config
   // pulse          - provides shutdown handlers
   // router         - routes used in the app
-  await server.register([
-    requestLogger,
-    requestTracing,
-    secureContext,
-    pulse,
-    router
-  ])
+  await server.register([requestLogger, requestTracing, secureContext, pulse, router])
 
   return server
 }

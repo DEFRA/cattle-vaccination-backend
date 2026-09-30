@@ -6,7 +6,7 @@ import { getCattleOnHolding } from './livestock-api.js'
 vi.mock('undici', () => ({
   ProxyAgent: vi.fn(function (url) {
     this._url = url
-  })
+  }),
 }))
 
 describe('#getCattleOnHolding', () => {
@@ -29,7 +29,7 @@ describe('#getCattleOnHolding', () => {
 
     const [url, options] = fetchMock.mock.calls[0]
     expect(url).toBe(
-      'https://api.livestock.example.com/cattle-on-holding?LocationID=12%2F345%2F6789&IncludeDeadAnimals=N'
+      'https://api.livestock.example.com/cattle-on-holding?LocationID=12%2F345%2F6789&IncludeDeadAnimals=N',
     )
     expect(options.method).toBe('GET')
     expect(options.headers.Authorization).toBe('Bearer mock-token')
@@ -47,9 +47,9 @@ describe('#getCattleOnHolding', () => {
   test('Should throw on non-ok response', async () => {
     fetchMock.mockResponseOnce('Not Found', { status: 404 })
 
-    await expect(
-      getCattleOnHolding({ holdingId: '12/345/6789' })
-    ).rejects.toThrow('Livestock API error 404')
+    await expect(getCattleOnHolding({ holdingId: '12/345/6789' })).rejects.toThrow(
+      'Livestock API error 404',
+    )
   })
 
   test('Should include a ProxyAgent dispatcher when httpProxy is configured', async () => {

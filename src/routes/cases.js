@@ -1,13 +1,10 @@
 import Joi from 'joi'
 import Boom from '@hapi/boom'
-import {
-  createCase,
-  getCase,
-  getCaseIdByCaseNumber
-} from '../services/salesforce/cases.js'
+import { createCase, getCase, getCaseIdByCaseNumber } from '../services/salesforce/cases.js'
 import { submitTestParts } from '../services/salesforce/test-parts.js'
 import { addTestPartResults } from '../services/salesforce/test-part-results.js'
 import { createLogger } from '../common/helpers/logging/logger.js'
+import { getErrorMessage } from '../common/helpers/error-message.js'
 
 const logger = createLogger()
 
@@ -21,56 +18,54 @@ const testPartResultSchema = Joi.object({
   earTagNo: Joi.string().max(20).required(),
   notTestedReason: Joi.when('testType', {
     is: 'Not Tested',
-    then: Joi.string()
-      .valid('Cattle too young', 'Cattle deceased', 'Other reason')
-      .required(),
-    otherwise: nullField
+    then: Joi.string().valid('Cattle too young', 'Cattle deceased', 'Other reason').required(),
+    otherwise: nullField,
   }),
   batchAvian: Joi.when('testType', {
     is: 'Not Tested',
     then: nullField,
-    otherwise: optionalBatchField
+    otherwise: optionalBatchField,
   }),
   batchBovine: Joi.when('testType', {
     is: 'Not Tested',
     then: nullField,
-    otherwise: optionalBatchField
+    otherwise: optionalBatchField,
   }),
   batchDiva: Joi.when('testType', {
     is: 'Not Tested',
     then: nullField,
-    otherwise: optionalBatchField
+    otherwise: optionalBatchField,
   }),
   day1Avian: Joi.when('testType', {
     is: 'SICCT',
     then: sicctDayField,
-    otherwise: nullField
+    otherwise: nullField,
   }),
   day1Bovine: Joi.when('testType', {
     is: 'SICCT',
     then: sicctDayField,
-    otherwise: nullField
+    otherwise: nullField,
   }),
   day1Diva: Joi.when('testType', {
     is: 'DIVA',
     then: divaDayField,
-    otherwise: nullField
+    otherwise: nullField,
   }),
   day2Avian: Joi.when('testType', {
     is: 'SICCT',
     then: sicctDayField,
-    otherwise: nullField
+    otherwise: nullField,
   }),
   day2Bovine: Joi.when('testType', {
     is: 'SICCT',
     then: sicctDayField,
-    otherwise: nullField
+    otherwise: nullField,
   }),
   day2Diva: Joi.when('testType', {
     is: 'DIVA',
     then: divaDayField,
-    otherwise: nullField
-  })
+    otherwise: nullField,
+  }),
 })
 
 const testPartSchema = Joi.object({
@@ -81,9 +76,10 @@ const testPartSchema = Joi.object({
   day2: Joi.string().isoDate().required(),
   certifyingVet: Joi.string().required(),
   tester: Joi.string().required(),
-  results: Joi.array().items(testPartResultSchema).min(1).required()
+  results: Joi.array().items(testPartResultSchema).min(1).required(),
 })
 
+/** @type {import('@hapi/hapi').ServerRoute} */
 export const createCaseRoute = {
   method: 'POST',
   path: '/cases',
@@ -95,20 +91,12 @@ export const createCaseRoute = {
           .pattern(/^\d{2}\/\d{3}\/\d{4}$/)
           .required(),
         reasonForTest: Joi.string()
-          .valid(
-            'Radial',
-            '6W',
-            '6M',
-            '12M',
-            '48M',
-            'Pre-Movement',
-            'Post-Movement'
-          )
+          .valid('Radial', '6W', '6M', '12M', '48M', 'Pre-Movement', 'Post-Movement')
           .required(),
         testWindowStart: Joi.string().isoDate().required(),
-        testWindowEnd: Joi.string().isoDate().required()
-      })
-    }
+        testWindowEnd: Joi.string().isoDate().required(),
+      }),
+    },
   },
   handler: async (request, h) => {
     try {
@@ -118,31 +106,33 @@ export const createCaseRoute = {
       logger.error(err, 'Salesforce create case request failed')
       throw Boom.badGateway('Failed to create case in Salesforce')
     }
-  }
+  },
 }
 
+/** @type {import('@hapi/hapi').ServerRoute} */
 export const searchCasesRoute = {
   method: 'GET',
   path: '/cases',
   options: {
     validate: {
       query: Joi.object({
-        caseNumber: Joi.string().pattern(/^\d+$/).required()
-      })
-    }
+        caseNumber: Joi.string().pattern(/^\d+$/).required(),
+      }),
+    },
   },
   handler: async (request, h) => {
     try {
       const result = await getCaseIdByCaseNumber(request.query.caseNumber)
       return h.response(result)
     } catch (err) {
-      if (err.message.startsWith('Case not found:')) {
-        throw Boom.notFound(err.message)
+      const message = getErrorMessage(err)
+      if (message.startsWith('Case not found:')) {
+        throw Boom.notFound(message)
       }
       logger.error(err, 'Salesforce search cases request failed')
       throw Boom.badGateway('Failed to search cases in Salesforce')
     }
-  }
+  },
 }
 
 export const getCaseRoute = {
@@ -151,24 +141,26 @@ export const getCaseRoute = {
   options: {
     validate: {
       params: Joi.object({
-        caseId: Joi.string().alphanum().min(15).max(18).required()
-      })
-    }
+        caseId: Joi.string().alphanum().min(15).max(18).required(),
+      }),
+    },
   },
   handler: async (request, h) => {
     try {
       const result = await getCase(request.params.caseId)
       return h.response(result)
     } catch (err) {
-      if (err.message.startsWith('Case not found:')) {
-        throw Boom.notFound(err.message)
+      const message = getErrorMessage(err)
+      if (message.startsWith('Case not found:')) {
+        throw Boom.notFound(message)
       }
       logger.error(err, 'Salesforce get case request failed')
       throw Boom.badGateway('Failed to retrieve case from Salesforce')
     }
-  }
+  },
 }
 
+/** @type {import('@hapi/hapi').ServerRoute} */
 export const submitTestPartsRoute = {
   method: 'POST',
   path: '/cases/{caseId}/test-parts',
@@ -176,30 +168,29 @@ export const submitTestPartsRoute = {
     validate: {
       options: { abortEarly: false },
       params: Joi.object({
-        caseId: Joi.string().alphanum().min(15).max(18).required()
+        caseId: Joi.string().alphanum().min(15).max(18).required(),
       }),
       payload: Joi.object({
-        testParts: Joi.array().items(testPartSchema).min(1).required()
-      })
-    }
+        testParts: Joi.array().items(testPartSchema).min(1).required(),
+      }),
+    },
   },
   handler: async (request, h) => {
     try {
-      const result = await submitTestParts(
-        request.params.caseId,
-        request.payload.testParts
-      )
+      const result = await submitTestParts(request.params.caseId, request.payload.testParts)
       return h.response(result).code(201)
     } catch (err) {
-      if (err.message.startsWith('Case not found:')) {
-        throw Boom.notFound(err.message)
+      const message = getErrorMessage(err)
+      if (message.startsWith('Case not found:')) {
+        throw Boom.notFound(message)
       }
       logger.error(err, 'Salesforce submit test parts request failed')
       throw Boom.badGateway('Failed to submit test parts to Salesforce')
     }
-  }
+  },
 }
 
+/** @type {import('@hapi/hapi').ServerRoute} */
 export const addTestPartResultsRoute = {
   method: 'POST',
   path: '/cases/{caseId}/test-parts/{testPartId}/results',
@@ -208,23 +199,20 @@ export const addTestPartResultsRoute = {
       options: { abortEarly: false },
       params: Joi.object({
         caseId: Joi.string().alphanum().min(15).max(18).required(),
-        testPartId: Joi.string().alphanum().min(15).max(18).required()
+        testPartId: Joi.string().alphanum().min(15).max(18).required(),
       }),
       payload: Joi.object({
-        results: Joi.array().items(testPartResultSchema).min(1).required()
-      })
-    }
+        results: Joi.array().items(testPartResultSchema).min(1).required(),
+      }),
+    },
   },
   handler: async (request, h) => {
     try {
-      const result = await addTestPartResults(
-        request.params.testPartId,
-        request.payload.results
-      )
+      const result = await addTestPartResults(request.params.testPartId, request.payload.results)
       return h.response(result).code(201)
     } catch (err) {
       logger.error(err, 'Salesforce add test part results request failed')
       throw Boom.badGateway('Failed to add test part results to Salesforce')
     }
-  }
+  },
 }

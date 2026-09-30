@@ -1,12 +1,7 @@
 import { ProxyAgent } from 'undici'
 import { config } from '../config.js'
 
-async function livestockRequest(
-  path,
-  method = 'GET',
-  body = undefined,
-  options = {}
-) {
+async function livestockRequest(path, method = 'GET', body = undefined, options = {}) {
   const apiBaseUrl = config.get('livestock.apiBaseUrl')
   const token = config.get('livestock.apiToken')
   const proxyUrl = config.get('httpProxy')
@@ -20,9 +15,9 @@ async function livestockRequest(
       Authorization: `Bearer ${token}`,
       'Content-Type': 'application/json',
       'Accept-Encoding': 'identity',
-      ...options.headers
+      ...options.headers,
     },
-    ...(dispatcher ? { dispatcher } : {})
+    ...(dispatcher ? { dispatcher } : {}),
   })
 
   if (!response.ok) {
@@ -34,6 +29,6 @@ async function livestockRequest(
 
 export async function getCattleOnHolding({ holdingId }) {
   return livestockRequest(
-    `/cattle-on-holding?LocationID=${encodeURIComponent(holdingId)}&IncludeDeadAnimals=N`
+    `/cattle-on-holding?LocationID=${encodeURIComponent(holdingId)}&IncludeDeadAnimals=N`,
   )
 }

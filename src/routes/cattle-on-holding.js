@@ -11,9 +11,9 @@ export const cattleOnHolding = {
   options: {
     validate: {
       query: Joi.object({
-        holdingId: Joi.string().required()
-      })
-    }
+        holdingId: Joi.string().required(),
+      }),
+    },
   },
   handler: async (request, h) => {
     const { holdingId } = request.query
@@ -23,9 +23,7 @@ export const cattleOnHolding = {
       return h.response(result)
     } catch (err) {
       logger.error(err, 'Livestock cattle-on-holding request failed')
-      throw Boom.badGateway(
-        'Failed to retrieve cattle on holding from Livestock API'
-      )
+      throw Boom.badGateway('Failed to retrieve cattle on holding from Livestock API')
     }
-  }
+  },
 }

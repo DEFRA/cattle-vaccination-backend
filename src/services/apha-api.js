@@ -1,12 +1,7 @@
 import { config } from '../config.js'
 import { getCognitoToken } from './cognito-auth.js'
 
-async function aphaRequest(
-  path,
-  method = 'GET',
-  body = undefined,
-  options = {}
-) {
+async function aphaRequest(path, method = 'GET', body = undefined, options = {}) {
   const apiBaseUrl = config.get('apha.apiBaseUrl')
 
   if (!apiBaseUrl) {
@@ -26,10 +21,10 @@ async function aphaRequest(
       'Accept-Encoding': 'identity',
       ...(env === 'local' &&
         config.get('cdp.devApiKey') && {
-          'x-api-key': config.get('cdp.devApiKey')
+          'x-api-key': config.get('cdp.devApiKey'),
         }),
-      ...options.headers
-    }
+      ...options.headers,
+    },
   })
 
   if (!response.ok) {
@@ -41,7 +36,7 @@ async function aphaRequest(
 
 export async function getWorkorders({ startDate, endDate, country }) {
   return aphaRequest(
-    `/workorders?startActivationDate=${startDate}T00:00:00.000Z&endActivationDate=${endDate}T00:00:00.000Z&country=${encodeURIComponent(country)}`
+    `/workorders?startActivationDate=${startDate}T00:00:00.000Z&endActivationDate=${endDate}T00:00:00.000Z&country=${encodeURIComponent(country)}`,
   )
 }
 

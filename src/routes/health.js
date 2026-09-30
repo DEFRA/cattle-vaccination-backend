@@ -1,5 +1,6 @@
+/** @type {import('@hapi/hapi').ServerRoute} */
 export const health = {
   method: 'GET',
   path: '/health',
-  handler: (_request, h) => h.response({ message: 'success' })
+  handler: (_request, h) => h.response({ message: 'success' }),
 }
