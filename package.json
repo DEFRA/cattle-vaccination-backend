@@ -30,7 +30,7 @@
     "@defra/hapi-tracing": "1.30.0",
     "@elastic/ecs-pino-format": "1.5.0",
     "@hapi/boom": "10.0.1",
-    "@hapi/hapi": "21.4.4",
+    "@hapi/hapi": "21.4.10",
     "aws-embedded-metrics": "4.2.1",
     "convict": "6.2.5",
     "convict-format-with-validator": "6.2.0",
