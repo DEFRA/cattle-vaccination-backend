@@ -6,7 +6,7 @@ vi.mock('./index.js', async (importOriginal) => {
   return {
     ...actual,
     composite: vi.fn(),
-    compositeGraph: vi.fn()
+    compositeGraph: vi.fn(),
   }
 })
 
@@ -22,10 +22,10 @@ const validTestParts = [
         earTagNo: 'UK-000001-000010',
         batchDiva: 'D1112',
         day1Avian: 6,
-        day1Bovine: 4
-      }
-    ]
-  }
+        day1Bovine: 4,
+      },
+    ],
+  },
 ]
 
 describe('#submitTestParts', () => {
@@ -39,9 +39,9 @@ describe('#submitTestParts', () => {
         {
           graphId: 'Graph_0',
           isSuccessful: true,
-          graphResponse: { compositeResponse }
-        }
-      ]
+          graphResponse: { compositeResponse },
+        },
+      ],
     })
   }
 
@@ -50,19 +50,19 @@ describe('#submitTestParts', () => {
       {
         referenceId: 'TestPart_0',
         httpStatusCode: 201,
-        body: { id: 'tp-id', success: true }
+        body: { id: 'tp-id', success: true },
       },
       {
         referenceId: 'TestPartResult_0_0',
         httpStatusCode: 201,
-        body: { id: 'result-id', success: true }
-      }
+        body: { id: 'result-id', success: true },
+      },
     ])
 
     const result = await submitTestParts('case-id', validTestParts)
 
     expect(result).toEqual({
-      testParts: [{ testPartId: 'tp-id', resultIds: ['result-id'] }]
+      testParts: [{ testPartId: 'tp-id', resultIds: ['result-id'] }],
     })
   })
 
@@ -71,22 +71,20 @@ describe('#submitTestParts', () => {
       {
         referenceId: 'TestPart_0',
         httpStatusCode: 201,
-        body: { id: 'tp-id', success: true }
+        body: { id: 'tp-id', success: true },
       },
       {
         referenceId: 'TestPartResult_0_0',
         httpStatusCode: 201,
-        body: { id: 'result-id', success: true }
-      }
+        body: { id: 'result-id', success: true },
+      },
     ])
 
     await submitTestParts('case-id', validTestParts)
 
     expect(composite).not.toHaveBeenCalled()
     expect(compositeGraph).toHaveBeenCalledTimes(1)
-    expect(compositeGraph).toHaveBeenCalledWith([
-      expect.objectContaining({ graphId: 'Graph_0' })
-    ])
+    expect(compositeGraph).toHaveBeenCalledWith([expect.objectContaining({ graphId: 'Graph_0' })])
   })
 
   test('Should link TestPart to the provided caseId directly (not via reference)', async () => {
@@ -94,13 +92,13 @@ describe('#submitTestParts', () => {
       {
         referenceId: 'TestPart_0',
         httpStatusCode: 201,
-        body: { id: 'tp-id', success: true }
+        body: { id: 'tp-id', success: true },
       },
       {
         referenceId: 'TestPartResult_0_0',
         httpStatusCode: 201,
-        body: { id: 'result-id', success: true }
-      }
+        body: { id: 'result-id', success: true },
+      },
     ])
 
     await submitTestParts('case-id-123', validTestParts)
@@ -109,7 +107,7 @@ describe('#submitTestParts', () => {
     expect(graphRequest[0].compositeRequest[0]).toMatchObject({
       method: 'POST',
       referenceId: 'TestPart_0',
-      body: expect.objectContaining({ Case__c: 'case-id-123' })
+      body: expect.objectContaining({ Case__c: 'case-id-123' }),
     })
   })
 
@@ -118,22 +116,20 @@ describe('#submitTestParts', () => {
       {
         referenceId: 'TestPart_0',
         httpStatusCode: 201,
-        body: { id: 'tp-id', success: true }
+        body: { id: 'tp-id', success: true },
       },
       {
         referenceId: 'TestPartResult_0_0',
         httpStatusCode: 201,
-        body: { id: 'result-id', success: true }
-      }
+        body: { id: 'result-id', success: true },
+      },
     ])
 
-    await submitTestParts('case-id', [
-      { ...validTestParts[0], day1StartTime: '09:30' }
-    ])
+    await submitTestParts('case-id', [{ ...validTestParts[0], day1StartTime: '09:30' }])
 
     const [graphRequest] = vi.mocked(compositeGraph).mock.calls[0]
     expect(graphRequest[0].compositeRequest[0].body).toMatchObject({
-      Test_Start_Time__c: '09:30'
+      Test_Start_Time__c: '09:30',
     })
   })
 
@@ -142,21 +138,19 @@ describe('#submitTestParts', () => {
       {
         referenceId: 'TestPart_0',
         httpStatusCode: 201,
-        body: { id: 'tp-id', success: true }
+        body: { id: 'tp-id', success: true },
       },
       {
         referenceId: 'TestPartResult_0_0',
         httpStatusCode: 201,
-        body: { id: 'result-id', success: true }
-      }
+        body: { id: 'result-id', success: true },
+      },
     ])
 
     await submitTestParts('case-id', validTestParts)
 
     const [graphRequest] = vi.mocked(compositeGraph).mock.calls[0]
-    expect(graphRequest[0].compositeRequest[0].body).not.toHaveProperty(
-      'Test_Start_Time__c'
-    )
+    expect(graphRequest[0].compositeRequest[0].body).not.toHaveProperty('Test_Start_Time__c')
   })
 
   test('Should throw when graph request is not successful', async () => {
@@ -173,18 +167,18 @@ describe('#submitTestParts', () => {
                 body: [
                   {
                     errorCode: 'FIELD_INTEGRITY_EXCEPTION',
-                    message: 'Field integrity violation'
-                  }
-                ]
-              }
-            ]
-          }
-        }
-      ]
+                    message: 'Field integrity violation',
+                  },
+                ],
+              },
+            ],
+          },
+        },
+      ],
     })
 
     await expect(submitTestParts('case-id', validTestParts)).rejects.toThrow(
-      'Salesforce graph request failed: Field integrity violation'
+      'Salesforce graph request failed: Field integrity violation',
     )
   })
 })

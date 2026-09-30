@@ -15,7 +15,7 @@ async function fetchNewToken() {
 
   if (!salesforceUrl || !clientId || !clientSecret) {
     throw new Error(
-      'Missing required config: SALESFORCE_URL, SALESFORCE_CLIENT_ID, SALESFORCE_CLIENT_SECRET'
+      'Missing required config: SALESFORCE_URL, SALESFORCE_CLIENT_ID, SALESFORCE_CLIENT_SECRET',
     )
   }
 
@@ -25,8 +25,8 @@ async function fetchNewToken() {
     body: new URLSearchParams({
       grant_type: 'client_credentials',
       client_id: clientId,
-      client_secret: clientSecret
-    })
+      client_secret: clientSecret,
+    }),
   })
 
   if (!response.ok) {
@@ -41,12 +41,7 @@ async function fetchNewToken() {
 }
 
 async function getSalesforceToken() {
-  if (
-    cachedToken &&
-    cachedInstanceUrl &&
-    refreshTokenAt &&
-    Date.now() < refreshTokenAt
-  ) {
+  if (cachedToken && cachedInstanceUrl && refreshTokenAt && Date.now() < refreshTokenAt) {
     return { token: cachedToken, instanceUrl: cachedInstanceUrl }
   }
 
@@ -69,17 +64,14 @@ export function clearTokenCache() {
 async function sfRequest(path, method = 'GET', body = undefined) {
   const { token, instanceUrl } = await getSalesforceToken()
 
-  const response = await fetch(
-    `${instanceUrl}/services/data/${SF_API_VERSION}${path}`,
-    {
-      method,
-      headers: {
-        Authorization: `Bearer ${token}`,
-        'Content-Type': 'application/json'
-      },
-      body: body !== undefined ? JSON.stringify(body) : undefined
-    }
-  )
+  const response = await fetch(`${instanceUrl}/services/data/${SF_API_VERSION}${path}`, {
+    method,
+    headers: {
+      Authorization: `Bearer ${token}`,
+      'Content-Type': 'application/json',
+    },
+    body: body !== undefined ? JSON.stringify(body) : undefined,
+  })
 
   if (response.status === 204) return null
 
@@ -113,7 +105,7 @@ export async function deleteRecord(type, id) {
 export async function composite(compositeRequest) {
   return sfRequest('/composite', 'POST', {
     allOrNone: true,
-    compositeRequest
+    compositeRequest,
   })
 }
 
@@ -123,7 +115,7 @@ export async function compositeGraph(graphs) {
 
 export function getSalesforceApiErrorFromCompositeResponse(compositeResponse) {
   const usefulErrorChunk = compositeResponse.find(
-    (errorChunk) => errorChunk.body[0].errorCode !== 'PROCESSING_HALTED'
+    (errorChunk) => errorChunk.body[0].errorCode !== 'PROCESSING_HALTED',
   )
   let errorMessage = 'Unknown reason'
 

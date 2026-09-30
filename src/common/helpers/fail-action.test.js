@@ -7,7 +7,7 @@ describe('#fail-action', () => {
     const mockError = Error('Something terrible has happened!')
 
     expect(() => failAction(mockRequest, mockToolkit, mockError)).toThrow(
-      'Something terrible has happened!'
+      'Something terrible has happened!',
     )
   })
 })

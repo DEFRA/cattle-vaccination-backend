@@ -3,10 +3,10 @@ import { holdings } from './holdings.js'
 import { findHoldings } from '../services/apha-api.js'
 
 vi.mock('../services/apha-api.js', () => ({
-  findHoldings: vi.fn()
+  findHoldings: vi.fn(),
 }))
 vi.mock('../common/helpers/logging/logger.js', () => ({
-  createLogger: () => ({ error: vi.fn() })
+  createLogger: () => ({ error: vi.fn() }),
 }))
 
 describe('#holdings route', () => {
@@ -29,7 +29,7 @@ describe('#holdings route', () => {
     const response = await server.inject({
       method: 'POST',
       url: '/holdings',
-      payload: { ids: ['12/345/6789'] }
+      payload: { ids: ['12/345/6789'] },
     })
 
     expect(response.statusCode).toBe(200)
@@ -42,11 +42,11 @@ describe('#holdings route', () => {
     await server.inject({
       method: 'POST',
       url: '/holdings',
-      payload: { ids: ['12/345/6789', '98/765/4321'] }
+      payload: { ids: ['12/345/6789', '98/765/4321'] },
     })
 
     expect(findHoldings).toHaveBeenCalledWith({
-      ids: ['12/345/6789', '98/765/4321']
+      ids: ['12/345/6789', '98/765/4321'],
     })
   })
 
@@ -54,7 +54,7 @@ describe('#holdings route', () => {
     const response = await server.inject({
       method: 'POST',
       url: '/holdings',
-      payload: {}
+      payload: {},
     })
 
     expect(response.statusCode).toBe(400)
@@ -64,21 +64,19 @@ describe('#holdings route', () => {
     const response = await server.inject({
       method: 'POST',
       url: '/holdings',
-      payload: { ids: [] }
+      payload: { ids: [] },
     })
 
     expect(response.statusCode).toBe(400)
   })
 
   test('Should return 502 when APHA API throws', async () => {
-    findHoldings.mockRejectedValue(
-      new Error('APHA API error 503: Service Unavailable')
-    )
+    findHoldings.mockRejectedValue(new Error('APHA API error 503: Service Unavailable'))
 
     const response = await server.inject({
       method: 'POST',
       url: '/holdings',
-      payload: { ids: ['12/345/6789'] }
+      payload: { ids: ['12/345/6789'] },
     })
 
     expect(response.statusCode).toBe(502)

@@ -3,7 +3,7 @@ import { getCognitoToken, clearTokenCache } from './cognito-auth.js'
 
 const validTokenResponse = {
   access_token: 'mock-access-token',
-  expires_in: 3600
+  expires_in: 3600,
 }
 
 describe('#getCognitoToken', () => {
@@ -29,9 +29,7 @@ describe('#getCognitoToken', () => {
 
     const [url, options] = fetchMock.mock.calls[0]
     expect(url).toBe('https://cognito.example.com/oauth2/token')
-    expect(options.headers.Authorization).toBe(
-      'Basic dGVzdC1jbGllbnQtaWQ6dGVzdC1jbGllbnQtc2VjcmV0'
-    )
+    expect(options.headers.Authorization).toBe('Basic dGVzdC1jbGllbnQtaWQ6dGVzdC1jbGllbnQtc2VjcmV0')
   })
 
   test('Should send client_credentials grant type in body', async () => {
@@ -69,15 +67,13 @@ describe('#getCognitoToken', () => {
     config.set('apha.cognitoClientId', null)
 
     await expect(getCognitoToken()).rejects.toThrow(
-      'Missing required config: COGNITO_CLIENT_ID, COGNITO_CLIENT_SECRET, APHA_COGNITO_URL'
+      'Missing required config: COGNITO_CLIENT_ID, COGNITO_CLIENT_SECRET, APHA_COGNITO_URL',
     )
   })
 
   test('Should throw when Cognito returns non-ok response', async () => {
     fetchMock.mockResponseOnce('Unauthorized', { status: 401 })
 
-    await expect(getCognitoToken()).rejects.toThrow(
-      'Failed to fetch Cognito token: 401'
-    )
+    await expect(getCognitoToken()).rejects.toThrow('Failed to fetch Cognito token: 401')
   })
 })

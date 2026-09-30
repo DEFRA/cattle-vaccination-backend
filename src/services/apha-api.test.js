@@ -2,7 +2,7 @@ import { config } from '../config.js'
 import { getWorkorders, findHoldings } from './apha-api.js'
 
 vi.mock('./cognito-auth.js', () => ({
-  getCognitoToken: vi.fn().mockResolvedValue('mock-bearer-token')
+  getCognitoToken: vi.fn().mockResolvedValue('mock-bearer-token'),
 }))
 
 describe('#getWorkorders', () => {
@@ -24,12 +24,12 @@ describe('#getWorkorders', () => {
     await getWorkorders({
       startDate: '2026-01-01',
       endDate: '2026-03-27',
-      country: 'England'
+      country: 'England',
     })
 
     const [url, options] = fetchMock.mock.calls[0]
     expect(url).toBe(
-      'https://api.apha.example.com/workorders?startActivationDate=2026-01-01T00:00:00.000Z&endActivationDate=2026-03-27T00:00:00.000Z&country=England'
+      'https://api.apha.example.com/workorders?startActivationDate=2026-01-01T00:00:00.000Z&endActivationDate=2026-03-27T00:00:00.000Z&country=England',
     )
     expect(options.method).toBe('GET')
     expect(options.headers.Authorization).toBe('Bearer mock-bearer-token')
@@ -42,7 +42,7 @@ describe('#getWorkorders', () => {
     const result = await getWorkorders({
       startDate: '2026-01-01',
       endDate: '2026-03-27',
-      country: 'England'
+      country: 'England',
     })
 
     expect(result).toEqual(mockData)
@@ -56,7 +56,7 @@ describe('#getWorkorders', () => {
     await getWorkorders({
       startDate: '2026-01-01',
       endDate: '2026-03-27',
-      country: 'England'
+      country: 'England',
     })
 
     const [, options] = fetchMock.mock.calls[0]
@@ -70,7 +70,7 @@ describe('#getWorkorders', () => {
     await getWorkorders({
       startDate: '2026-01-01',
       endDate: '2026-03-27',
-      country: 'England'
+      country: 'England',
     })
 
     const [, options] = fetchMock.mock.calls[0]
@@ -85,7 +85,7 @@ describe('#getWorkorders', () => {
     await getWorkorders({
       startDate: '2026-01-01',
       endDate: '2026-03-27',
-      country: 'England'
+      country: 'England',
     })
 
     const [, options] = fetchMock.mock.calls[0]
@@ -99,8 +99,8 @@ describe('#getWorkorders', () => {
       getWorkorders({
         startDate: '2026-01-01',
         endDate: '2026-03-27',
-        country: 'England'
-      })
+        country: 'England',
+      }),
     ).rejects.toThrow('Missing required config: APHA_API_BASE_URL')
   })
 
@@ -111,8 +111,8 @@ describe('#getWorkorders', () => {
       getWorkorders({
         startDate: '2026-01-01',
         endDate: '2026-03-27',
-        country: 'England'
-      })
+        country: 'England',
+      }),
     ).rejects.toThrow('APHA API error 404')
   })
 })

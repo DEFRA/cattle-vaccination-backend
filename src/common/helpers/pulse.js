@@ -7,6 +7,6 @@ export const pulse = {
   plugin: hapiPulse,
   options: {
     logger: createLogger(),
-    timeout: tenSeconds
-  }
+    timeout: tenSeconds,
+  },
 }

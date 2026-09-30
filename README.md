@@ -90,8 +90,8 @@ return await fetch(url, {
   dispatcher: new ProxyAgent({
     uri: proxyUrl,
     keepAliveTimeout: 10,
-    keepAliveMaxTimeout: 10
-  })
+    keepAliveMaxTimeout: 10,
+  }),
 })
 ```
 

@@ -5,13 +5,13 @@ module.exports = {
     [
       '@babel/preset-env',
       {
-        modules: NODE_ENV === 'test' ? 'auto' : false
-      }
-    ]
+        modules: NODE_ENV === 'test' ? 'auto' : false,
+      },
+    ],
   ],
   env: {
     test: {
-      plugins: ['babel-plugin-transform-import-meta']
-    }
-  }
+      plugins: ['babel-plugin-transform-import-meta'],
+    },
+  },
 }

@@ -12,23 +12,21 @@ async function fetchNewToken() {
 
   if (!clientId || !clientSecret || !cognitoUrl) {
     throw new Error(
-      'Missing required config: COGNITO_CLIENT_ID, COGNITO_CLIENT_SECRET, APHA_COGNITO_URL'
+      'Missing required config: COGNITO_CLIENT_ID, COGNITO_CLIENT_SECRET, APHA_COGNITO_URL',
     )
   }
 
-  const encodedCredentials = Buffer.from(
-    `${clientId}:${clientSecret}`
-  ).toString('base64')
+  const encodedCredentials = Buffer.from(`${clientId}:${clientSecret}`).toString('base64')
 
   const response = await fetch(cognitoUrl, {
     method: 'POST',
     headers: {
       Authorization: `Basic ${encodedCredentials}`,
-      'Content-Type': 'application/x-www-form-urlencoded'
+      'Content-Type': 'application/x-www-form-urlencoded',
     },
     body: new URLSearchParams({
-      grant_type: 'client_credentials'
-    })
+      grant_type: 'client_credentials',
+    }),
   })
 
   if (!response.ok) {

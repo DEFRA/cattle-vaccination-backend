@@ -9,7 +9,7 @@ function pad(n, length = 6) {
 
 const results = Array.from({ length: 499 }, (_, i) => ({
   testType: i % 2 === 0 ? 'SICCT' : 'DIVA',
-  earTagNo: `UK${pad(i + 1)}`
+  earTagNo: `UK${pad(i + 1)}`,
 }))
 
 const body = {
@@ -19,19 +19,19 @@ const body = {
       day2: '2026-05-01',
       certifyingVet: 'Dr. Test Vet',
       tester: 'Test Tester',
-      results
-    }
-  ]
+      results,
+    },
+  ],
 }
 
 console.log(
-  `Submitting ${results.length} results to case ${CASE_ID} (${results.length + 1} sub-requests → graph path)...`
+  `Submitting ${results.length} results to case ${CASE_ID} (${results.length + 1} sub-requests → graph path)...`,
 )
 
 const response = await fetch(`${API_BASE}/cases/${CASE_ID}/test-parts`, {
   method: 'POST',
   headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify(body)
+  body: JSON.stringify(body),
 })
 
 const text = await response.text()

@@ -3,10 +3,10 @@ import { workorders } from './workorders.js'
 import { getWorkorders } from '../services/apha-api.js'
 
 vi.mock('../services/apha-api.js', () => ({
-  getWorkorders: vi.fn()
+  getWorkorders: vi.fn(),
 }))
 vi.mock('../common/helpers/logging/logger.js', () => ({
-  createLogger: () => ({ error: vi.fn() })
+  createLogger: () => ({ error: vi.fn() }),
 }))
 
 describe('#workorders route', () => {
@@ -28,7 +28,7 @@ describe('#workorders route', () => {
 
     const response = await server.inject({
       method: 'GET',
-      url: '/workorders?startDate=2026-01-01&endDate=2026-03-27&country=England'
+      url: '/workorders?startDate=2026-01-01&endDate=2026-03-27&country=England',
     })
 
     expect(response.statusCode).toBe(200)
@@ -40,20 +40,20 @@ describe('#workorders route', () => {
 
     await server.inject({
       method: 'GET',
-      url: '/workorders?startDate=2026-01-01&endDate=2026-03-27&country=England'
+      url: '/workorders?startDate=2026-01-01&endDate=2026-03-27&country=England',
     })
 
     expect(getWorkorders).toHaveBeenCalledWith({
       startDate: '2026-01-01',
       endDate: '2026-03-27',
-      country: 'England'
+      country: 'England',
     })
   })
 
   test('Should return 400 when startDate is missing', async () => {
     const response = await server.inject({
       method: 'GET',
-      url: '/workorders?endDate=2026-03-27&country=England'
+      url: '/workorders?endDate=2026-03-27&country=England',
     })
 
     expect(response.statusCode).toBe(400)
@@ -62,7 +62,7 @@ describe('#workorders route', () => {
   test('Should return 400 when endDate is missing', async () => {
     const response = await server.inject({
       method: 'GET',
-      url: '/workorders?startDate=2026-01-01&country=England'
+      url: '/workorders?startDate=2026-01-01&country=England',
     })
 
     expect(response.statusCode).toBe(400)
@@ -71,7 +71,7 @@ describe('#workorders route', () => {
   test('Should return 400 when country is missing', async () => {
     const response = await server.inject({
       method: 'GET',
-      url: '/workorders?startDate=2026-01-01&endDate=2026-03-27'
+      url: '/workorders?startDate=2026-01-01&endDate=2026-03-27',
     })
 
     expect(response.statusCode).toBe(400)
@@ -80,20 +80,18 @@ describe('#workorders route', () => {
   test('Should return 400 when startDate is not ISO date format', async () => {
     const response = await server.inject({
       method: 'GET',
-      url: '/workorders?startDate=not-a-date&endDate=2026-03-27&country=England'
+      url: '/workorders?startDate=not-a-date&endDate=2026-03-27&country=England',
     })
 
     expect(response.statusCode).toBe(400)
   })
 
   test('Should return 502 when APHA API throws', async () => {
-    getWorkorders.mockRejectedValue(
-      new Error('APHA API error 500: Internal Server Error')
-    )
+    getWorkorders.mockRejectedValue(new Error('APHA API error 500: Internal Server Error'))
 
     const response = await server.inject({
       method: 'GET',
-      url: '/workorders?startDate=2026-01-01&endDate=2026-03-27&country=England'
+      url: '/workorders?startDate=2026-01-01&endDate=2026-03-27&country=England',
     })
 
     expect(response.statusCode).toBe(502)

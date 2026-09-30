@@ -1,43 +1,32 @@
-import {
-  compositeGraph,
-  getSalesforceApiErrorFromCompositeResponse,
-  SF_API_PATH
-} from './index.js'
+import { compositeGraph, getSalesforceApiErrorFromCompositeResponse, SF_API_PATH } from './index.js'
 
 export async function submitTestParts(caseId, testParts) {
   const graphResponse = await compositeGraph([
     {
       graphId: 'Graph_0',
-      compositeRequest: buildSubRequests(caseId, testParts)
-    }
+      compositeRequest: buildSubRequests(caseId, testParts),
+    },
   ])
 
   const graphResult = graphResponse.graphs[0]
 
   if (!graphResult.isSuccessful) {
     const errorMessage = getSalesforceApiErrorFromCompositeResponse(
-      graphResult.graphResponse.compositeResponse
+      graphResult.graphResponse.compositeResponse,
     )
 
     throw new Error(`Salesforce graph request failed: ${errorMessage}`)
   }
 
   return {
-    testParts: extractResults(
-      graphResult.graphResponse.compositeResponse,
-      testParts
-    )
+    testParts: extractResults(graphResult.graphResponse.compositeResponse, testParts),
   }
 }
 
 function buildSubRequests(caseId, testParts) {
   const subRequests = []
 
-  for (
-    let testPartIndex = 0;
-    testPartIndex < testParts.length;
-    testPartIndex++
-  ) {
+  for (let testPartIndex = 0; testPartIndex < testParts.length; testPartIndex++) {
     const testPart = testParts[testPartIndex]
     const testPartRefId = `TestPart_${testPartIndex}`
 
@@ -51,18 +40,14 @@ function buildSubRequests(caseId, testParts) {
         APHA_Day2__c: testPart.day2,
         // No timezone conversion — sent as entered (HH:MM). Salesforce display offset is a known issue to resolve on the SF side.
         ...(testPart.day1StartTime != null && {
-          Test_Start_Time__c: testPart.day1StartTime
+          Test_Start_Time__c: testPart.day1StartTime,
         }),
         APHA_IdentityOfCertifyingVet__c: testPart.certifyingVet,
-        APHA_IdentityOfTester__c: testPart.tester
-      }
+        APHA_IdentityOfTester__c: testPart.tester,
+      },
     })
 
-    for (
-      let resultIndex = 0;
-      resultIndex < testPart.results.length;
-      resultIndex++
-    ) {
+    for (let resultIndex = 0; resultIndex < testPart.results.length; resultIndex++) {
       const result = testPart.results[resultIndex]
 
       subRequests.push({
@@ -82,8 +67,8 @@ function buildSubRequests(caseId, testParts) {
           APHA_TestDay1DIVA__c: result.day1Diva,
           APHA_TestDay2Avian__c: result.day2Avian,
           APHA_TestDay2Bovine__c: result.day2Bovine,
-          APHA_TestDay2DIVA__c: result.day2Diva
-        }
+          APHA_TestDay2DIVA__c: result.day2Diva,
+        },
       })
     }
   }
@@ -95,11 +80,7 @@ function extractResults(compositeResponse, testParts) {
   const createdTestParts = []
   let responseIndex = 0
 
-  for (
-    let testPartIndex = 0;
-    testPartIndex < testParts.length;
-    testPartIndex++
-  ) {
+  for (let testPartIndex = 0; testPartIndex < testParts.length; testPartIndex++) {
     const testPartId = compositeResponse[responseIndex].body.id
     responseIndex++
 

@@ -6,7 +6,7 @@ vi.mock('./index.js', async (importOriginal) => {
   return {
     ...actual,
     composite: vi.fn(),
-    query: vi.fn()
+    query: vi.fn(),
   }
 })
 
@@ -14,7 +14,7 @@ const validInput = {
   cphNumber: '01/001/0006',
   reasonForTest: 'Pre-Movement',
   testWindowStart: '2026-04-22',
-  testWindowEnd: '2026-04-22'
+  testWindowEnd: '2026-04-22',
 }
 
 function mockComposite() {
@@ -23,19 +23,19 @@ function mockComposite() {
       {
         referenceId: 'CaseRecordType',
         httpStatusCode: 200,
-        body: { records: [{ Id: 'record-type-id' }] }
+        body: { records: [{ Id: 'record-type-id' }] },
       },
       {
         referenceId: 'CPHRef',
         httpStatusCode: 200,
-        body: { records: [{ Id: 'cph-id' }] }
+        body: { records: [{ Id: 'cph-id' }] },
       },
       {
         referenceId: 'CaseRef',
         httpStatusCode: 201,
-        body: { id: 'case-id', success: true }
-      }
-    ]
+        body: { id: 'case-id', success: true },
+      },
+    ],
   })
   vi.mocked(query).mockResolvedValue({ records: [{ CaseNumber: '00001234' }] })
 }
@@ -66,9 +66,7 @@ describe('#createCase', () => {
 
     await createCase(validInput)
 
-    expect(query).toHaveBeenCalledWith(
-      expect.stringContaining("WHERE Id='case-id'")
-    )
+    expect(query).toHaveBeenCalledWith(expect.stringContaining("WHERE Id='case-id'"))
   })
 
   test('Should query RecordType and CPH as first two sub-requests', async () => {
@@ -80,12 +78,12 @@ describe('#createCase', () => {
     expect(compositeRequest[0]).toMatchObject({
       method: 'GET',
       referenceId: 'CaseRecordType',
-      url: expect.stringContaining('APHA_CattleVax')
+      url: expect.stringContaining('APHA_CattleVax'),
     })
     expect(compositeRequest[1]).toMatchObject({
       method: 'GET',
       referenceId: 'CPHRef',
-      url: expect.stringContaining('APHA_CPH__c')
+      url: expect.stringContaining('APHA_CPH__c'),
     })
   })
 
@@ -102,8 +100,8 @@ describe('#createCase', () => {
       body: expect.objectContaining({
         RecordTypeId: '@{CaseRecordType.records[0].Id}',
         APHA_CPH__c: '@{CPHRef.records[0].Id}',
-        APHA_ReasonForTest__c: 'Pre-Movement'
-      })
+        APHA_ReasonForTest__c: 'Pre-Movement',
+      }),
     })
   })
 
@@ -113,19 +111,17 @@ describe('#createCase', () => {
         {
           referenceId: 'CaseRecordType',
           httpStatusCode: 200,
-          body: { records: [] }
+          body: { records: [] },
         },
         {
           referenceId: 'CPHRef',
           httpStatusCode: 200,
-          body: { records: [{ Id: 'cph-id' }] }
-        }
-      ]
+          body: { records: [{ Id: 'cph-id' }] },
+        },
+      ],
     })
 
-    await expect(createCase(validInput)).rejects.toThrow(
-      'RecordType APHA_CattleVax not found'
-    )
+    await expect(createCase(validInput)).rejects.toThrow('RecordType APHA_CattleVax not found')
   })
 
   test('Should throw when CPH is not found', async () => {
@@ -134,15 +130,13 @@ describe('#createCase', () => {
         {
           referenceId: 'CaseRecordType',
           httpStatusCode: 200,
-          body: { records: [{ Id: 'rt-id' }] }
+          body: { records: [{ Id: 'rt-id' }] },
         },
-        { referenceId: 'CPHRef', httpStatusCode: 200, body: { records: [] } }
-      ]
+        { referenceId: 'CPHRef', httpStatusCode: 200, body: { records: [] } },
+      ],
     })
 
-    await expect(createCase(validInput)).rejects.toThrow(
-      'CPH not found: 01/001/0006'
-    )
+    await expect(createCase(validInput)).rejects.toThrow('CPH not found: 01/001/0006')
   })
 
   test('Should throw when a composite step fails', async () => {
@@ -154,15 +148,15 @@ describe('#createCase', () => {
           body: [
             {
               errorCode: 'REQUIRED_FIELD_MISSING',
-              message: 'Required fields missing'
-            }
-          ]
-        }
-      ]
+              message: 'Required fields missing',
+            },
+          ],
+        },
+      ],
     })
 
     await expect(createCase(validInput)).rejects.toThrow(
-      'Salesforce composite request failed: Required fields missing'
+      'Salesforce composite request failed: Required fields missing',
     )
   })
 
@@ -172,18 +166,18 @@ describe('#createCase', () => {
         {
           referenceId: 'CaseRecordType',
           httpStatusCode: 400,
-          body: [{ errorCode: 'INSUFFICIENT_ACCESS', message: 'No access' }]
+          body: [{ errorCode: 'INSUFFICIENT_ACCESS', message: 'No access' }],
         },
         {
           referenceId: 'CPHRef',
           httpStatusCode: 400,
-          body: [{ errorCode: 'INSUFFICIENT_ACCESS', message: 'No access' }]
-        }
-      ]
+          body: [{ errorCode: 'INSUFFICIENT_ACCESS', message: 'No access' }],
+        },
+      ],
     })
 
     await expect(createCase(validInput)).rejects.toThrow(
-      'Salesforce composite request failed: No access'
+      'Salesforce composite request failed: No access',
     )
   })
 })
@@ -207,9 +201,9 @@ describe('#getCase', () => {
             APHA_TestWindowEndDate__c: '2026-04-22',
             APHA_CPH__r: { Name: '01/001/0006' },
             CreatedDate: '2026-04-22T10:00:00.000Z',
-            Owner: { Name: 'John Smith' }
-          }
-        ]
+            Owner: { Name: 'John Smith' },
+          },
+        ],
       })
       .mockResolvedValueOnce({
         records: [
@@ -218,9 +212,9 @@ describe('#getCase', () => {
             APHA_Day1__c: '2026-04-16',
             APHA_Day2__c: '2026-04-19',
             APHA_IdentityOfCertifyingVet__c: 'Vet Identity',
-            APHA_IdentityOfTester__c: 'Tester Identity'
-          }
-        ]
+            APHA_IdentityOfTester__c: 'Tester Identity',
+          },
+        ],
       })
       .mockResolvedValueOnce({
         records: [
@@ -236,9 +230,9 @@ describe('#getCase', () => {
             APHA_TestDay1DIVA__c: null,
             APHA_TestDay2Avian__c: null,
             APHA_TestDay2Bovine__c: null,
-            APHA_TestDay2DIVA__c: null
-          }
-        ]
+            APHA_TestDay2DIVA__c: null,
+          },
+        ],
       })
 
     const result = await getCase('00001234')
@@ -274,11 +268,11 @@ describe('#getCase', () => {
               day1Diva: null,
               day2Avian: null,
               day2Bovine: null,
-              day2Diva: null
-            }
-          ]
-        }
-      ]
+              day2Diva: null,
+            },
+          ],
+        },
+      ],
     })
   })
 
@@ -296,17 +290,15 @@ describe('#getCase', () => {
             APHA_TestWindowEndDate__c: '2026-04-22',
             APHA_CPH__r: { Name: '01/001/0006' },
             CreatedDate: '2026-04-22T10:00:00.000Z',
-            Owner: { Name: 'John Smith' }
-          }
-        ]
+            Owner: { Name: 'John Smith' },
+          },
+        ],
       })
       .mockResolvedValueOnce({ records: [] })
 
     await getCase('a00000000000001')
 
-    expect(query).toHaveBeenCalledWith(
-      expect.stringContaining("WHERE Id='a00000000000001'")
-    )
+    expect(query).toHaveBeenCalledWith(expect.stringContaining("WHERE Id='a00000000000001'"))
   })
 
   test('Should select CPH name, CreatedDate and Owner name in the Case SOQL query', async () => {
@@ -323,9 +315,9 @@ describe('#getCase', () => {
             APHA_TestWindowEndDate__c: '2026-04-22',
             APHA_CPH__r: { Name: '01/001/0006' },
             CreatedDate: '2026-04-22T10:00:00.000Z',
-            Owner: { Name: 'John Smith' }
-          }
-        ]
+            Owner: { Name: 'John Smith' },
+          },
+        ],
       })
       .mockResolvedValueOnce({ records: [] })
 
@@ -351,9 +343,9 @@ describe('#getCase', () => {
             APHA_TestWindowEndDate__c: '2026-04-22',
             APHA_CPH__r: { Name: '01/001/0006' },
             CreatedDate: '2026-04-22T10:00:00.000Z',
-            Owner: { Name: 'John Smith' }
-          }
-        ]
+            Owner: { Name: 'John Smith' },
+          },
+        ],
       })
       .mockResolvedValueOnce({ records: [] })
 
@@ -365,9 +357,7 @@ describe('#getCase', () => {
   test('Should throw when case is not found', async () => {
     vi.mocked(query).mockResolvedValueOnce({ records: [] })
 
-    await expect(getCase('99999999')).rejects.toThrow(
-      'Case not found: 99999999'
-    )
+    await expect(getCase('99999999')).rejects.toThrow('Case not found: 99999999')
   })
 
   test('Should query TestPartResults for each TestPart', async () => {
@@ -384,9 +374,9 @@ describe('#getCase', () => {
             APHA_TestWindowEndDate__c: '2026-04-22',
             APHA_CPH__r: { Name: '01/001/0006' },
             CreatedDate: '2026-04-22T10:00:00.000Z',
-            Owner: { Name: 'John Smith' }
-          }
-        ]
+            Owner: { Name: 'John Smith' },
+          },
+        ],
       })
       .mockResolvedValueOnce({
         records: [
@@ -395,16 +385,16 @@ describe('#getCase', () => {
             APHA_Day1__c: '2026-04-16',
             APHA_Day2__c: '2026-04-19',
             APHA_IdentityOfCertifyingVet__c: 'Vet',
-            APHA_IdentityOfTester__c: 'Tester'
+            APHA_IdentityOfTester__c: 'Tester',
           },
           {
             Id: 'tp-id-2',
             APHA_Day1__c: '2026-04-17',
             APHA_Day2__c: '2026-04-20',
             APHA_IdentityOfCertifyingVet__c: 'Vet 2',
-            APHA_IdentityOfTester__c: 'Tester 2'
-          }
-        ]
+            APHA_IdentityOfTester__c: 'Tester 2',
+          },
+        ],
       })
       .mockResolvedValueOnce({ records: [] })
       .mockResolvedValueOnce({ records: [] })

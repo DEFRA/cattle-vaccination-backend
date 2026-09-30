@@ -15,9 +15,9 @@ export const workorders = {
       query: Joi.object({
         startDate: Joi.string().pattern(DATE_PATTERN).required(),
         endDate: Joi.string().pattern(DATE_PATTERN).required(),
-        country: Joi.string().required()
-      })
-    }
+        country: Joi.string().required(),
+      }),
+    },
   },
   handler: async (request, h) => {
     const { startDate, endDate, country } = request.query
@@ -29,5 +29,5 @@ export const workorders = {
       logger.error(err, 'APHA workorders request failed')
       throw Boom.badGateway('Failed to retrieve workorders from APHA API')
     }
-  }
+  },
 }

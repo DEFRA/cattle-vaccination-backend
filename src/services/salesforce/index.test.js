@@ -7,13 +7,13 @@ import {
   updateRecord,
   deleteRecord,
   composite,
-  compositeGraph
+  compositeGraph,
 } from './index.js'
 
 const validTokenResponse = {
   access_token: 'mock-sf-token',
   instance_url: 'https://instance.salesforce.example.com',
-  expires_in: 3600
+  expires_in: 3600,
 }
 
 function mockTokenThenResponse(apiResponse, options = {}) {
@@ -42,9 +42,7 @@ describe('Salesforce service', () => {
       await query('SELECT Id FROM Case LIMIT 1')
 
       const [url, options] = fetchMock.mock.calls[0]
-      expect(url).toBe(
-        'https://login.salesforce.example.com/services/oauth2/token'
-      )
+      expect(url).toBe('https://login.salesforce.example.com/services/oauth2/token')
       expect(options.method).toBe('POST')
       const body = new URLSearchParams(options.body)
       expect(body.get('grant_type')).toBe('client_credentials')
@@ -59,9 +57,7 @@ describe('Salesforce service', () => {
       fetchMock.mockResponseOnce(JSON.stringify({ records: [] }))
       await query('SELECT Id FROM Case LIMIT 1')
 
-      const tokenCalls = fetchMock.mock.calls.filter(([url]) =>
-        url.includes('/oauth2/token')
-      )
+      const tokenCalls = fetchMock.mock.calls.filter(([url]) => url.includes('/oauth2/token'))
       expect(tokenCalls).toHaveLength(1)
     })
 
@@ -69,16 +65,14 @@ describe('Salesforce service', () => {
       config.set('salesforce.clientId', null)
 
       await expect(query('SELECT Id FROM Case')).rejects.toThrow(
-        'Missing required config: SALESFORCE_URL, SALESFORCE_CLIENT_ID, SALESFORCE_CLIENT_SECRET'
+        'Missing required config: SALESFORCE_URL, SALESFORCE_CLIENT_ID, SALESFORCE_CLIENT_SECRET',
       )
     })
 
     test('Should throw on non-ok auth response', async () => {
       fetchMock.mockResponseOnce('Unauthorized', { status: 401 })
 
-      await expect(query('SELECT Id FROM Case')).rejects.toThrow(
-        'Salesforce auth error 401'
-      )
+      await expect(query('SELECT Id FROM Case')).rejects.toThrow('Salesforce auth error 401')
     })
 
     test('Should fetch new token when existing token has expired', async () => {
@@ -91,9 +85,7 @@ describe('Salesforce service', () => {
       fetchMock.mockResponseOnce(JSON.stringify({ records: [] }))
       await query('SELECT Id FROM Case LIMIT 1')
 
-      const tokenCalls = fetchMock.mock.calls.filter(([url]) =>
-        url.includes('/oauth2/token')
-      )
+      const tokenCalls = fetchMock.mock.calls.filter(([url]) => url.includes('/oauth2/token'))
       expect(tokenCalls).toHaveLength(2)
     })
 
@@ -108,9 +100,7 @@ describe('Salesforce service', () => {
       fetchMock.mockResponseOnce(JSON.stringify({ records: [] }))
       await query('SELECT Id FROM Case LIMIT 1')
 
-      const tokenCalls = fetchMock.mock.calls.filter(([url]) =>
-        url.includes('/oauth2/token')
-      )
+      const tokenCalls = fetchMock.mock.calls.filter(([url]) => url.includes('/oauth2/token'))
       expect(tokenCalls).toHaveLength(2)
     })
 
@@ -118,7 +108,7 @@ describe('Salesforce service', () => {
       config.set('salesforce.url', null)
 
       await expect(query('SELECT Id FROM Case')).rejects.toThrow(
-        'Missing required config: SALESFORCE_URL'
+        'Missing required config: SALESFORCE_URL',
       )
     })
   })
@@ -131,7 +121,7 @@ describe('Salesforce service', () => {
 
       const [url, options] = fetchMock.mock.calls[1]
       expect(url).toBe(
-        "https://instance.salesforce.example.com/services/data/v62.0/query?q=SELECT%20Id%20FROM%20Case%20WHERE%20Name%3D'foo'%20LIMIT%201"
+        "https://instance.salesforce.example.com/services/data/v62.0/query?q=SELECT%20Id%20FROM%20Case%20WHERE%20Name%3D'foo'%20LIMIT%201",
       )
       expect(options.method).toBe('GET')
       expect(options.headers.Authorization).toBe('Bearer mock-sf-token')
@@ -150,9 +140,7 @@ describe('Salesforce service', () => {
       fetchMock.mockResponseOnce(JSON.stringify(validTokenResponse))
       fetchMock.mockResponseOnce('Not Found', { status: 404 })
 
-      await expect(query('SELECT Id FROM Case')).rejects.toThrow(
-        'Salesforce API error 404'
-      )
+      await expect(query('SELECT Id FROM Case')).rejects.toThrow('Salesforce API error 404')
     })
   })
 
@@ -164,7 +152,7 @@ describe('Salesforce service', () => {
 
       const [url, options] = fetchMock.mock.calls[1]
       expect(url).toBe(
-        'https://instance.salesforce.example.com/services/data/v62.0/sobjects/Case/abc123'
+        'https://instance.salesforce.example.com/services/data/v62.0/sobjects/Case/abc123',
       )
       expect(options.method).toBe('GET')
     })
@@ -177,13 +165,11 @@ describe('Salesforce service', () => {
       await createRecord('Case', { Status: 'New', Priority: 'Medium' })
 
       const [url, options] = fetchMock.mock.calls[1]
-      expect(url).toBe(
-        'https://instance.salesforce.example.com/services/data/v62.0/sobjects/Case'
-      )
+      expect(url).toBe('https://instance.salesforce.example.com/services/data/v62.0/sobjects/Case')
       expect(options.method).toBe('POST')
       expect(JSON.parse(options.body)).toEqual({
         Status: 'New',
-        Priority: 'Medium'
+        Priority: 'Medium',
       })
     })
 
@@ -206,7 +192,7 @@ describe('Salesforce service', () => {
 
       const [url, options] = fetchMock.mock.calls[1]
       expect(url).toBe(
-        'https://instance.salesforce.example.com/services/data/v62.0/sobjects/Case/abc123'
+        'https://instance.salesforce.example.com/services/data/v62.0/sobjects/Case/abc123',
       )
       expect(options.method).toBe('PATCH')
       expect(JSON.parse(options.body)).toEqual({ Status: 'Closed' })
@@ -223,7 +209,7 @@ describe('Salesforce service', () => {
 
       const [url, options] = fetchMock.mock.calls[1]
       expect(url).toBe(
-        'https://instance.salesforce.example.com/services/data/v62.0/sobjects/Case/abc123'
+        'https://instance.salesforce.example.com/services/data/v62.0/sobjects/Case/abc123',
       )
       expect(options.method).toBe('DELETE')
       expect(result).toBeNull()
@@ -239,15 +225,13 @@ describe('Salesforce service', () => {
         {
           method: 'GET',
           referenceId: 'Foo',
-          url: '/services/data/v62.0/query?q=SELECT+Id+FROM+Case'
-        }
+          url: '/services/data/v62.0/query?q=SELECT+Id+FROM+Case',
+        },
       ]
       await composite(subRequests)
 
       const [url, options] = fetchMock.mock.calls[1]
-      expect(url).toBe(
-        'https://instance.salesforce.example.com/services/data/v62.0/composite'
-      )
+      expect(url).toBe('https://instance.salesforce.example.com/services/data/v62.0/composite')
       expect(options.method).toBe('POST')
       const body = JSON.parse(options.body)
       expect(body.allOrNone).toBe(true)
@@ -256,9 +240,7 @@ describe('Salesforce service', () => {
 
     test('Should return the composite response body', async () => {
       const mockResponse = {
-        compositeResponse: [
-          { referenceId: 'Foo', httpStatusCode: 200, body: {} }
-        ]
+        compositeResponse: [{ referenceId: 'Foo', httpStatusCode: 200, body: {} }],
       }
       mockTokenThenResponse(mockResponse)
 
@@ -281,16 +263,16 @@ describe('Salesforce service', () => {
               method: 'POST',
               referenceId: 'CaseRef',
               url: '/services/data/v62.0/sobjects/Case',
-              body: { Status: 'New' }
-            }
-          ]
-        }
+              body: { Status: 'New' },
+            },
+          ],
+        },
       ]
       await compositeGraph(graphs)
 
       const [url, options] = fetchMock.mock.calls[1]
       expect(url).toBe(
-        'https://instance.salesforce.example.com/services/data/v62.0/composite/graph'
+        'https://instance.salesforce.example.com/services/data/v62.0/composite/graph',
       )
       expect(options.method).toBe('POST')
       const body = JSON.parse(options.body)
@@ -303,9 +285,9 @@ describe('Salesforce service', () => {
           {
             graphId: 'Graph_0',
             isSuccessful: true,
-            graphResponse: { compositeResponse: [] }
-          }
-        ]
+            graphResponse: { compositeResponse: [] },
+          },
+        ],
       }
       mockTokenThenResponse(mockResponse)
 

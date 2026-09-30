@@ -14,12 +14,12 @@ vi.mock('aws-embedded-metrics', async (importOriginal) => {
     ...awsEmbeddedMetrics,
     createMetricsLogger: () => ({
       putMetric: mockPutMetric,
-      flush: mockFlush
-    })
+      flush: mockFlush,
+    }),
   }
 })
 vi.mock('./logging/logger.js', () => ({
-  createLogger: () => ({ error: (...args) => mockLoggerError(...args) })
+  createLogger: () => ({ error: (...args) => mockLoggerError(...args) }),
 }))
 
 const mockMetricsName = 'mock-metrics-name'
@@ -54,7 +54,7 @@ describe('#metrics', () => {
         mockMetricsName,
         defaultMetricsValue,
         Unit.Count,
-        StorageResolution.Standard
+        StorageResolution.Standard,
       )
     })
 
@@ -65,7 +65,7 @@ describe('#metrics', () => {
         mockMetricsName,
         mockValue,
         Unit.Count,
-        StorageResolution.Standard
+        StorageResolution.Standard,
       )
     })
 

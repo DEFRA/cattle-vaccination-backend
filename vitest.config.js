@@ -13,7 +13,7 @@ export default defineConfig({
       LIVESTOCK_API_TOKEN: 'test-livestock-token',
       SALESFORCE_URL: 'http://localhost/salesforce',
       SALESFORCE_CLIENT_ID: 'test-salesforce-client-id',
-      SALESFORCE_CLIENT_SECRET: 'test-salesforce-client-secret'
+      SALESFORCE_CLIENT_SECRET: 'test-salesforce-client-secret',
     },
     clearMocks: true,
     // module-level token caches in service files are shared across test files; parallel execution causes cache poisoning between suites
@@ -23,8 +23,8 @@ export default defineConfig({
       reportsDirectory: './coverage',
       reporter: ['text', 'lcov'],
       include: ['src/**/*.js'],
-      exclude: [...configDefaults.exclude, 'coverage']
+      exclude: [...configDefaults.exclude, 'coverage'],
     },
-    setupFiles: ['.vite/setup-files.js']
-  }
+    setupFiles: ['.vite/setup-files.js'],
+  },
 })

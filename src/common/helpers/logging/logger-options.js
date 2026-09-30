@@ -10,10 +10,10 @@ const formatters = {
   ecs: {
     ...ecsFormat({
       serviceVersion,
-      serviceName
-    })
+      serviceName,
+    }),
   },
-  'pino-pretty': { transport: { target: 'pino-pretty' } }
+  'pino-pretty': { transport: { target: 'pino-pretty' } },
 }
 
 export const loggerOptions = {
@@ -21,7 +21,7 @@ export const loggerOptions = {
   ignorePaths: ['/health'],
   redact: {
     paths: logConfig.redact,
-    remove: true
+    remove: true,
   },
   level: logConfig.level,
   ...formatters[logConfig.format],
@@ -33,5 +33,5 @@ export const loggerOptions = {
       mixinValues.trace = { id: traceId }
     }
     return mixinValues
-  }
+  },
 }
