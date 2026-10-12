@@ -2,6 +2,7 @@ import Hapi from '@hapi/hapi'
 import { secureContext } from '@defra/hapi-secure-context'
 import { config } from './config.js'
 import { router } from './plugins/router.js'
+import { serviceAuth } from './plugins/service-auth.js'
 import { requestLogger } from './common/helpers/logging/request-logger.js'
 import { failAction } from './common/helpers/fail-action.js'
 import { pulse } from './common/helpers/pulse.js'
@@ -41,8 +42,9 @@ export async function createServer() {
   // requestTracing - trace header logging and propagation
   // secureContext  - loads CA certificates from environment config
   // pulse          - provides shutdown handlers
+  // serviceAuth    - verifies service-to-service JWTs when enabled
   // router         - routes used in the app
-  await server.register([requestLogger, requestTracing, secureContext, pulse, router])
+  await server.register([requestLogger, requestTracing, secureContext, pulse, serviceAuth, router])
 
   return server
 }

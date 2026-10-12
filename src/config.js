@@ -169,6 +169,40 @@ const config = convict({
       env: 'DEV_API_KEY',
     },
   },
+  serviceAuth: {
+    enabled: {
+      doc: 'Enable service-to-service JWT authentication on all non-health routes',
+      format: Boolean,
+      default: false,
+      env: 'SERVICE_AUTH_ENABLED',
+    },
+    jwksUri: {
+      doc: 'JWKS endpoint URI for verifying service JWT tokens',
+      format: String,
+      nullable: true,
+      default: /** @type {string | null} */ (null),
+      env: 'CDP_JWT_JWKS_URI',
+    },
+    issuer: {
+      doc: 'Expected JWT issuer',
+      format: String,
+      nullable: true,
+      default: /** @type {string | null} */ (null),
+      env: 'CDP_JWT_ISSUER',
+    },
+    audience: {
+      doc: 'Expected JWT audience',
+      format: String,
+      default: 'cattle-vaccination-backend',
+      env: 'SERVICE_AUTH_AUDIENCE',
+    },
+    allowedServices: {
+      doc: 'Comma-separated service names permitted to call this API. Empty allows any valid JWT.',
+      format: String,
+      default: '',
+      env: 'SERVICE_AUTH_ALLOWED_SERVICES',
+    },
+  },
 })
 
 config.validate({ allowed: 'strict' })
