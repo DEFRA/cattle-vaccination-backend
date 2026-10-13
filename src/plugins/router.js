@@ -2,6 +2,7 @@ import { health } from '../routes/health.js'
 import { holdings } from '../routes/holdings.js'
 import { workorders } from '../routes/workorders.js'
 import { cattleOnHolding } from '../routes/cattle-on-holding.js'
+import { getCphRoute } from '../routes/cphs.js'
 import {
   addTestPartResultsRoute,
   createCaseRoute,
@@ -19,6 +20,7 @@ export const router = {
         holdings,
         workorders,
         cattleOnHolding,
+        getCphRoute,
         createCaseRoute,
         searchCasesRoute,
         getCaseRoute,
