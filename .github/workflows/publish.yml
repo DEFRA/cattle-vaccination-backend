@@ -37,7 +37,7 @@ jobs:
       #
 
       - name: Build and Publish
-        uses: DEFRA/cdp-build-action/build@69fe830f0cd9fa6cfbf5c10919287bad4f6a2ffe # main
+        uses: DEFRA/cdp-build-action/build@0c3d6e78f8acbe15f8ee331481dc2dbc8e2db8b2 # main
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
