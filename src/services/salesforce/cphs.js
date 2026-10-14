@@ -14,8 +14,10 @@ const cphFields = [
 ]
 
 export async function getCph(cphNumber) {
-  const conn = await getSalesforceConnection()
-  const record = await conn.sobject('APHA_CPH__c').findOne({ Name: cphNumber }, cphFields)
+  const salesforceConnection = await getSalesforceConnection()
+  const record = await salesforceConnection
+    .sobject('APHA_CPH__c')
+    .findOne({ Name: cphNumber }, cphFields)
 
   if (!record) {
     throw new Error(`CPH not found: ${cphNumber}`)
