@@ -89,16 +89,21 @@ function createSalesforceConnection() {
   })
 }
 
+async function authorizeSalesforceConnection() {
+  const connection = createSalesforceConnection()
+
+  try {
+    await connection.authorize({ grant_type: 'client_credentials' })
+    return connection
+  } catch (error) {
+    salesforceConnectionPromise = null
+    throw error
+  }
+}
+
 export function getSalesforceConnection() {
   if (!salesforceConnectionPromise) {
-    const connection = createSalesforceConnection()
-    salesforceConnectionPromise = connection
-      .authorize({ grant_type: 'client_credentials' })
-      .then(() => connection)
-      .catch((error) => {
-        salesforceConnectionPromise = null
-        throw error
-      })
+    salesforceConnectionPromise = authorizeSalesforceConnection()
   }
 
   return salesforceConnectionPromise
