@@ -1,11 +1,14 @@
 import { getCph } from './cphs.js'
-import { query } from './index.js'
+import { getSalesforceConnection } from './index.js'
+
+const findOne = vi.fn()
+const sobject = vi.fn(() => ({ findOne }))
 
 vi.mock('./index.js', async (importOriginal) => {
   const actual = await importOriginal()
   return {
     ...actual,
-    query: vi.fn(),
+    getSalesforceConnection: vi.fn(),
   }
 })
 
@@ -24,13 +27,18 @@ const salesforceRecord = {
   APHA_Location__c: 'location-id',
 }
 
+function mockRecord(record) {
+  findOne.mockResolvedValue(record)
+  vi.mocked(getSalesforceConnection).mockResolvedValue({ sobject })
+}
+
 describe('#getCph', () => {
   afterEach(() => {
     vi.clearAllMocks()
   })
 
   test('Should return the CPH details', async () => {
-    vi.mocked(query).mockResolvedValue({ records: [salesforceRecord] })
+    mockRecord(salesforceRecord)
 
     await expect(getCph(cphNumber)).resolves.toEqual({
       id: 'cph-id',
@@ -46,17 +54,20 @@ describe('#getCph', () => {
     })
   })
 
-  test('Should query APHA_CPH__c by Name', async () => {
-    vi.mocked(query).mockResolvedValue({ records: [salesforceRecord] })
+  test('Should look up APHA_CPH__c by Name', async () => {
+    mockRecord(salesforceRecord)
 
     await getCph(cphNumber)
 
-    expect(query).toHaveBeenCalledWith(expect.stringContaining(`Name='${cphNumber}'`))
-    expect(query).toHaveBeenCalledWith(expect.stringContaining('FROM APHA_CPH__c'))
+    expect(sobject).toHaveBeenCalledWith('APHA_CPH__c')
+    expect(findOne).toHaveBeenCalledWith(
+      { Name: cphNumber },
+      expect.arrayContaining(['Id', 'Name']),
+    )
   })
 
   test('Should throw when the CPH is not found', async () => {
-    vi.mocked(query).mockResolvedValue({ records: [] })
+    mockRecord(null)
 
     await expect(getCph(cphNumber)).rejects.toThrow(`CPH not found: ${cphNumber}`)
   })

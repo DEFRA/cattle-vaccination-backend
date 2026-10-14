@@ -1,3 +1,4 @@
+import { Connection } from 'jsforce'
 import { config } from '../../config.js'
 
 const SF_API_VERSION = 'v62.0'
@@ -52,6 +53,16 @@ async function getSalesforceToken() {
   }
 
   return tokenRefreshPromise
+}
+
+export async function getSalesforceConnection() {
+  const { token, instanceUrl } = await getSalesforceToken()
+
+  return new Connection({
+    instanceUrl,
+    accessToken: token,
+    version: SF_API_VERSION.slice(1),
+  })
 }
 
 export function clearTokenCache() {

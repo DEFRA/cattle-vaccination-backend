@@ -1,16 +1,25 @@
-import { query } from './index.js'
+import { getSalesforceConnection } from './index.js'
+
+const cphFields = [
+  'Id',
+  'Name',
+  'APHA_CPHCode__c',
+  'APHA_CPHCodeStartDate__c',
+  'APHA_CPHCodeEndDate__c',
+  'APHA_CPHCodeStatus__c',
+  'APHA_CPHType__c',
+  'APHA_PreviousCPHNumber__c',
+  'APHA_TemporaryCPHNumber__c',
+  'APHA_Location__c',
+]
 
 export async function getCph(cphNumber) {
-  const escaped = cphNumber.replaceAll("'", "''")
-  const result = await query(
-    `SELECT Id, Name, APHA_CPHCode__c, APHA_CPHCodeStartDate__c, APHA_CPHCodeEndDate__c, APHA_CPHCodeStatus__c, APHA_CPHType__c, APHA_PreviousCPHNumber__c, APHA_TemporaryCPHNumber__c, APHA_Location__c FROM APHA_CPH__c WHERE Name='${escaped}' LIMIT 1`,
-  )
+  const conn = await getSalesforceConnection()
+  const record = await conn.sobject('APHA_CPH__c').findOne({ Name: cphNumber }, cphFields)
 
-  if (result.records.length === 0) {
+  if (!record) {
     throw new Error(`CPH not found: ${cphNumber}`)
   }
-
-  const record = result.records[0]
 
   return {
     id: record.Id,
