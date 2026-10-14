@@ -9,19 +9,19 @@ const logger = createLogger()
 /** @type {import('@hapi/hapi').ServerRoute} */
 export const getCphRoute = {
   method: 'GET',
-  path: '/cphs',
+  path: '/cphs/{cphNumber}',
   options: {
     validate: {
-      query: Joi.object({
+      params: Joi.object({
         cphNumber: Joi.string()
-          .pattern(/^\d{2}\/\d{3}\/\d{4}$/)
+          .pattern(/^\d{9}$/)
           .required(),
       }),
     },
   },
   handler: async (request, h) => {
     try {
-      const result = await getCph(request.query.cphNumber)
+      const result = await getCph(request.params.cphNumber)
       return h.response(result)
     } catch (err) {
       const message = getErrorMessage(err)
