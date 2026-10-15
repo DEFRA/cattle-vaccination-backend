@@ -9,134 +9,27 @@ You are the expert on the Salesforce integration in this codebase.
 
 ## What exists
 
-- **Base service:** `src/services/salesforce/index.js` — token caching, `sfRequest()` helper, and exported `query`, `getRecord`, `createRecord`, `updateRecord`, `deleteRecord`, `composite`, `compositeGraph`. Also exports `SF_API_PATH` (e.g. `/services/data/v62.0`) for use in composite sub-request URLs.
-- **Cases orchestration:** `src/services/salesforce/cases.js` — `createCase()` creates a Case and returns `{ caseId, caseNumber }`; `getCaseIdByCaseNumber()` looks up a Salesforce Case ID by case number; `getCase()` retrieves a Case by Salesforce ID with its TestParts and results
-- **Test parts:** `src/services/salesforce/test-parts.js` — `submitTestParts()` submits new TestParts and their results to an existing Case using the graph API
-- **Test part results:** `src/services/salesforce/test-part-results.js` — `addTestPartResults()` adds results to an already-existing TestPart using the graph API
+- **Connection:** `src/services/salesforce/index.js` — one shared jsforce `Connection`, created on first use. `getSalesforceConnection()` returns that promise. A failed login clears it so the next call can try again.
+- **CPH lookup:** `src/services/salesforce/cphs.js` — `getCph(cphNumber)` loads `APHA_CPH__c` with `findOne`.
+- **Route:** `GET /cphs/{cphNumber}` in `src/routes/cphs.js`. The path param is 9 digits. The service inserts slashes (`NN/NNN/NNNN`) and queries `Name`.
 - **Config keys** (under `salesforce` in `src/config.js`, all nullable):
-  - `salesforce.url` — env `SALESFORCE_URL` (REST API host)
+  - `salesforce.url` — env `SALESFORCE_URL` (My Domain login URL)
   - `salesforce.clientId` — env `SALESFORCE_CLIENT_ID` (sensitive)
   - `salesforce.clientSecret` — env `SALESFORCE_CLIENT_SECRET` (sensitive)
 
 ## Key patterns
 
-- **Auth:** OAuth 2.0 client credentials — POST `${salesforceUrl}/services/oauth2/token` with `grant_type=client_credentials`, `client_id`, `client_secret` as form body. Module-level token caching with `refreshTokenAt = Date.now() + ((expires_in ?? 3600) - 60) * 1000`. A `tokenRefreshPromise` deduplicates concurrent inflight token requests. `clearTokenCache()` is exported for tests.
-- **API version:** `v62.0` — hardcoded as `SF_API_VERSION` in `index.js`; `SF_API_PATH` is the derived path prefix exported for composite sub-request URLs
-- **HTTP:** native `fetch`, no proxy agent (unlike livestock-api)
-- **Errors:** throw `new Error(\`Salesforce API error \${response.status}\`)`on non-ok; throw`new Error(\`Salesforce auth error \${response.status}\`)`on auth failure; throw on missing config with message`'Missing required config: SALESFORCE_URL, SALESFORCE_CLIENT_ID, SALESFORCE_CLIENT_SECRET'`
-- **204 responses:** `sfRequest` returns `null` for 204
-- **Config:** all keys use `nullable: true, format: String, default: null` so the app starts without Salesforce credentials; mark secrets `sensitive: true`
-- **Tests:** colocated `*.test.js`, Vitest; `index.test.js` uses real fetch mock via `fetchMock` with `clearTokenCache()` in `beforeEach`; all orchestration test files (`cases.test.js`, `test-parts.test.js`, `test-part-results.test.js`) mock `./index.js` with `vi.mock` (exporting `composite`, `compositeGraph`, `SF_API_PATH`) and use `vi.clearAllMocks()` in `afterEach`
+- **Auth:** jsforce client credentials. `Connection` is constructed with `oauth2: { loginUrl, clientId, clientSecret }` and `version: '62.0'`. The first call runs `authorize({ grant_type: 'client_credentials' })`. `refreshFn` authorizes again and passes the new access token to the callback.
+- **Errors:** missing config throws `'Missing required config: SALESFORCE_URL, SALESFORCE_CLIENT_ID, SALESFORCE_CLIENT_SECRET'`. A missing CPH throws `'CPH not found: ${cphNumber}'`, which the route maps to 404. Other Salesforce failures on that route are 502.
+- **Config:** all keys use `nullable: true, format: String, default: null` so the app starts without Salesforce credentials; mark secrets `sensitive: true`.
+- **Tests:** colocated `*.test.js`, Vitest. `cphs.test.js` mocks `getSalesforceConnection`. `index.test.js` checks that missing config rejects before a connection is cached.
 
-## Composite API (`composite`)
+## CPH
 
-`composite(compositeRequest)` POSTs to `/composite` with `allOrNone: true`. Sub-requests use `referenceId` strings and cross-reference previous results via `@{referenceId.field}` syntax. Salesforce limit is 25 sub-requests per call.
-
-## Composite Graph API (`compositeGraph`)
-
-`compositeGraph(graphs)` POSTs to `/composite/graph` with a `{ graphs }` body. Each graph is `{ graphId, compositeRequest[] }`. Unlike the regular Composite API, there is no 25 sub-request limit per graph node (Salesforce allows up to 500). `submitTestParts` always uses the graph API.
-
-## Salesforce Sobject model
-
-- **Case** — `RecordTypeId` (looked up by `DeveloperName='APHA_CattleVax'`), `APHA_CPH__c` (CPH lookup), `APHA_ReasonForTest__c`, `APHA_TestWindowStartDate__c`, `APHA_TestWindowEndDate__c`, `Status`, `Priority`
-- **APHA_CPH\_\_c** — looked up by `Name` (CPH number e.g. `'01/001/0006'`)
-- **APHA_TestPart\_\_c** — `Case__c` (Case ID), `APHA_Day1__c`, `APHA_Day2__c`, `Test_Start_Time__c` (optional HH:MM string, no timezone conversion), `APHA_IdentityOfCertifyingVet__c`, `APHA_IdentityOfTester__c`
-- **APHA_TestPartResult\_\_c** — `APHA_TestPart__c` (TestPart ID), `APHA_TestType__c` (picklist: `'DIVA'`, `'SICCT'`, `'Not Tested'`), `APHA_EarTagNo__c`, `Not_Tested_Reason__c` (picklist: `'Cattle too young'`, `'Cattle deceased'`, `'Other reason'`; required when test type is `'Not Tested'`), batch fields (`APHA_BatchAvian__c`, `APHA_BatchBovine__c`, `APHA_BatchDIVA__c`), measurement fields (`APHA_TestDay1Avian__c`, `APHA_TestDay1Bovine__c`, `APHA_TestDay1DIVA__c`, `APHA_TestDay2Avian__c`, `APHA_TestDay2Bovine__c`, `APHA_TestDay2DIVA__c`)
-
-## Case flow
-
-### `createCase({ cphNumber, reasonForTest, testWindowStart, testWindowEnd })`
-
-Single `composite()` call with 3 sub-requests:
-
-1. `GET` query — `RecordType` for `APHA_CattleVax` → `referenceId: 'CaseRecordType'`
-2. `GET` query — `APHA_CPH__c` by `Name` → `referenceId: 'CPHRef'`
-3. `POST` `Case` using `@{CaseRecordType.records[0].Id}` and `@{CPHRef.records[0].Id}` → `referenceId: 'CaseRef'`
-
-After the composite call, does a follow-up `query()` to fetch `CaseNumber` for the newly created Case ID.
-
-Returns `{ caseId, caseNumber }`. Does NOT create TestParts or results.
-
-Error handling: throws `'Salesforce composite request failed at step: ${referenceId}'` if any sub-request returns HTTP 4xx/5xx; throws `'RecordType APHA_CattleVax not found'` if the RecordType query returns no records; throws `'CPH not found: ${cphNumber}'` if the CPH query returns no records.
-
-### `getCaseIdByCaseNumber(caseNumber)`
-
-Accepts a **case number** (numeric string, e.g. `'00001234'`). Single SOQL query: `SELECT Id, CaseNumber FROM Case WHERE CaseNumber='${escaped}' LIMIT 1`. Throws `'Case not found: ${caseNumber}'` if no records returned. Returns `{ caseId }`.
-
-### `getCase(caseId)`
-
-Accepts a **Salesforce Case ID** (not a case number). Three sequential SOQL queries:
-
-1. Query `Case WHERE Id='${escapedCaseId}' LIMIT 1` — selects `Id, CaseNumber, Status, Priority, APHA_ReasonForTest__c, APHA_TestWindowStartDate__c, APHA_TestWindowEndDate__c, APHA_CPH__r.Name, CreatedDate, Owner.Name`. Throws `'Case not found: ${caseId}'` if no records returned.
-2. Query `APHA_TestPart__c WHERE Case__c='${escapedId}'` — uses the ID from step 1.
-3. For each TestPart in parallel (`Promise.all`): query `APHA_TestPartResult__c WHERE APHA_TestPart__c='${escapedTpId}'`.
-
-Returns the full nested object with camelCase field names: `{ id, caseNumber, status, priority, reasonForTest, testWindowStart, testWindowEnd, cph, openedDate, openedBy, testParts: [{ id, day1, day2, certifyingVet, tester, results: [{ id, testType, earTagNo, notTestedReason, batchAvian, batchBovine, batchDiva, day1Avian, day1Bovine, day1Diva, day2Avian, day2Bovine, day2Diva }] }] }`.
-
-`cph` is the CPH number string from `APHA_CPH__r?.Name` (relationship traversal, not the raw lookup ID). `openedDate` is `CreatedDate`. `openedBy` is `Owner?.Name` (NOT `CreatedBy.Name`). Both `cph` and `openedBy` default to `null` if the relationship is absent.
-
-### `submitTestParts(caseId, testParts)` — `src/services/salesforce/test-parts.js`
-
-Submits new TestParts and their results to an existing Case using `compositeGraph` (single node, `graphId: 'Graph_0'`). Private helper `buildSubRequests` interleaves `APHA_TestPart__c` POSTs (referenceId `TestPart_${i}`) with `APHA_TestPartResult__c` POSTs (referenceId `TestPartResult_${i}_${j}`); results cross-reference the TestPart via `@{TestPart_${i}.id}`. Private helper `extractResults` walks the flat composite response sequentially to reconstruct the return shape. Returns `{ testParts: [{ testPartId, resultIds }] }`. Throws `Salesforce graph request failed at step: <referenceId>` (or without the step suffix if no failed step is found) on failure.
-
-### `addTestPartResults(testPartId, results)` — `src/services/salesforce/test-part-results.js`
-
-Adds results to an **already-existing** TestPart (does not create the TestPart). Uses `compositeGraph` with a single node; one sub-request per result, referenceIds `Result_0`, `Result_1`, etc. All optional result fields (`batchAvian`, `batchBovine`, `batchDiva`, `day1Avian`, `day1Bovine`, `day1Diva`, `day2Avian`, `day2Bovine`, `day2Diva`) default to `null` via `?? null` — unlike `submitTestParts` which passes optional fields through directly. Returns `{ resultIds: string[] }`.
-
-Error handling differs from `submitTestParts`: on graph failure it looks for a `FIELD_CUSTOM_VALIDATION_EXCEPTION` error code in the failed step's body array and extracts its `message`, falling back to `'Salesforce validation failed'`. Throws `Salesforce graph request failed - ${errorMessage}`.
-
-## HTTP Routes (`src/routes/cases.js`)
-
-All routes use Joi validation and convert errors to Boom responses. `'Case not found: ...'` errors map to `404 Not Found`; all other service errors map to `502 Bad Gateway` (exception: `addTestPartResultsRoute` does not check for `'Case not found:'` — all errors go straight to 502).
-
-### `POST /cases`
-
-Creates a new Case. Payload validated with Joi:
-
-- `cphNumber` — string matching `/^\d{2}\/\d{3}\/\d{4}$/`
-- `reasonForTest` — one of `'Radial'`, `'6W'`, `'6M'`, `'12M'`, `'48M'`, `'Pre-Movement'`, `'Post-Movement'`
-- `testWindowStart` — ISO date string
-- `testWindowEnd` — ISO date string
-
-Returns `201` with `{ caseId, caseNumber }`.
-
-### `GET /cases`
-
-Looks up a Case by case number. Query param `caseNumber` must match `/^\d+$/` (numeric digits only). Calls `getCaseIdByCaseNumber(caseNumber)` and returns `200` with `{ caseId }`. Returns `404` if the case is not found.
-
-### `GET /cases/{caseId}`
-
-Retrieves a Case with all TestParts and results. Path param `caseId` is a Salesforce ID (alphanum, 15–18 chars). Calls `getCase(caseId)` and returns `200` with the full nested object. Returns `404` if the case is not found.
-
-### `POST /cases/{id}/test-parts`
-
-Submits new TestParts to an existing Case. Path param `id` is a Salesforce ID (alphanum, 15–18 chars). Payload:
-
-- `testParts` — array (min 1) of:
-  - `day1`, `day2` — ISO date strings
-  - `day1StartTime` — optional HH:MM string; maps to `Test_Start_Time__c` in Salesforce (omitted from payload if not provided; no timezone conversion — offset handling is deferred to the SF side)
-  - `certifyingVet`, `tester` — strings
-  - `results` — array (min 1) of `testPartResultSchema` (see below)
-
-Returns `201` with `{ testParts: [{ testPartId, resultIds }] }`. Returns `404` if `'Case not found:'` is in the error message; otherwise `502`.
-
-### `POST /cases/{caseId}/test-parts/{testPartId}/results`
-
-Adds results to an existing TestPart. Both path params are Salesforce IDs (alphanum, 15–18 chars). Payload: `{ results: [testPartResultSchema] }` (min 1). Returns `201` with `{ resultIds: string[] }`. All errors return `502` (no `404` handling).
-
-### `testPartResultSchema` (shared Joi schema)
-
-- `testType` — `'DIVA'`, `'SICCT'`, or `'Not Tested'`
-- `earTagNo` — string, max 20 chars, required
-- `notTestedReason` — one of `'Cattle too young'`, `'Cattle deceased'`, `'Other reason'`; required when `testType='Not Tested'`, forced to `null` otherwise
-- `batchAvian`, `batchBovine`, `batchDiva` — string max 20, allows `null` or empty string `''`, default `null`; forced to `null` when `testType='Not Tested'`
-- `day1Avian`, `day1Bovine`, `day2Avian`, `day2Bovine` — integer 0–999, required when `testType='SICCT'`, forced to `null` otherwise
-- `day1Diva`, `day2Diva` — integer 0–999, required when `testType='DIVA'`, forced to `null` otherwise
+`getCph` selects `Name`, `APHA_CPHCode__c`, start and end dates, status, type, previous CPH number, and temporary CPH number. The response uses `id` (9 digits), `displayName`, `cphCode`, `startDate`, `endDate`, `status`, `type`, `previousCphNumber`, and `temporaryCphNumber`. It does not return Salesforce record ids.
 
 ## Adding new functionality
 
-- New sobject operations: add exported functions to `src/services/salesforce/index.js` calling `sfRequest()`
-- New orchestration flows: create a new file alongside `cases.js` (e.g. `src/services/salesforce/updates.js`)
-- New config: add under the `salesforce` convict key with `nullable: true, format: String, default: null`
-- Tests for orchestration files: mock `./index.js` with `vi.mock`, use `vi.clearAllMocks()` in `afterEach`
-- Tests for `index.js`: use real `fetchMock`, call `clearTokenCache()` in `beforeEach`
+- New Salesforce reads: call `getSalesforceConnection()` and use jsforce query chaining (`sobject().findOne()` / `find()`).
+- New config: add under the `salesforce` convict key with `nullable: true, format: String, default: null`.
+- Tests: mock `getSalesforceConnection` with `vi.mock`.
