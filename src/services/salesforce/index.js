@@ -1,3 +1,4 @@
+import { Connection } from 'jsforce'
 import { config } from '../../config.js'
 
 const SF_API_VERSION = 'v62.0'
@@ -7,19 +8,27 @@ let cachedToken = null
 let cachedInstanceUrl = null
 let refreshTokenAt = null
 let tokenRefreshPromise = null
+let salesforceConnectionPromise = null
 
-async function fetchNewToken() {
-  const salesforceUrl = config.get('salesforce.url')
+function salesforceCredentials() {
+  const loginUrl = config.get('salesforce.url')
   const clientId = config.get('salesforce.clientId')
   const clientSecret = config.get('salesforce.clientSecret')
 
-  if (!salesforceUrl || !clientId || !clientSecret) {
+  if (!loginUrl || !clientId || !clientSecret) {
     throw new Error(
       'Missing required config: SALESFORCE_URL, SALESFORCE_CLIENT_ID, SALESFORCE_CLIENT_SECRET',
     )
   }
 
-  const response = await fetch(`${salesforceUrl}/services/oauth2/token`, {
+  return { loginUrl, clientId, clientSecret }
+}
+
+// Cases and test parts still authenticate through this fetch. Once they use the shared jsforce connection, this can go.
+async function fetchNewToken() {
+  const { loginUrl, clientId, clientSecret } = salesforceCredentials()
+
+  const response = await fetch(`${loginUrl}/services/oauth2/token`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
     body: new URLSearchParams({
@@ -54,11 +63,58 @@ async function getSalesforceToken() {
   return tokenRefreshPromise
 }
 
+function createSalesforceConnection() {
+  const { loginUrl, clientId, clientSecret } = salesforceCredentials()
+
+  return new Connection({
+    oauth2: {
+      loginUrl,
+      clientId,
+      clientSecret,
+    },
+    version: SF_API_VERSION.slice(1),
+    refreshFn: async (connection, callback) => {
+      try {
+        await connection.authorize({ grant_type: 'client_credentials' })
+
+        if (!connection.accessToken) {
+          throw new Error('Salesforce client_credentials authorize error')
+        }
+
+        callback(null, connection.accessToken)
+      } catch (error) {
+        callback(error instanceof Error ? error : new Error(String(error)))
+      }
+    },
+  })
+}
+
+async function authorizeSalesforceConnection() {
+  const connection = createSalesforceConnection()
+
+  try {
+    await connection.authorize({ grant_type: 'client_credentials' })
+    return connection
+  } catch (error) {
+    salesforceConnectionPromise = null
+    throw error
+  }
+}
+
+export function getSalesforceConnection() {
+  if (!salesforceConnectionPromise) {
+    salesforceConnectionPromise = authorizeSalesforceConnection()
+  }
+
+  return salesforceConnectionPromise
+}
+
 export function clearTokenCache() {
   cachedToken = null
   cachedInstanceUrl = null
   refreshTokenAt = null
   tokenRefreshPromise = null
+  salesforceConnectionPromise = null
 }
 
 async function sfRequest(path, method = 'GET', body = undefined) {
