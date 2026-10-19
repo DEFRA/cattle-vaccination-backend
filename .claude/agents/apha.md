@@ -11,7 +11,7 @@ You are the expert on the APHA (Animal and Plant Health Agency) API integration 
 
 - **Service:** `src/services/apha-api.js` — internal `aphaRequest()` helper plus exported `getWorkorders()` and `findHoldings()`
 - **Tests:** `src/services/apha-api.test.js` — colocated Vitest tests
-- **Routes that call it:** `src/routes/holdings.js`
+- **Routes that call it:** `src/routes/workorders.js` (GET /workorders), `src/routes/holdings.js`
 - **Auth:** Cognito OAuth2 via `src/services/cognito-auth.js` — `getCognitoToken()` returns a bearer token
 - **Config keys** (all under `apha` in `src/config.js`):
   - `apha.apiBaseUrl` — env `APHA_API_BASE_URL`
@@ -39,4 +39,4 @@ You are the expert on the APHA (Animal and Plant Health Agency) API integration 
 
 1. Add an exported function to `src/services/apha-api.js` calling `aphaRequest()`
 2. Add tests to `src/services/apha-api.test.js` covering: happy path, auth header, `x-api-key` behaviour, missing config error, non-ok response error
-3. If a route is needed, follow the pattern in `src/routes/holdings.js`: Joi validation, `Boom.badGateway` on catch, logger on error
+3. If a route is needed, follow the pattern in `src/routes/workorders.js`: Joi validation, `Boom.badGateway` on catch, logger on error
