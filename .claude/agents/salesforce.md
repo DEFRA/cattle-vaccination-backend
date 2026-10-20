@@ -12,6 +12,7 @@ You are the expert on the Salesforce integration in this codebase.
 - **Connection:** `src/services/salesforce/index.js` — one shared jsforce `Connection`, created on first use. `getSalesforceConnection()` returns that promise. A failed login clears it so the next call can try again.
 - **CPH lookup:** `src/services/salesforce/cphs.js` — `getCph(cphNumber)` loads `APHA_CPH__c` with `findOne`.
 - **Route:** `GET /cphs/{cphNumber}` in `src/routes/cphs.js`. The path param is 9 digits. The service inserts slashes (`NN/NNN/NNNN`) and queries `Name`.
+- **Work orders:** `src/services/salesforce/work-orders.js` — `getWorkOrders()` lists `CV_WorkOrder__c`. `GET /workorders` returns one card per work order: title (`location name - CPH code`), `cphNumber` for the CPH details link, and address. It does not filter by assignee.
 - **Config keys** (under `salesforce` in `src/config.js`, all nullable):
   - `salesforce.url` — env `SALESFORCE_URL` (My Domain login URL)
   - `salesforce.clientId` — env `SALESFORCE_CLIENT_ID` (sensitive)
