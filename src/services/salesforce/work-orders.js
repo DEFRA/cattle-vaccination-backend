@@ -48,6 +48,10 @@ function cphNumberFrom(cphCode) {
   return cphCode.replaceAll('/', '')
 }
 
+function addressPart(value) {
+  return value?.replaceAll(/^[,\s]+|[,\s]+$/g, '') || null
+}
+
 function formatAddress(location) {
   const address = location?.VisitorAddress
 
@@ -56,6 +60,7 @@ function formatAddress(location) {
   }
 
   const line = [address.Street, address.City, address.State, address.PostalCode, address.Country]
+    .map(addressPart)
     .filter(Boolean)
     .join(', ')
 
@@ -116,9 +121,15 @@ export async function getWorkOrder(workOrderId) {
     .find({ 'CV_Work_Order__r.Name': workOrderId }, workListFields)
     .sort('Name')
 
+  const cph = record.CV_CPH__r
+  const cphCode = cphCodeFrom(cph)
+
   return {
     id: record.Name,
-    cphName: cphNameFrom(record.CV_CPH__r),
+    cphName: cphNameFrom(cph),
+    cphCode,
+    cphNumber: cphNumberFrom(cphCode),
+    address: formatAddress(cph?.APHA_Location__r),
     workLists: workLists.map(toWorkList),
   }
 }

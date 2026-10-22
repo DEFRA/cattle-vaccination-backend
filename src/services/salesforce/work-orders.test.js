@@ -56,6 +56,32 @@ describe('#getWorkOrders', () => {
     ])
   })
 
+  test('Should drop a trailing comma already stored on the street', async () => {
+    sort.mockResolvedValue([
+      {
+        Name: 'CV WorkOrder 1',
+        CV_CPH__r: {
+          Name: '06/036/0006',
+          APHA_CPHCode__c: '06/036/0006',
+          APHA_Location__r: {
+            Name: 'Odds Farm Park',
+            VisitorAddress: {
+              Street: 'Odds Farm Park, Wooburn Common Rd, Wooburn Green,',
+              City: 'High Wycombe',
+              PostalCode: 'HP10 0LX',
+            },
+          },
+        },
+      },
+    ])
+
+    const [workOrder] = await getWorkOrders()
+
+    expect(workOrder.address).toBe(
+      'Odds Farm Park, Wooburn Common Rd, Wooburn Green, High Wycombe, HP10 0LX',
+    )
+  })
+
   test('Should use the CPH code as the title when the holding has no location name', async () => {
     sort.mockResolvedValue([
       {
@@ -121,6 +147,9 @@ describe('#getWorkOrder', () => {
     await expect(getWorkOrder('CV WorkOrder 2')).resolves.toEqual({
       id: 'CV WorkOrder 2',
       cphName: 'Hill Farm',
+      cphCode: '40/715/9200',
+      cphNumber: '407159200',
+      address: '1 Farm Lane, Exeter, Devon, EX1 1AA, United Kingdom',
       workLists: [
         { id: 'CV WorkList 2', cphName: 'Hill Farm', cphCode: '40/715/9200' },
         { id: 'CV WorkList 9', cphName: null, cphCode: '02/582/7575' },
