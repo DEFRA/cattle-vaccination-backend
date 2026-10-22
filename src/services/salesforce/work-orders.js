@@ -77,12 +77,48 @@ function toWorkOrder(record) {
   }
 }
 
+const workListFields = [
+  'Name',
+  'CV_CPH__r.Name',
+  'CV_CPH__r.APHA_CPHCode__c',
+  'CV_CPH__r.APHA_Location__r.Name',
+]
+
+function toWorkList(record) {
+  const cph = record.CV_CPH__r
+
+  return {
+    id: record.Name,
+    cphName: cphNameFrom(cph),
+    cphCode: cphCodeFrom(cph),
+  }
+}
+
 export async function getWorkOrders() {
-  const salesforceConnection = await getSalesforceConnection()
-  const records = await salesforceConnection
-    .sobject('CV_WorkOrder__c')
-    .find({}, workOrderFields)
-    .sort('Name')
+  const connection = await getSalesforceConnection()
+  const records = await connection.sobject('CV_WorkOrder__c').find({}, workOrderFields).sort('Name')
 
   return records.map(toWorkOrder)
+}
+
+export async function getWorkOrder(workOrderId) {
+  const connection = await getSalesforceConnection()
+  const record = await connection
+    .sobject('CV_WorkOrder__c')
+    .findOne({ Name: workOrderId }, workOrderFields)
+
+  if (!record) {
+    throw new Error(`Work order not found: ${workOrderId}`)
+  }
+
+  const workLists = await connection
+    .sobject('CV_WorkList__c')
+    .find({ 'CV_Work_Order__r.Name': workOrderId }, workListFields)
+    .sort('Name')
+
+  return {
+    id: record.Name,
+    cphName: cphNameFrom(record.CV_CPH__r),
+    workLists: workLists.map(toWorkList),
+  }
 }

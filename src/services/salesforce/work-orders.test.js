@@ -1,9 +1,10 @@
-import { getWorkOrders } from './work-orders.js'
+import { getWorkOrder, getWorkOrders } from './work-orders.js'
 import { getSalesforceConnection } from './index.js'
 
 const sort = vi.fn()
 const find = vi.fn(() => ({ sort }))
-const sobject = vi.fn(() => ({ find }))
+const findOne = vi.fn()
+const sobject = vi.fn(() => ({ find, findOne }))
 
 vi.mock('./index.js', async (importOriginal) => {
   const actual = await importOriginal()
@@ -95,5 +96,55 @@ describe('#getWorkOrders', () => {
       ]),
     )
     expect(sort).toHaveBeenCalledWith('Name')
+  })
+})
+
+describe('#getWorkOrder', () => {
+  beforeEach(() => {
+    vi.mocked(getSalesforceConnection).mockResolvedValue({ sobject })
+  })
+
+  afterEach(() => {
+    vi.clearAllMocks()
+  })
+
+  test('Should return the CPH name and work lists', async () => {
+    findOne.mockResolvedValue(salesforceRecord)
+    sort.mockResolvedValue([
+      { Name: 'CV WorkList 2', CV_CPH__r: salesforceRecord.CV_CPH__r },
+      {
+        Name: 'CV WorkList 9',
+        CV_CPH__r: { Name: '02/582/7575', APHA_CPHCode__c: '02/582/7575' },
+      },
+    ])
+
+    await expect(getWorkOrder('CV WorkOrder 2')).resolves.toEqual({
+      id: 'CV WorkOrder 2',
+      cphName: 'Hill Farm',
+      workLists: [
+        { id: 'CV WorkList 2', cphName: 'Hill Farm', cphCode: '40/715/9200' },
+        { id: 'CV WorkList 9', cphName: null, cphCode: '02/582/7575' },
+      ],
+    })
+
+    expect(sobject).toHaveBeenCalledWith('CV_WorkOrder__c')
+    expect(findOne).toHaveBeenCalledWith({ Name: 'CV WorkOrder 2' }, expect.any(Array))
+    expect(sobject).toHaveBeenCalledWith('CV_WorkList__c')
+    expect(find).toHaveBeenCalledWith({ 'CV_Work_Order__r.Name': 'CV WorkOrder 2' }, [
+      'Name',
+      'CV_CPH__r.Name',
+      'CV_CPH__r.APHA_CPHCode__c',
+      'CV_CPH__r.APHA_Location__r.Name',
+    ])
+    expect(sort).toHaveBeenCalledWith('Name')
+  })
+
+  test('Should throw when the work order does not exist', async () => {
+    findOne.mockResolvedValue(null)
+
+    await expect(getWorkOrder('CV WorkOrder 99')).rejects.toThrow(
+      'Work order not found: CV WorkOrder 99',
+    )
+    expect(find).not.toHaveBeenCalled()
   })
 })
