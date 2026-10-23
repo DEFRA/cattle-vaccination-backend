@@ -19,6 +19,12 @@ const salesforceRecord = {
   CV_CPH__r: {
     Name: '40/715/9200',
     APHA_CPHCode__c: '40/715/9200',
+    APHA_CPHCodeStartDate__c: '2020-01-01',
+    APHA_CPHCodeEndDate__c: null,
+    APHA_CPHCodeStatus__c: 'Active',
+    APHA_CPHType__c: 'Permanent',
+    APHA_PreviousCPHNumber__c: null,
+    APHA_TemporaryCPHNumber__c: null,
     APHA_Location__r: {
       Name: 'Hill Farm',
       VisitorAddress: {
@@ -146,10 +152,19 @@ describe('#getWorkOrder', () => {
 
     await expect(getWorkOrder('CV WorkOrder 2')).resolves.toEqual({
       id: 'CV WorkOrder 2',
-      cphName: 'Hill Farm',
-      cphCode: '40/715/9200',
-      cphNumber: '407159200',
-      address: '1 Farm Lane, Exeter, Devon, EX1 1AA, United Kingdom',
+      cph: {
+        id: '407159200',
+        displayName: '40/715/9200',
+        cphCode: '40/715/9200',
+        startDate: '2020-01-01',
+        endDate: null,
+        status: 'Active',
+        type: 'Permanent',
+        previousCphNumber: null,
+        temporaryCphNumber: null,
+        locationName: 'Hill Farm',
+        address: '1 Farm Lane, Exeter, Devon, EX1 1AA, United Kingdom',
+      },
       workLists: [
         { id: 'CV WorkList 2', cphName: 'Hill Farm', cphCode: '40/715/9200' },
         { id: 'CV WorkList 9', cphName: null, cphCode: '02/582/7575' },
@@ -157,7 +172,14 @@ describe('#getWorkOrder', () => {
     })
 
     expect(sobject).toHaveBeenCalledWith('CV_WorkOrder__c')
-    expect(findOne).toHaveBeenCalledWith({ Name: 'CV WorkOrder 2' }, expect.any(Array))
+    expect(findOne).toHaveBeenCalledWith(
+      { Name: 'CV WorkOrder 2' },
+      expect.arrayContaining([
+        'CV_CPH__r.APHA_CPHCodeStartDate__c',
+        'CV_CPH__r.APHA_CPHCodeStatus__c',
+        'CV_CPH__r.APHA_Location__r.VisitorAddress.Street',
+      ]),
+    )
     expect(sobject).toHaveBeenCalledWith('CV_WorkList__c')
     expect(find).toHaveBeenCalledWith({ 'CV_Work_Order__r.Name': 'CV WorkOrder 2' }, [
       'Name',

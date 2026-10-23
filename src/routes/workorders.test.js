@@ -61,7 +61,13 @@ describe('#workorders route', () => {
   test('Should return 200 with the work order details', async () => {
     const workOrder = {
       id: 'CV WorkOrder 2',
-      cphName: 'Hill Farm',
+      cph: {
+        id: '407159200',
+        displayName: '40/715/9200',
+        cphCode: '40/715/9200',
+        locationName: 'Hill Farm',
+        address: '1 Farm Lane, Exeter, Devon, EX1 1AA, United Kingdom',
+      },
       workLists: [{ id: 'CV WorkList 2' }],
     }
     vi.mocked(getWorkOrder).mockResolvedValue(workOrder)

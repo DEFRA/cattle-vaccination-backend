@@ -1,4 +1,5 @@
 import { getSalesforceConnection } from './index.js'
+import { toCph } from './cphs.js'
 
 const cphCodePattern = /^\d{2}\/\d{3}\/\d{4}$/
 
@@ -67,6 +68,28 @@ function formatAddress(location) {
   return line || null
 }
 
+const workOrderDetailFields = [
+  ...workOrderFields,
+  'CV_CPH__r.APHA_CPHCodeStartDate__c',
+  'CV_CPH__r.APHA_CPHCodeEndDate__c',
+  'CV_CPH__r.APHA_CPHCodeStatus__c',
+  'CV_CPH__r.APHA_CPHType__c',
+  'CV_CPH__r.APHA_PreviousCPHNumber__c',
+  'CV_CPH__r.APHA_TemporaryCPHNumber__c',
+]
+
+function toWorkOrderCph(cph) {
+  if (!cph) {
+    return null
+  }
+
+  return {
+    ...toCph(cph),
+    locationName: cphNameFrom(cph),
+    address: formatAddress(cph.APHA_Location__r),
+  }
+}
+
 function toWorkOrder(record) {
   const cph = record.CV_CPH__r
   const cphName = cphNameFrom(cph)
@@ -110,7 +133,7 @@ export async function getWorkOrder(workOrderId) {
   const connection = await getSalesforceConnection()
   const record = await connection
     .sobject('CV_WorkOrder__c')
-    .findOne({ Name: workOrderId }, workOrderFields)
+    .findOne({ Name: workOrderId }, workOrderDetailFields)
 
   if (!record) {
     throw new Error(`Work order not found: ${workOrderId}`)
@@ -121,15 +144,9 @@ export async function getWorkOrder(workOrderId) {
     .find({ 'CV_Work_Order__r.Name': workOrderId }, workListFields)
     .sort('Name')
 
-  const cph = record.CV_CPH__r
-  const cphCode = cphCodeFrom(cph)
-
   return {
     id: record.Name,
-    cphName: cphNameFrom(cph),
-    cphCode,
-    cphNumber: cphNumberFrom(cphCode),
-    address: formatAddress(cph?.APHA_Location__r),
+    cph: toWorkOrderCph(record.CV_CPH__r),
     workLists: workLists.map(toWorkList),
   }
 }
