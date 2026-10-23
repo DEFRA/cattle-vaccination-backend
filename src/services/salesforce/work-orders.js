@@ -150,3 +150,35 @@ export async function getWorkOrder(workOrderId) {
     workLists: workLists.map(toWorkList),
   }
 }
+
+function createWorkListFlowError(result) {
+  const message = result?.outputValues?.responseMessage || result?.errors?.[0]?.message
+
+  return new Error(message || 'Create work list flow failed')
+}
+
+async function startCreateWorkListFlow(connection, workOrderRecordId) {
+  const [result] = await connection.requestPost(
+    '/actions/custom/flow/Fetch_and_Create_Commodity_Animals',
+    { inputs: [{ recordId: workOrderRecordId }] },
+  )
+
+  const workListId = result?.outputValues?.WorkListId
+
+  if (!result?.isSuccess || result.outputValues?.isSuccess !== true || !workListId) {
+    throw createWorkListFlowError(result)
+  }
+
+  return { id: workListId }
+}
+
+export async function createWorkList(workOrderId) {
+  const connection = await getSalesforceConnection()
+  const record = await connection.sobject('CV_WorkOrder__c').findOne({ Name: workOrderId }, ['Id'])
+
+  if (!record) {
+    throw new Error(`Work order not found: ${workOrderId}`)
+  }
+
+  return startCreateWorkListFlow(connection, record.Id)
+}

@@ -1,9 +1,10 @@
-import { getWorkOrder, getWorkOrders } from './work-orders.js'
+import { createWorkList, getWorkOrder, getWorkOrders } from './work-orders.js'
 import { getSalesforceConnection } from './index.js'
 
 const sort = vi.fn()
 const find = vi.fn(() => ({ sort }))
 const findOne = vi.fn()
+const requestPost = vi.fn()
 const sobject = vi.fn(() => ({ find, findOne }))
 
 vi.mock('./index.js', async (importOriginal) => {
@@ -197,5 +198,60 @@ describe('#getWorkOrder', () => {
       'Work order not found: CV WorkOrder 99',
     )
     expect(find).not.toHaveBeenCalled()
+  })
+})
+
+describe('#createWorkList', () => {
+  beforeEach(() => {
+    vi.mocked(getSalesforceConnection).mockResolvedValue({ sobject, requestPost })
+  })
+
+  afterEach(() => {
+    vi.clearAllMocks()
+  })
+
+  test('Should start the flow with the work order Salesforce id', async () => {
+    findOne.mockResolvedValue({ Id: 'a0B000000000001' })
+    requestPost.mockResolvedValue([
+      {
+        isSuccess: true,
+        outputValues: {
+          isSuccess: true,
+          WorkListId: 'a0W000000000001',
+          responseMessage: 'Worklist created Successfully',
+        },
+      },
+    ])
+
+    await expect(createWorkList('CV WorkOrder 2')).resolves.toEqual({ id: 'a0W000000000001' })
+    expect(findOne).toHaveBeenCalledWith({ Name: 'CV WorkOrder 2' }, ['Id'])
+    expect(requestPost).toHaveBeenCalledWith(
+      '/actions/custom/flow/Fetch_and_Create_Commodity_Animals',
+      { inputs: [{ recordId: 'a0B000000000001' }] },
+    )
+  })
+
+  test('Should throw the flow message when Salesforce rejects the interview', async () => {
+    findOne.mockResolvedValue({ Id: 'a0B000000000001' })
+    requestPost.mockResolvedValue([
+      {
+        isSuccess: true,
+        outputValues: {
+          isSuccess: false,
+          responseMessage: 'CPH is missing from WorkOrder',
+        },
+      },
+    ])
+
+    await expect(createWorkList('CV WorkOrder 2')).rejects.toThrow('CPH is missing from WorkOrder')
+  })
+
+  test('Should throw when the work order does not exist', async () => {
+    findOne.mockResolvedValue(null)
+
+    await expect(createWorkList('CV WorkOrder 99')).rejects.toThrow(
+      'Work order not found: CV WorkOrder 99',
+    )
+    expect(requestPost).not.toHaveBeenCalled()
   })
 })
