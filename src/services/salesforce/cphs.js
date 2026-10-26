@@ -15,16 +15,7 @@ function toSalesforceCphName(cphNumber) {
   return `${cphNumber.slice(0, 2)}/${cphNumber.slice(2, 5)}/${cphNumber.slice(5)}`
 }
 
-export async function getCph(cphNumber) {
-  const salesforceConnection = await getSalesforceConnection()
-  const record = await salesforceConnection
-    .sobject('APHA_CPH__c')
-    .findOne({ Name: toSalesforceCphName(cphNumber) }, cphFields)
-
-  if (!record) {
-    throw new Error(`CPH not found: ${cphNumber}`)
-  }
-
+export function toCph(record) {
   return {
     id: record.Name.replaceAll('/', ''),
     displayName: record.Name,
@@ -36,4 +27,17 @@ export async function getCph(cphNumber) {
     previousCphNumber: record.APHA_PreviousCPHNumber__c,
     temporaryCphNumber: record.APHA_TemporaryCPHNumber__c,
   }
+}
+
+export async function getCph(cphNumber) {
+  const salesforceConnection = await getSalesforceConnection()
+  const record = await salesforceConnection
+    .sobject('APHA_CPH__c')
+    .findOne({ Name: toSalesforceCphName(cphNumber) }, cphFields)
+
+  if (!record) {
+    throw new Error(`CPH not found: ${cphNumber}`)
+  }
+
+  return toCph(record)
 }
