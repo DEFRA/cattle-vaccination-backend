@@ -46,7 +46,10 @@
     "undici": "7.30.1"
   },
   "overrides": {
-    "minimatch": ">=9.0.0"
+    "minimatch": ">=9.0.0",
+    "jsforce": {
+      "undici": "8.12.3"
+    }
   },
   "devDependencies": {
     "@babel/core": "7.29.7",
