@@ -95,8 +95,10 @@ export const getWorkListRoute = {
     },
   },
   handler: async (request, h) => {
+    const { workOrderId, workListId } = request.params
+
     try {
-      const result = await getWorkList(request.params.workOrderId, request.params.workListId)
+      const result = await getWorkList(workOrderId, workListId)
       return h.response(result)
     } catch (err) {
       const message = getErrorMessage(err)
