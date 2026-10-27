@@ -1,6 +1,11 @@
 import Joi from 'joi'
 import Boom from '@hapi/boom'
-import { createWorkList, getWorkOrder, getWorkOrders } from '../services/salesforce/work-orders.js'
+import {
+  createWorkList,
+  getWorkList,
+  getWorkOrder,
+  getWorkOrders,
+} from '../services/salesforce/work-orders.js'
 import { createLogger } from '../common/helpers/logging/logger.js'
 import { getErrorMessage } from '../common/helpers/error-message.js'
 
@@ -73,6 +78,37 @@ export const createWorkListRoute = {
 
       logger.error(err, 'Salesforce create work list request failed')
       throw Boom.badGateway('Failed to create work list in Salesforce')
+    }
+  },
+}
+
+/** @type {import('@hapi/hapi').ServerRoute} */
+export const getWorkListRoute = {
+  method: 'GET',
+  path: '/workorders/{workOrderId}/work-lists/{workListId}',
+  options: {
+    validate: {
+      params: Joi.object({
+        workOrderId: Joi.string().trim().min(1).max(80).required(),
+        workListId: Joi.string().trim().min(1).max(80).required(),
+      }),
+    },
+  },
+  handler: async (request, h) => {
+    const { workOrderId, workListId } = request.params
+
+    try {
+      const result = await getWorkList(workOrderId, workListId)
+      return h.response(result)
+    } catch (err) {
+      const message = getErrorMessage(err)
+
+      if (message.startsWith('Work list not found:')) {
+        throw Boom.notFound(message)
+      }
+
+      logger.error(err, 'Salesforce get work list request failed')
+      throw Boom.badGateway('Failed to retrieve work list from Salesforce')
     }
   },
 }

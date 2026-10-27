@@ -1,11 +1,22 @@
 import Hapi from '@hapi/hapi'
-import { createWorkListRoute, getWorkOrderRoute, workorders } from './workorders.js'
-import { createWorkList, getWorkOrder, getWorkOrders } from '../services/salesforce/work-orders.js'
+import {
+  createWorkListRoute,
+  getWorkListRoute,
+  getWorkOrderRoute,
+  workorders,
+} from './workorders.js'
+import {
+  createWorkList,
+  getWorkList,
+  getWorkOrder,
+  getWorkOrders,
+} from '../services/salesforce/work-orders.js'
 
 vi.mock('../services/salesforce/work-orders.js', () => ({
   getWorkOrders: vi.fn(),
   getWorkOrder: vi.fn(),
   createWorkList: vi.fn(),
+  getWorkList: vi.fn(),
 }))
 vi.mock('../common/helpers/logging/logger.js', () => ({
   createLogger: () => ({ error: vi.fn() }),
@@ -27,7 +38,7 @@ describe('#workorders route', () => {
 
   beforeEach(async () => {
     server = Hapi.server()
-    server.route([workorders, getWorkOrderRoute, createWorkListRoute])
+    server.route([workorders, getWorkOrderRoute, createWorkListRoute, getWorkListRoute])
     await server.initialize()
   })
 
@@ -139,5 +150,33 @@ describe('#workorders route', () => {
     })
 
     expect(response.statusCode).toBe(502)
+  })
+
+  test('Should return 200 with the cattle on a work list', async () => {
+    const workList = {
+      id: 'CV WorkList 2',
+      cattle: [{ earTag: 'UK111', dob: '2020-11-04', sex: 'Male', breed: 'WPA' }],
+    }
+    vi.mocked(getWorkList).mockResolvedValue(workList)
+
+    const response = await server.inject({
+      method: 'GET',
+      url: '/workorders/CV%20WorkOrder%202/work-lists/a0W000000000002',
+    })
+
+    expect(response.statusCode).toBe(200)
+    expect(getWorkList).toHaveBeenCalledWith('CV WorkOrder 2', 'a0W000000000002')
+    expect(response.result).toEqual(workList)
+  })
+
+  test('Should return 404 when the work list does not exist', async () => {
+    vi.mocked(getWorkList).mockRejectedValue(new Error('Work list not found: CV WorkList 99'))
+
+    const response = await server.inject({
+      method: 'GET',
+      url: '/workorders/CV%20WorkOrder%202/work-lists/a0W000000000099',
+    })
+
+    expect(response.statusCode).toBe(404)
   })
 })
