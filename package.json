@@ -63,5 +63,10 @@
     "prettier": "3.7.4",
     "vitest": "4.1.11",
     "vitest-fetch-mock": "0.4.5"
+  },
+  "allowScripts": {
+    "@defra/cdp-auditing@0.6.1": true,
+    "@defra/hapi-secure-context@0.4.0": true,
+    "@defra/hapi-tracing@1.30.0": true
   }
 }
