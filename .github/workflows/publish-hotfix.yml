@@ -22,7 +22,7 @@ jobs:
         with:
           fetch-depth: 0 # Depth 0 is required for branch-based versioning
 
-      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version-file: .nvmrc
           cache: npm
@@ -32,7 +32,7 @@ jobs:
       - run: npm test
 
       - name: Publish Hot Fix
-        uses: DEFRA/cdp-build-action/build-hotfix@69fe830f0cd9fa6cfbf5c10919287bad4f6a2ffe # main
+        uses: DEFRA/cdp-build-action/build-hotfix@4ab1468825e6361dc8503863359ca38d7234153d # main
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
