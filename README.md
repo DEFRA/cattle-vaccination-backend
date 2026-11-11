@@ -127,8 +127,10 @@ docker run -e PORT=3002 -p 3002:3002 cattle-vaccination-backend
 
 ### Dependabot
 
-We have added an example dependabot configuration file to the repository. You can enable it by renaming
-the [.github/example.dependabot.yml](.github/example.dependabot.yml) to `.github/dependabot.yml`
+Dependabot is configured in [.github/dependabot.yml](.github/dependabot.yml) to check npm dependencies and GitHub Actions weekly.
+Minor and patch version updates are grouped into separate PRs for runtime dependencies, development dependencies, and GitHub Actions.
+Major version updates remain separate PRs. ESLint and `eslint-*` packages remain excluded from npm updates.
+These groups apply to version updates; security updates are unchanged.
 
 ### SonarCloud
 
