@@ -8,6 +8,11 @@ updates:
 
     # Group routine version updates; keep major upgrades separate
     groups:
+      vitest:
+        patterns:
+          - 'vitest'
+          - '@vitest/*'
+
       runtime-dependencies:
         dependency-type: production
         patterns:
