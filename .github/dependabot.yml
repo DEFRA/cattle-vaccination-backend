@@ -6,12 +6,16 @@ updates:
     directory: /
     open-pull-requests-limit: 10
 
-    # Group routine version updates; keep major upgrades separate
+    # Keep coupled toolchains together, including majors; otherwise group routine updates
     groups:
       vitest:
         patterns:
           - 'vitest'
           - '@vitest/*'
+
+      babel:
+        patterns:
+          - '@babel/*'
 
       runtime-dependencies:
         dependency-type: production
