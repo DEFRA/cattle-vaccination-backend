@@ -54,6 +54,10 @@ updates:
     directory: /
 
     groups:
+      defra-cdp-build-action:
+        patterns:
+          - 'DEFRA/cdp-build-action/*'
+
       github-actions:
         patterns:
           - '*'
