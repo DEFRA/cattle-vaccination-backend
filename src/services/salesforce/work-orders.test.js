@@ -144,10 +144,16 @@ describe('#getWorkOrder', () => {
   test('Should return the CPH name and work lists', async () => {
     findOne.mockResolvedValue(salesforceRecord)
     sort.mockResolvedValue([
-      { Id: 'a0W000000000002', Name: 'CV WorkList 2', CV_CPH__r: salesforceRecord.CV_CPH__r },
+      {
+        Id: 'a0W000000000002',
+        Name: 'CV WorkList 2',
+        CreatedDate: '2026-10-08T09:00:00.000+0000',
+        CV_CPH__r: salesforceRecord.CV_CPH__r,
+      },
       {
         Id: 'a0W000000000009',
         Name: 'CV WorkList 9',
+        CreatedDate: '2026-10-09T09:00:00.000+0000',
         CV_CPH__r: { Name: '02/582/7575', APHA_CPHCode__c: '02/582/7575' },
       },
     ])
@@ -171,10 +177,17 @@ describe('#getWorkOrder', () => {
         {
           id: 'a0W000000000002',
           name: 'CV WorkList 2',
+          createdDate: '2026-10-08T09:00:00.000+0000',
           cphName: 'Hill Farm',
           cphCode: '40/715/9200',
         },
-        { id: 'a0W000000000009', name: 'CV WorkList 9', cphName: null, cphCode: '02/582/7575' },
+        {
+          id: 'a0W000000000009',
+          name: 'CV WorkList 9',
+          createdDate: '2026-10-09T09:00:00.000+0000',
+          cphName: null,
+          cphCode: '02/582/7575',
+        },
       ],
     })
 
@@ -183,6 +196,7 @@ describe('#getWorkOrder', () => {
       { Name: 'CV WorkOrder 2' },
       expect.arrayContaining([
         'CV_CPH__r.APHA_CPHCodeStartDate__c',
+        'CV_CPH__r.APHA_CPHCodeEndDate__c',
         'CV_CPH__r.APHA_CPHCodeStatus__c',
         'CV_CPH__r.APHA_Location__r.VisitorAddress.Street',
       ]),
@@ -191,6 +205,7 @@ describe('#getWorkOrder', () => {
     expect(find).toHaveBeenCalledWith({ 'CV_Work_Order__r.Name': 'CV WorkOrder 2' }, [
       'Id',
       'Name',
+      'CreatedDate',
       'CV_CPH__r.Name',
       'CV_CPH__r.APHA_CPHCode__c',
       'CV_CPH__r.APHA_Location__r.Name',
@@ -276,7 +291,12 @@ describe('#getWorkList', () => {
   })
 
   test('Should return the cattle on the work list', async () => {
-    findOne.mockResolvedValue({ Id: 'a0W000000000002', Name: 'CV WorkList 2' })
+    findOne.mockResolvedValue({
+      Id: 'a0W000000000002',
+      Name: 'CV WorkList 2',
+      CreatedDate: '2026-10-08T09:00:00.000+0000',
+      CV_CPH__r: salesforceRecord.CV_CPH__r,
+    })
     sort.mockResolvedValue([
       {
         CV_Animal__r: {
@@ -299,6 +319,9 @@ describe('#getWorkList', () => {
     await expect(getWorkList('CV WorkOrder 2', 'a0W000000000002')).resolves.toEqual({
       id: 'a0W000000000002',
       name: 'CV WorkList 2',
+      createdDate: '2026-10-08T09:00:00.000+0000',
+      cphName: 'Hill Farm',
+      cphCode: '40/715/9200',
       cattle: [
         { earTag: 'UK111', dob: null, sex: null, breed: null },
         { earTag: 'UK977985345673', dob: '2020-11-04', sex: 'Male', breed: 'WPA' },
@@ -306,7 +329,14 @@ describe('#getWorkList', () => {
     })
     expect(findOne).toHaveBeenCalledWith(
       { Id: 'a0W000000000002', 'CV_Work_Order__r.Name': 'CV WorkOrder 2' },
-      ['Id', 'Name'],
+      [
+        'Id',
+        'Name',
+        'CreatedDate',
+        'CV_CPH__r.Name',
+        'CV_CPH__r.APHA_CPHCode__c',
+        'CV_CPH__r.APHA_Location__r.Name',
+      ],
     )
     expect(sobject).toHaveBeenCalledWith('CV_WorkListAnimal__c')
     expect(find).toHaveBeenCalledWith({ CV_WorkList__c: 'a0W000000000002' }, [
