@@ -108,6 +108,7 @@ function toWorkOrder(record) {
 const workListFields = [
   'Id',
   'Name',
+  'CreatedDate',
   'CV_CPH__r.Name',
   'CV_CPH__r.APHA_CPHCode__c',
   'CV_CPH__r.APHA_Location__r.Name',
@@ -119,6 +120,7 @@ function toWorkList(record) {
   return {
     id: record.Id,
     name: record.Name,
+    createdDate: record.CreatedDate || null,
     cphName: cphNameFrom(cph),
     cphCode: cphCodeFrom(cph),
   }
@@ -204,7 +206,7 @@ export async function getWorkList(workOrderId, workListId) {
   const connection = await getSalesforceConnection()
   const workList = await connection
     .sobject('CV_WorkList__c')
-    .findOne({ Id: workListId, 'CV_Work_Order__r.Name': workOrderId }, ['Id', 'Name'])
+    .findOne({ Id: workListId, 'CV_Work_Order__r.Name': workOrderId }, workListFields)
 
   if (!workList) {
     throw new Error(`Work list not found: ${workListId}`)
@@ -216,8 +218,7 @@ export async function getWorkList(workOrderId, workListId) {
     .sort('Name')
 
   return {
-    id: workList.Id,
-    name: workList.Name,
+    ...toWorkList(workList),
     cattle: animals
       .map(toCattle)
       .sort((left, right) => (left.earTag || '').localeCompare(right.earTag || '')),
