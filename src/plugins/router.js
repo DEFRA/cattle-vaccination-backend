@@ -1,6 +1,11 @@
 import { health } from '../routes/health.js'
 import { holdings } from '../routes/holdings.js'
-import { createWorkListRoute, getWorkOrderRoute, workorders } from '../routes/workorders.js'
+import {
+  createWorkListRoute,
+  getWorkListRoute,
+  getWorkOrderRoute,
+  workorders,
+} from '../routes/workorders.js'
 import { cattleOnHolding } from '../routes/cattle-on-holding.js'
 import { getCphRoute } from '../routes/cphs.js'
 
@@ -14,6 +19,7 @@ export const router = {
         workorders,
         getWorkOrderRoute,
         createWorkListRoute,
+        getWorkListRoute,
         cattleOnHolding,
         getCphRoute,
       ])

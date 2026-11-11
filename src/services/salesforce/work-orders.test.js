@@ -1,4 +1,4 @@
-import { createWorkList, getWorkOrder, getWorkOrders } from './work-orders.js'
+import { createWorkList, getWorkList, getWorkOrder, getWorkOrders } from './work-orders.js'
 import { getSalesforceConnection } from './index.js'
 
 const sort = vi.fn()
@@ -144,8 +144,9 @@ describe('#getWorkOrder', () => {
   test('Should return the CPH name and work lists', async () => {
     findOne.mockResolvedValue(salesforceRecord)
     sort.mockResolvedValue([
-      { Name: 'CV WorkList 2', CV_CPH__r: salesforceRecord.CV_CPH__r },
+      { Id: 'a0W000000000002', Name: 'CV WorkList 2', CV_CPH__r: salesforceRecord.CV_CPH__r },
       {
+        Id: 'a0W000000000009',
         Name: 'CV WorkList 9',
         CV_CPH__r: { Name: '02/582/7575', APHA_CPHCode__c: '02/582/7575' },
       },
@@ -167,8 +168,13 @@ describe('#getWorkOrder', () => {
         address: '1 Farm Lane, Exeter, Devon, EX1 1AA, United Kingdom',
       },
       workLists: [
-        { id: 'CV WorkList 2', cphName: 'Hill Farm', cphCode: '40/715/9200' },
-        { id: 'CV WorkList 9', cphName: null, cphCode: '02/582/7575' },
+        {
+          id: 'a0W000000000002',
+          name: 'CV WorkList 2',
+          cphName: 'Hill Farm',
+          cphCode: '40/715/9200',
+        },
+        { id: 'a0W000000000009', name: 'CV WorkList 9', cphName: null, cphCode: '02/582/7575' },
       ],
     })
 
@@ -183,6 +189,7 @@ describe('#getWorkOrder', () => {
     )
     expect(sobject).toHaveBeenCalledWith('CV_WorkList__c')
     expect(find).toHaveBeenCalledWith({ 'CV_Work_Order__r.Name': 'CV WorkOrder 2' }, [
+      'Id',
       'Name',
       'CV_CPH__r.Name',
       'CV_CPH__r.APHA_CPHCode__c',
@@ -211,7 +218,9 @@ describe('#createWorkList', () => {
   })
 
   test('Should start the flow with the work order Salesforce id', async () => {
-    findOne.mockResolvedValue({ Id: 'a0B000000000001' })
+    findOne
+      .mockResolvedValueOnce({ Id: 'a0B000000000001' })
+      .mockResolvedValueOnce({ Id: 'a0W000000000001' })
     requestPost.mockResolvedValue([
       {
         isSuccess: true,
@@ -225,6 +234,7 @@ describe('#createWorkList', () => {
 
     await expect(createWorkList('CV WorkOrder 2')).resolves.toEqual({ id: 'a0W000000000001' })
     expect(findOne).toHaveBeenCalledWith({ Name: 'CV WorkOrder 2' }, ['Id'])
+    expect(findOne).toHaveBeenCalledWith({ Id: 'a0W000000000001' }, ['Id'])
     expect(requestPost).toHaveBeenCalledWith(
       '/actions/custom/flow/Fetch_and_Create_Commodity_Animals',
       { inputs: [{ recordId: 'a0B000000000001' }] },
@@ -253,5 +263,67 @@ describe('#createWorkList', () => {
       'Work order not found: CV WorkOrder 99',
     )
     expect(requestPost).not.toHaveBeenCalled()
+  })
+})
+
+describe('#getWorkList', () => {
+  beforeEach(() => {
+    vi.mocked(getSalesforceConnection).mockResolvedValue({ sobject })
+  })
+
+  afterEach(() => {
+    vi.clearAllMocks()
+  })
+
+  test('Should return the cattle on the work list', async () => {
+    findOne.mockResolvedValue({ Id: 'a0W000000000002', Name: 'CV WorkList 2' })
+    sort.mockResolvedValue([
+      {
+        CV_Animal__r: {
+          Name: 'UK977985345673',
+          APHA_CommodityAnimalDOB__c: '2020-11-04',
+          APHA_CommodityAnimalGender__c: 'Male',
+          APHA_CommodityAnimalBreed__c: 'WPA',
+        },
+      },
+      {
+        CV_Animal__r: {
+          Name: 'UK111',
+          APHA_CommodityAnimalDOB__c: null,
+          APHA_CommodityAnimalGender__c: null,
+          APHA_CommodityAnimalBreed__c: null,
+        },
+      },
+    ])
+
+    await expect(getWorkList('CV WorkOrder 2', 'a0W000000000002')).resolves.toEqual({
+      id: 'a0W000000000002',
+      name: 'CV WorkList 2',
+      cattle: [
+        { earTag: 'UK111', dob: null, sex: null, breed: null },
+        { earTag: 'UK977985345673', dob: '2020-11-04', sex: 'Male', breed: 'WPA' },
+      ],
+    })
+    expect(findOne).toHaveBeenCalledWith(
+      { Id: 'a0W000000000002', 'CV_Work_Order__r.Name': 'CV WorkOrder 2' },
+      ['Id', 'Name'],
+    )
+    expect(sobject).toHaveBeenCalledWith('CV_WorkListAnimal__c')
+    expect(find).toHaveBeenCalledWith({ CV_WorkList__c: 'a0W000000000002' }, [
+      'CV_Animal__r.Name',
+      'CV_Animal__r.APHA_CommodityAnimalDOB__c',
+      'CV_Animal__r.APHA_CommodityAnimalGender__c',
+      'CV_Animal__r.APHA_CommodityAnimalBreed__c',
+    ])
+    expect(sort).toHaveBeenCalledWith('Name')
+  })
+
+  test('Should throw when the work list does not exist', async () => {
+    findOne.mockResolvedValue(null)
+
+    await expect(getWorkList('CV WorkOrder 2', 'a0W000000000099')).rejects.toThrow(
+      'Work list not found: a0W000000000099',
+    )
+    expect(find).not.toHaveBeenCalled()
   })
 })

@@ -106,6 +106,7 @@ function toWorkOrder(record) {
 }
 
 const workListFields = [
+  'Id',
   'Name',
   'CV_CPH__r.Name',
   'CV_CPH__r.APHA_CPHCode__c',
@@ -116,7 +117,8 @@ function toWorkList(record) {
   const cph = record.CV_CPH__r
 
   return {
-    id: record.Name,
+    id: record.Id,
+    name: record.Name,
     cphName: cphNameFrom(cph),
     cphCode: cphCodeFrom(cph),
   }
@@ -163,13 +165,63 @@ async function startCreateWorkListFlow(connection, workOrderRecordId) {
     { inputs: [{ recordId: workOrderRecordId }] },
   )
 
-  const workListId = result?.outputValues?.WorkListId
+  const workListRecordId = result?.outputValues?.WorkListId
 
-  if (!result?.isSuccess || result.outputValues?.isSuccess !== true || !workListId) {
+  if (!result?.isSuccess || result.outputValues?.isSuccess !== true || !workListRecordId) {
     throw createWorkListFlowError(result)
   }
 
-  return { id: workListId }
+  const workList = await connection
+    .sobject('CV_WorkList__c')
+    .findOne({ Id: workListRecordId }, ['Id'])
+
+  if (!workList) {
+    throw new Error(`Work list not found: ${workListRecordId}`)
+  }
+
+  return { id: workList.Id }
+}
+
+const workListCattleFields = [
+  'CV_Animal__r.Name',
+  'CV_Animal__r.APHA_CommodityAnimalDOB__c',
+  'CV_Animal__r.APHA_CommodityAnimalGender__c',
+  'CV_Animal__r.APHA_CommodityAnimalBreed__c',
+]
+
+function toCattle(record) {
+  const animal = record.CV_Animal__r
+
+  return {
+    earTag: animal?.Name || null,
+    dob: animal?.APHA_CommodityAnimalDOB__c || null,
+    sex: animal?.APHA_CommodityAnimalGender__c || null,
+    breed: animal?.APHA_CommodityAnimalBreed__c || null,
+  }
+}
+
+export async function getWorkList(workOrderId, workListId) {
+  const connection = await getSalesforceConnection()
+  const workList = await connection
+    .sobject('CV_WorkList__c')
+    .findOne({ Id: workListId, 'CV_Work_Order__r.Name': workOrderId }, ['Id', 'Name'])
+
+  if (!workList) {
+    throw new Error(`Work list not found: ${workListId}`)
+  }
+
+  const animals = await connection
+    .sobject('CV_WorkListAnimal__c')
+    .find({ CV_WorkList__c: workList.Id }, workListCattleFields)
+    .sort('Name')
+
+  return {
+    id: workList.Id,
+    name: workList.Name,
+    cattle: animals
+      .map(toCattle)
+      .sort((left, right) => (left.earTag || '').localeCompare(right.earTag || '')),
+  }
 }
 
 export async function createWorkList(workOrderId) {
