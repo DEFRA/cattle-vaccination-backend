@@ -163,7 +163,7 @@ function createWorkListFlowError(result) {
 
 async function startCreateWorkListFlow(connection, workOrderRecordId) {
   const [result] = await connection.requestPost(
-    '/actions/custom/flow/Fetch_and_Create_Commodity_Animals',
+    '/actions/custom/flow/CV_Retrieve_and_Create_Commodity_Animals_and_WorkOrder_AUF',
     { inputs: [{ recordId: workOrderRecordId }] },
   )
 
@@ -206,6 +206,15 @@ function toCattle(record) {
   }
 }
 
+function compareCattleEarTags(left, right) {
+  const leftEarTag = left.earTag || ''
+  const rightEarTag = right.earTag || ''
+  const leftLastDigits = Number(leftEarTag.match(/.{1,4}$/)?.[0] || 0)
+  const rightLastDigits = Number(rightEarTag.match(/.{1,4}$/)?.[0] || 0)
+
+  return leftLastDigits - rightLastDigits || leftEarTag.localeCompare(rightEarTag)
+}
+
 export async function getWorkList(workOrderId, workListId) {
   const connection = await getSalesforceConnection()
   const workList = await connection
@@ -223,9 +232,7 @@ export async function getWorkList(workOrderId, workListId) {
 
   return {
     ...toWorkList(workList),
-    cattle: animals
-      .map(toCattle)
-      .sort((left, right) => (left.earTag || '').localeCompare(right.earTag || '')),
+    cattle: animals.map(toCattle).sort(compareCattleEarTags),
   }
 }
 
