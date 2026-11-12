@@ -189,6 +189,7 @@ const workListCattleFields = [
   'CV_Animal__r.APHA_CommodityAnimalDOB__c',
   'CV_Animal__r.APHA_CommodityAnimalGender__c',
   'CV_Animal__r.APHA_CommodityAnimalBreed__c',
+  'CV_LastVaccinationCattleBCG__c',
 ]
 
 function toCattle(record) {
@@ -199,6 +200,9 @@ function toCattle(record) {
     dob: animal?.APHA_CommodityAnimalDOB__c || null,
     sex: animal?.APHA_CommodityAnimalGender__c || null,
     breed: animal?.APHA_CommodityAnimalBreed__c || null,
+    lastVaccination: {
+      cattleBCG: record.CV_LastVaccinationCattleBCG__c || null,
+    },
   }
 }
 

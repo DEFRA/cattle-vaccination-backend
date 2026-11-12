@@ -305,6 +305,7 @@ describe('#getWorkList', () => {
           APHA_CommodityAnimalGender__c: 'Male',
           APHA_CommodityAnimalBreed__c: 'WPA',
         },
+        CV_LastVaccinationCattleBCG__c: '2026-04-12',
       },
       {
         CV_Animal__r: {
@@ -313,6 +314,7 @@ describe('#getWorkList', () => {
           APHA_CommodityAnimalGender__c: null,
           APHA_CommodityAnimalBreed__c: null,
         },
+        CV_LastVaccinationCattleBCG__c: null,
       },
     ])
 
@@ -323,8 +325,20 @@ describe('#getWorkList', () => {
       cphName: 'Hill Farm',
       cphCode: '40/715/9200',
       cattle: [
-        { earTag: 'UK111', dob: null, sex: null, breed: null },
-        { earTag: 'UK977985345673', dob: '2020-11-04', sex: 'Male', breed: 'WPA' },
+        {
+          earTag: 'UK111',
+          dob: null,
+          sex: null,
+          breed: null,
+          lastVaccination: { cattleBCG: null },
+        },
+        {
+          earTag: 'UK977985345673',
+          dob: '2020-11-04',
+          sex: 'Male',
+          breed: 'WPA',
+          lastVaccination: { cattleBCG: '2026-04-12' },
+        },
       ],
     })
     expect(findOne).toHaveBeenCalledWith(
@@ -344,6 +358,7 @@ describe('#getWorkList', () => {
       'CV_Animal__r.APHA_CommodityAnimalDOB__c',
       'CV_Animal__r.APHA_CommodityAnimalGender__c',
       'CV_Animal__r.APHA_CommodityAnimalBreed__c',
+      'CV_LastVaccinationCattleBCG__c',
     ])
     expect(sort).toHaveBeenCalledWith('Name')
   })
