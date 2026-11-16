@@ -251,7 +251,7 @@ describe('#createWorkList', () => {
     expect(findOne).toHaveBeenCalledWith({ Name: 'CV WorkOrder 2' }, ['Id'])
     expect(findOne).toHaveBeenCalledWith({ Id: 'a0W000000000001' }, ['Id'])
     expect(requestPost).toHaveBeenCalledWith(
-      '/actions/custom/flow/Fetch_and_Create_Commodity_Animals',
+      '/actions/custom/flow/CV_Retrieve_and_Create_Commodity_Animals_and_WorkOrder_AUF',
       { inputs: [{ recordId: 'a0B000000000001' }] },
     )
   })
@@ -290,6 +290,31 @@ describe('#getWorkList', () => {
     vi.clearAllMocks()
   })
 
+  test.each([
+    {
+      description: 'last four digits before the full ear tag',
+      earTags: ['UK100000009999', 'UK900000000002', 'UK500000000010'],
+      expected: ['UK900000000002', 'UK500000000010', 'UK100000009999'],
+    },
+    {
+      description: 'full ear tag when the last four digits match',
+      earTags: ['UK900000001234', 'UK100000001234', 'UK500000001234'],
+      expected: ['UK100000001234', 'UK500000001234', 'UK900000001234'],
+    },
+    {
+      description: 'missing and short ear tags without throwing',
+      earTags: ['UK977985345673', 'UK111', null],
+      expected: [null, 'UK111', 'UK977985345673'],
+    },
+  ])('Should sort cattle by $description', async ({ earTags, expected }) => {
+    findOne.mockResolvedValue({ Id: 'a0W000000000002' })
+    sort.mockResolvedValue(earTags.map((Name) => ({ CV_Animal__r: { Name } })))
+
+    const workList = await getWorkList('CV WorkOrder 2', 'a0W000000000002')
+
+    expect(workList.cattle.map(({ earTag }) => earTag)).toEqual(expected)
+  })
+
   test('Should return the cattle on the work list', async () => {
     findOne.mockResolvedValue({
       Id: 'a0W000000000002',
@@ -305,6 +330,7 @@ describe('#getWorkList', () => {
           APHA_CommodityAnimalGender__c: 'Male',
           APHA_CommodityAnimalBreed__c: 'WPA',
         },
+        CV_LastVaccinationCattleBCG__c: '2026-04-12',
       },
       {
         CV_Animal__r: {
@@ -313,6 +339,7 @@ describe('#getWorkList', () => {
           APHA_CommodityAnimalGender__c: null,
           APHA_CommodityAnimalBreed__c: null,
         },
+        CV_LastVaccinationCattleBCG__c: null,
       },
     ])
 
@@ -323,8 +350,20 @@ describe('#getWorkList', () => {
       cphName: 'Hill Farm',
       cphCode: '40/715/9200',
       cattle: [
-        { earTag: 'UK111', dob: null, sex: null, breed: null },
-        { earTag: 'UK977985345673', dob: '2020-11-04', sex: 'Male', breed: 'WPA' },
+        {
+          earTag: 'UK111',
+          dob: null,
+          sex: null,
+          breed: null,
+          lastVaccination: { cattleBCG: null },
+        },
+        {
+          earTag: 'UK977985345673',
+          dob: '2020-11-04',
+          sex: 'Male',
+          breed: 'WPA',
+          lastVaccination: { cattleBCG: '2026-04-12' },
+        },
       ],
     })
     expect(findOne).toHaveBeenCalledWith(
@@ -344,6 +383,7 @@ describe('#getWorkList', () => {
       'CV_Animal__r.APHA_CommodityAnimalDOB__c',
       'CV_Animal__r.APHA_CommodityAnimalGender__c',
       'CV_Animal__r.APHA_CommodityAnimalBreed__c',
+      'CV_LastVaccinationCattleBCG__c',
     ])
     expect(sort).toHaveBeenCalledWith('Name')
   })

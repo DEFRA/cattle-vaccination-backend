@@ -163,7 +163,7 @@ function createWorkListFlowError(result) {
 
 async function startCreateWorkListFlow(connection, workOrderRecordId) {
   const [result] = await connection.requestPost(
-    '/actions/custom/flow/Fetch_and_Create_Commodity_Animals',
+    '/actions/custom/flow/CV_Retrieve_and_Create_Commodity_Animals_and_WorkOrder_AUF',
     { inputs: [{ recordId: workOrderRecordId }] },
   )
 
@@ -189,6 +189,7 @@ const workListCattleFields = [
   'CV_Animal__r.APHA_CommodityAnimalDOB__c',
   'CV_Animal__r.APHA_CommodityAnimalGender__c',
   'CV_Animal__r.APHA_CommodityAnimalBreed__c',
+  'CV_LastVaccinationCattleBCG__c',
 ]
 
 function toCattle(record) {
@@ -199,7 +200,19 @@ function toCattle(record) {
     dob: animal?.APHA_CommodityAnimalDOB__c || null,
     sex: animal?.APHA_CommodityAnimalGender__c || null,
     breed: animal?.APHA_CommodityAnimalBreed__c || null,
+    lastVaccination: {
+      cattleBCG: record.CV_LastVaccinationCattleBCG__c || null,
+    },
   }
+}
+
+function compareCattleEarTags(left, right) {
+  const leftEarTag = left.earTag || ''
+  const rightEarTag = right.earTag || ''
+  const leftLastDigits = Number(leftEarTag.match(/.{1,4}$/)?.[0] || 0)
+  const rightLastDigits = Number(rightEarTag.match(/.{1,4}$/)?.[0] || 0)
+
+  return leftLastDigits - rightLastDigits || leftEarTag.localeCompare(rightEarTag)
 }
 
 export async function getWorkList(workOrderId, workListId) {
@@ -219,9 +232,7 @@ export async function getWorkList(workOrderId, workListId) {
 
   return {
     ...toWorkList(workList),
-    cattle: animals
-      .map(toCattle)
-      .sort((left, right) => (left.earTag || '').localeCompare(right.earTag || '')),
+    cattle: animals.map(toCattle).sort(compareCattleEarTags),
   }
 }
 
