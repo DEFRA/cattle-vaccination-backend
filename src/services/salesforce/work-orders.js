@@ -109,6 +109,7 @@ const workListFields = [
   'Id',
   'Name',
   'CreatedDate',
+  'CV_AnimalCount__c',
   'CV_CPH__r.Name',
   'CV_CPH__r.APHA_CPHCode__c',
   'CV_CPH__r.APHA_Location__r.Name',
@@ -121,6 +122,7 @@ function toWorkList(record) {
     id: record.Id,
     name: record.Name,
     createdDate: record.CreatedDate || null,
+    animalCount: record.CV_AnimalCount__c ?? 0,
     cphName: cphNameFrom(cph),
     cphCode: cphCodeFrom(cph),
   }

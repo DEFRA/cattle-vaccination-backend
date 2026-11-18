@@ -148,12 +148,14 @@ describe('#getWorkOrder', () => {
         Id: 'a0W000000000002',
         Name: 'CV WorkList 2',
         CreatedDate: '2026-10-08T09:00:00.000+0000',
+        CV_AnimalCount__c: 2,
         CV_CPH__r: salesforceRecord.CV_CPH__r,
       },
       {
         Id: 'a0W000000000009',
         Name: 'CV WorkList 9',
         CreatedDate: '2026-10-09T09:00:00.000+0000',
+        CV_AnimalCount__c: null,
         CV_CPH__r: { Name: '02/582/7575', APHA_CPHCode__c: '02/582/7575' },
       },
     ])
@@ -178,6 +180,7 @@ describe('#getWorkOrder', () => {
           id: 'a0W000000000002',
           name: 'CV WorkList 2',
           createdDate: '2026-10-08T09:00:00.000+0000',
+          animalCount: 2,
           cphName: 'Hill Farm',
           cphCode: '40/715/9200',
         },
@@ -185,6 +188,7 @@ describe('#getWorkOrder', () => {
           id: 'a0W000000000009',
           name: 'CV WorkList 9',
           createdDate: '2026-10-09T09:00:00.000+0000',
+          animalCount: 0,
           cphName: null,
           cphCode: '02/582/7575',
         },
@@ -206,11 +210,13 @@ describe('#getWorkOrder', () => {
       'Id',
       'Name',
       'CreatedDate',
+      'CV_AnimalCount__c',
       'CV_CPH__r.Name',
       'CV_CPH__r.APHA_CPHCode__c',
       'CV_CPH__r.APHA_Location__r.Name',
     ])
     expect(sort).toHaveBeenCalledWith('Name')
+    expect(sobject).not.toHaveBeenCalledWith('CV_WorkListAnimal__c')
   })
 
   test('Should throw when the work order does not exist', async () => {
@@ -347,6 +353,7 @@ describe('#getWorkList', () => {
       id: 'a0W000000000002',
       name: 'CV WorkList 2',
       createdDate: '2026-10-08T09:00:00.000+0000',
+      animalCount: 0,
       cphName: 'Hill Farm',
       cphCode: '40/715/9200',
       cattle: [
@@ -372,6 +379,7 @@ describe('#getWorkList', () => {
         'Id',
         'Name',
         'CreatedDate',
+        'CV_AnimalCount__c',
         'CV_CPH__r.Name',
         'CV_CPH__r.APHA_CPHCode__c',
         'CV_CPH__r.APHA_Location__r.Name',
