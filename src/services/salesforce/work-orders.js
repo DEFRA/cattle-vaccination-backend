@@ -122,7 +122,7 @@ function toWorkList(record) {
     id: record.Id,
     name: record.Name,
     createdDate: record.CreatedDate || null,
-    animalCount: record.CV_AnimalCount__c ?? 0,
+    animalCount: record.CV_AnimalCount__c ?? null,
     cphName: cphNameFrom(cph),
     cphCode: cphCodeFrom(cph),
   }
