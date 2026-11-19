@@ -188,7 +188,7 @@ describe('#getWorkOrder', () => {
           id: 'a0W000000000009',
           name: 'CV WorkList 9',
           createdDate: '2026-10-09T09:00:00.000+0000',
-          animalCount: 0,
+          animalCount: null,
           cphName: null,
           cphCode: '02/582/7575',
         },
@@ -353,7 +353,7 @@ describe('#getWorkList', () => {
       id: 'a0W000000000002',
       name: 'CV WorkList 2',
       createdDate: '2026-10-08T09:00:00.000+0000',
-      animalCount: 0,
+      animalCount: null,
       cphName: 'Hill Farm',
       cphCode: '40/715/9200',
       cattle: [
