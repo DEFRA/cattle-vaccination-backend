@@ -86,7 +86,7 @@ describe('#workorders route', () => {
 
     const response = await server.inject({
       method: 'GET',
-      url: '/workorders/CV%20WorkOrder%202',
+      url: '/workorders/CV-WorkOrder-2',
     })
 
     expect(response.statusCode).toBe(200)
@@ -99,7 +99,7 @@ describe('#workorders route', () => {
 
     const response = await server.inject({
       method: 'GET',
-      url: '/workorders/CV%20WorkOrder%2099',
+      url: '/workorders/CV-WorkOrder-99',
     })
 
     expect(response.statusCode).toBe(404)
@@ -110,7 +110,7 @@ describe('#workorders route', () => {
 
     const response = await server.inject({
       method: 'GET',
-      url: '/workorders/CV%20WorkOrder%202',
+      url: '/workorders/CV-WorkOrder-2',
     })
 
     expect(response.statusCode).toBe(502)
@@ -122,7 +122,7 @@ describe('#workorders route', () => {
 
     const response = await server.inject({
       method: 'POST',
-      url: '/workorders/CV%20WorkOrder%202/work-lists',
+      url: '/workorders/CV-WorkOrder-2/work-lists',
     })
 
     expect(response.statusCode).toBe(201)
@@ -135,7 +135,7 @@ describe('#workorders route', () => {
 
     const response = await server.inject({
       method: 'POST',
-      url: '/workorders/CV%20WorkOrder%2099/work-lists',
+      url: '/workorders/CV-WorkOrder-99/work-lists',
     })
 
     expect(response.statusCode).toBe(404)
@@ -146,7 +146,7 @@ describe('#workorders route', () => {
 
     const response = await server.inject({
       method: 'POST',
-      url: '/workorders/CV%20WorkOrder%202/work-lists',
+      url: '/workorders/CV-WorkOrder-2/work-lists',
     })
 
     expect(response.statusCode).toBe(502)
@@ -161,7 +161,7 @@ describe('#workorders route', () => {
 
     const response = await server.inject({
       method: 'GET',
-      url: '/workorders/CV%20WorkOrder%202/work-lists/a0W000000000002',
+      url: '/workorders/CV-WorkOrder-2/work-lists/a0W000000000002',
     })
 
     expect(response.statusCode).toBe(200)
@@ -174,7 +174,7 @@ describe('#workorders route', () => {
 
     const response = await server.inject({
       method: 'GET',
-      url: '/workorders/CV%20WorkOrder%202/work-lists/a0W000000000099',
+      url: '/workorders/CV-WorkOrder-2/work-lists/a0W000000000099',
     })
 
     expect(response.statusCode).toBe(404)

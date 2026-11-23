@@ -55,6 +55,9 @@ To run the application in `development` mode run:
 npm run dev
 ```
 
+Use hyphens for spaces in the work-order segment of API URLs. For example, request `GET /workorders/CV-WorkOrder-2`
+for the Salesforce work order named `CV WorkOrder 2`. The work-list routes use the same work-order segment.
+
 ### Testing
 
 To test the application run:
