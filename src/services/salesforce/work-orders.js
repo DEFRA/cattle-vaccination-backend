@@ -229,7 +229,10 @@ export async function getWorkList(workOrderId, workListId) {
 
   const animals = await connection
     .sobject('CV_WorkListAnimal__c')
-    .find({ CV_WorkList__c: workList.Id }, workListCattleFields)
+    .find({ CV_WorkList__c: workList.Id }, workListCattleFields, {
+      autoFetch: true,
+      maxFetch: Infinity,
+    })
     .sort('Name')
 
   return {
