@@ -86,7 +86,7 @@ describe('#workorders route', () => {
 
     const response = await server.inject({
       method: 'GET',
-      url: '/workorders/CV-WorkOrder-2',
+      url: '/workorders/CV%20WorkOrder%202',
     })
 
     expect(response.statusCode).toBe(200)
@@ -94,12 +94,25 @@ describe('#workorders route', () => {
     expect(response.result).toEqual(workOrder)
   })
 
+  test('Should preserve hyphens and spaces in the work order ID', async () => {
+    const workOrderId = ' CV-WorkOrder 2 '
+    vi.mocked(getWorkOrder).mockRejectedValue(new Error(`Work order not found: ${workOrderId}`))
+
+    const response = await server.inject({
+      method: 'GET',
+      url: `/workorders/${encodeURIComponent(workOrderId)}`,
+    })
+
+    expect(response.statusCode).toBe(404)
+    expect(getWorkOrder).toHaveBeenCalledWith(workOrderId)
+  })
+
   test('Should return 404 when the work order does not exist', async () => {
     vi.mocked(getWorkOrder).mockRejectedValue(new Error('Work order not found: CV WorkOrder 99'))
 
     const response = await server.inject({
       method: 'GET',
-      url: '/workorders/CV-WorkOrder-99',
+      url: '/workorders/CV%20WorkOrder%2099',
     })
 
     expect(response.statusCode).toBe(404)
@@ -110,7 +123,7 @@ describe('#workorders route', () => {
 
     const response = await server.inject({
       method: 'GET',
-      url: '/workorders/CV-WorkOrder-2',
+      url: '/workorders/CV%20WorkOrder%202',
     })
 
     expect(response.statusCode).toBe(502)
@@ -122,7 +135,7 @@ describe('#workorders route', () => {
 
     const response = await server.inject({
       method: 'POST',
-      url: '/workorders/CV-WorkOrder-2/work-lists',
+      url: '/workorders/CV%20WorkOrder%202/work-lists',
     })
 
     expect(response.statusCode).toBe(201)
@@ -135,7 +148,7 @@ describe('#workorders route', () => {
 
     const response = await server.inject({
       method: 'POST',
-      url: '/workorders/CV-WorkOrder-99/work-lists',
+      url: '/workorders/CV%20WorkOrder%2099/work-lists',
     })
 
     expect(response.statusCode).toBe(404)
@@ -146,7 +159,7 @@ describe('#workorders route', () => {
 
     const response = await server.inject({
       method: 'POST',
-      url: '/workorders/CV-WorkOrder-2/work-lists',
+      url: '/workorders/CV%20WorkOrder%202/work-lists',
     })
 
     expect(response.statusCode).toBe(502)
@@ -161,7 +174,7 @@ describe('#workorders route', () => {
 
     const response = await server.inject({
       method: 'GET',
-      url: '/workorders/CV-WorkOrder-2/work-lists/a0W000000000002',
+      url: '/workorders/CV%20WorkOrder%202/work-lists/a0W000000000002',
     })
 
     expect(response.statusCode).toBe(200)
@@ -174,7 +187,7 @@ describe('#workorders route', () => {
 
     const response = await server.inject({
       method: 'GET',
-      url: '/workorders/CV-WorkOrder-2/work-lists/a0W000000000099',
+      url: '/workorders/CV%20WorkOrder%202/work-lists/a0W000000000099',
     })
 
     expect(response.statusCode).toBe(404)
