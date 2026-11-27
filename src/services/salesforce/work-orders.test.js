@@ -1,3 +1,4 @@
+import { Connection } from 'jsforce'
 import { createWorkList, getWorkList, getWorkOrder, getWorkOrders } from './work-orders.js'
 import { getSalesforceConnection } from './index.js'
 
@@ -148,12 +149,14 @@ describe('#getWorkOrder', () => {
         Id: 'a0W000000000002',
         Name: 'CV WorkList 2',
         CreatedDate: '2026-10-08T09:00:00.000+0000',
+        CV_AnimalCount__c: 2,
         CV_CPH__r: salesforceRecord.CV_CPH__r,
       },
       {
         Id: 'a0W000000000009',
         Name: 'CV WorkList 9',
         CreatedDate: '2026-10-09T09:00:00.000+0000',
+        CV_AnimalCount__c: null,
         CV_CPH__r: { Name: '02/582/7575', APHA_CPHCode__c: '02/582/7575' },
       },
     ])
@@ -178,6 +181,7 @@ describe('#getWorkOrder', () => {
           id: 'a0W000000000002',
           name: 'CV WorkList 2',
           createdDate: '2026-10-08T09:00:00.000+0000',
+          animalCount: 2,
           cphName: 'Hill Farm',
           cphCode: '40/715/9200',
         },
@@ -185,6 +189,7 @@ describe('#getWorkOrder', () => {
           id: 'a0W000000000009',
           name: 'CV WorkList 9',
           createdDate: '2026-10-09T09:00:00.000+0000',
+          animalCount: null,
           cphName: null,
           cphCode: '02/582/7575',
         },
@@ -206,11 +211,13 @@ describe('#getWorkOrder', () => {
       'Id',
       'Name',
       'CreatedDate',
+      'CV_AnimalCount__c',
       'CV_CPH__r.Name',
       'CV_CPH__r.APHA_CPHCode__c',
       'CV_CPH__r.APHA_Location__r.Name',
     ])
     expect(sort).toHaveBeenCalledWith('Name')
+    expect(sobject).not.toHaveBeenCalledWith('CV_WorkListAnimal__c')
   })
 
   test('Should throw when the work order does not exist', async () => {
@@ -347,6 +354,7 @@ describe('#getWorkList', () => {
       id: 'a0W000000000002',
       name: 'CV WorkList 2',
       createdDate: '2026-10-08T09:00:00.000+0000',
+      animalCount: null,
       cphName: 'Hill Farm',
       cphCode: '40/715/9200',
       cattle: [
@@ -372,20 +380,78 @@ describe('#getWorkList', () => {
         'Id',
         'Name',
         'CreatedDate',
+        'CV_AnimalCount__c',
         'CV_CPH__r.Name',
         'CV_CPH__r.APHA_CPHCode__c',
         'CV_CPH__r.APHA_Location__r.Name',
       ],
     )
     expect(sobject).toHaveBeenCalledWith('CV_WorkListAnimal__c')
-    expect(find).toHaveBeenCalledWith({ CV_WorkList__c: 'a0W000000000002' }, [
-      'CV_Animal__r.Name',
-      'CV_Animal__r.APHA_CommodityAnimalDOB__c',
-      'CV_Animal__r.APHA_CommodityAnimalGender__c',
-      'CV_Animal__r.APHA_CommodityAnimalBreed__c',
-      'CV_LastVaccinationCattleBCG__c',
-    ])
+    expect(find).toHaveBeenCalledWith(
+      { CV_WorkList__c: 'a0W000000000002' },
+      [
+        'CV_Animal__r.Name',
+        'CV_Animal__r.APHA_CommodityAnimalDOB__c',
+        'CV_Animal__r.APHA_CommodityAnimalGender__c',
+        'CV_Animal__r.APHA_CommodityAnimalBreed__c',
+        'CV_LastVaccinationCattleBCG__c',
+      ],
+      { autoFetch: true, maxFetch: Infinity },
+    )
     expect(sort).toHaveBeenCalledWith('Name')
+  })
+
+  test('Should retrieve all 2,748 cattle across Salesforce query pages', async () => {
+    const instanceUrl = 'https://salesforce.example'
+    const connection = new Connection({ instanceUrl })
+    vi.mocked(getSalesforceConnection).mockResolvedValue(connection)
+    const request = vi
+      .spyOn(connection, 'request')
+      .mockRejectedValue(new Error('Unexpected Salesforce request'))
+    const nextRecordsUrl = `/services/data/v${connection.version}/query/work-list-cattle-2000`
+    const cattleRecords = Array.from({ length: 2748 }, (_, index) => ({
+      CV_Animal__r: { Name: `UK12345678${String(index + 1).padStart(4, '0')}` },
+    }))
+    request
+      .mockResolvedValueOnce({ totalSize: 1, done: true, records: [{ Id: 'a0W000000000002' }] })
+      .mockResolvedValueOnce({
+        totalSize: cattleRecords.length,
+        done: false,
+        records: cattleRecords.slice(0, 2000),
+        nextRecordsUrl,
+      })
+      .mockResolvedValueOnce({
+        totalSize: cattleRecords.length,
+        done: true,
+        records: cattleRecords.slice(2000),
+      })
+
+    const { cattle } = await getWorkList('CV WorkOrder 2', 'a0W000000000002')
+
+    expect(request).toHaveBeenCalledTimes(3)
+    expect(request).toHaveBeenLastCalledWith(
+      expect.objectContaining({ url: `${instanceUrl}${nextRecordsUrl}` }),
+    )
+    expect(cattle.map(({ earTag }) => earTag)).toEqual(
+      cattleRecords.map((record) => record.CV_Animal__r.Name),
+    )
+  })
+
+  test('Should reject the work list when a Salesforce continuation request fails', async () => {
+    const connection = new Connection({ instanceUrl: 'https://salesforce.example' })
+    vi.mocked(getSalesforceConnection).mockResolvedValue(connection)
+    const error = new Error('Salesforce continuation request failed')
+    vi.spyOn(connection, 'request')
+      .mockResolvedValueOnce({ totalSize: 1, done: true, records: [{ Id: 'a0W000000000002' }] })
+      .mockResolvedValueOnce({
+        totalSize: 2,
+        done: false,
+        records: [{ CV_Animal__r: { Name: 'UK123456780001' } }],
+        nextRecordsUrl: `/services/data/v${connection.version}/query/work-list-cattle-1`,
+      })
+      .mockRejectedValue(error)
+
+    await expect(getWorkList('CV WorkOrder 2', 'a0W000000000002')).rejects.toThrow(error)
   })
 
   test('Should throw when the work list does not exist', async () => {

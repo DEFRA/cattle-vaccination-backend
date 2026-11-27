@@ -11,6 +11,9 @@ import { getErrorMessage } from '../common/helpers/error-message.js'
 
 const logger = createLogger()
 
+/** @type {import('joi').StringSchema} */
+const workOrderIdParam = Joi.string().trim().min(1).max(80).required().raw()
+
 /** @type {import('@hapi/hapi').ServerRoute} */
 export const workorders = {
   method: 'GET',
@@ -33,7 +36,7 @@ export const getWorkOrderRoute = {
   options: {
     validate: {
       params: Joi.object({
-        workOrderId: Joi.string().trim().min(1).max(80).required(),
+        workOrderId: workOrderIdParam,
       }),
     },
   },
@@ -61,7 +64,7 @@ export const createWorkListRoute = {
   options: {
     validate: {
       params: Joi.object({
-        workOrderId: Joi.string().trim().min(1).max(80).required(),
+        workOrderId: workOrderIdParam,
       }),
     },
   },
@@ -89,7 +92,7 @@ export const getWorkListRoute = {
   options: {
     validate: {
       params: Joi.object({
-        workOrderId: Joi.string().trim().min(1).max(80).required(),
+        workOrderId: workOrderIdParam,
         workListId: Joi.string().trim().min(1).max(80).required(),
       }),
     },
